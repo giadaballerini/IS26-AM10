@@ -1,12 +1,47 @@
 package it.polimi.ingsw.model.entities.card.types.event;
 
-public class Ritual {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
+import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
+import it.polimi.ingsw.model.player.Player;
 
-    private final int foodGain;
+import java.util.List;
+
+public class Ritual extends Event {
+
+    private final int ppLoss;
     private final int ppGain;
 
-    public Ritual(int foodGain, int ppGain) {
-        this.foodGain = foodGain;
+    @JsonCreator
+    public Ritual(@JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
+                  @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects,
+                  @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
+                  @JsonProperty("age") int age,@JsonProperty("ppLoss") int ppLoss,@JsonProperty("ppGain") int ppGain,
+                  @JsonProperty("type") CardTypeEnum type) {
+        super(id, trigger, interactiveEffects, instantEffects, age, type);
+        this.ppLoss = ppLoss;
         this.ppGain = ppGain;
+    }
+
+    public void execEvent(List<Player> players, GamePhaseEnum phase){
+        if(phase == GamePhaseEnum.END_ROUND || phase == GamePhaseEnum.PLAY_EVENT) {
+            int maxStars;
+            int minStars;
+            maxStars = players.stream().map(player -> player.getNStars()).max(Integer::compareTo).get();
+            minStars = players.stream().map(p -> p.getNStars()).min(Integer::compareTo).get();
+            for (Player player : players) {
+                if (player.getNStars() == maxStars) {
+                    player.addPP(ppGain);
+                }
+                if (player.getNStars() == minStars) {
+                    player.addPP(-ppLoss);
+                }
+
+            }
+        }
+
     }
 }

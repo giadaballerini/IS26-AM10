@@ -1,0 +1,312 @@
+[{
+  "type" : "BUILDING",
+  "id" : 1,
+  "trigger" : "END_ROUND",
+  "age" : 1,
+  "ppValue" : 3,
+  "foodCost" : 5,
+  "instantEffects" : [{
+    "type" : "DISCOUNT_FOOD",
+    "cat" : "PAINTER",
+    "foodAmount" : 1,
+    "discountFoodType" : "DISCOUNT_CAT"
+  }],
+  "interactiveEffects" : []
+},
+  {
+    "type" : "BUILDING",
+    "id" : 2,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppValue" : 2,
+    "foodCost" : 5,
+    "instantEffects" : [{
+      "type" : "PROTECT_PP",
+      "protectPpType" : "PP_PROTECTION"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 3,
+    "trigger" : "END_ROUND",
+    "age" : 1,
+    "ppValue" : 4,
+    "foodCost" : 4,
+    "instantEffects" : [{
+      "type" : "DISCOUNT_FOOD",
+      "category" : "GATHERER",
+      "foodAmount" : 1,
+      "discountFoodType" : "DISCOUNT_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 4,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppValue" : 3,
+    "foodCost" : 4,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 5,
+      "gainFoodType" : "FOOD_FOR_SET"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 5,
+    "trigger" : "END_TURN",
+    "age" : 1,
+    "ppValue" : 3,
+    "foodCost" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 6,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppValue" : 4,
+    "foodCost" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 3,
+      "gainFoodType" : "FOOD_FOR_CRAFTER"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 7,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "ppAmount" : 4,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "DISCOUNT_FOOD",
+      "category" : "CRAFTER",
+      "foodAmount" : 1,
+      "discountFoodType" : "DISCOUNT_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 8,
+    "trigger" :  "END_ROUND",
+    "age" : 2,
+    "ppValue" : 2,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD-FOR_HUNTER_HUNT"
+    }, {
+      "type" : "GAIN_PP",
+      "cat" : "HUNTER",
+      "ppAmount" : 1,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 9,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "ppValue" : 4,
+    "foodCost" : 6,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 3,
+      "gainStarsType" : "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 10,
+    "trigger" : "END_GAME",
+    "age" : 2,
+    "ppValue" : 0,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : null,
+      "ppAmount": null,
+      "gainPPType" : "DOUBLE_PP_SHAMAN"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 11,
+    "trigger" : "END_GAME",
+    "age" : 2,
+    "ppValue" : 4,
+    "foodCost" : 6,
+    "instantEffects" : [{
+      "type" : "PP_GAIN",
+      "cat" : null,
+      "ppAmount": null,
+      "ppGainType" : "DOUBLE_BUILDER"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 12,
+    "trigger" : "END_GAME",
+    "age" : 2,
+    "ppValue" : 6,
+    "foodCost" : 5,
+    "instantEffects" : [{
+      "type" : "PP_GAIN",
+      "cat" : null,
+      "ppAmount" : 6,
+      "ppGainType" : "PP_FOR_SET"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 13,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "ppValue" : 6,
+    "foodCost" : 5,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FOR_ARTIST_PAINT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 14,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppValue" : 0,
+    "foodCost" : 10,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : null,
+      "ppAmount" : 25,
+      "gainPPType" : "PP_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 15,
+    "trigger" : "END_TURN",
+    "age" : 3,
+    "ppValue" : 3,
+    "foodCost" : 9,
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW"
+      }],
+    "instantEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 16,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppValue" : 8,
+    "foodCost" : 8,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "HUNTER",
+      "ppAmount" : 3,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 17,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppValue" : 4,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "SHAMAN",
+      "ppAmount" : 4,
+      "ppGainType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 18,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppValue" : 6,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "GATHERER",
+      "ppAmount" : 4,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 19,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppAmount" : 4,
+    "foodCost" : 7,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "PAINTER",
+      "ppAmount" : 4,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 20,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppValue" : 3,
+    "foodCost" : 6,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "BUILDER",
+      "ppAmount" : 4,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 21,
+    "trigger" : "END_GAME",
+    "age" : 3,
+    "ppAmount" : 6,
+    "foodCost" : 6,
+    "instantEffects" : [{
+      "type" : "GAIN_PP",
+      "cat" : "CRAFTER",
+      "ppAmount" : 4,
+      "gainPPType" : "PP_FOR_CAT"
+    }],
+    "interactiveEffects" : []
+  }
+]

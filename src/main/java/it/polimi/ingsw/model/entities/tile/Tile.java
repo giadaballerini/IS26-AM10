@@ -8,9 +8,11 @@ import java.util.List;
 
 public class Tile {
     private boolean occupied;
+    private char id;
+    private int minPlayers;
     private Pawn pawn;
-    private List<CardEffectInstant> autoEffects;
-    private List<CardEffectInteractive> interactiveEffects;
+    private final List<CardEffectInstant> autoEffects;
+    private final List<CardEffectInteractive> interactiveEffects;
 
     public Tile(boolean occupied, Pawn pawn, List<CardEffectInstant> autoEffects, List<CardEffectInteractive> interactiveEffects){
         this.occupied = occupied;
@@ -32,6 +34,14 @@ public class Tile {
 
     public boolean isOccupied(){
         return occupied;
+    }
+
+    public int getMinPlayers(){
+        return minPlayers;
+    }
+
+    public char getId(){
+        return id;
     }
 
 }

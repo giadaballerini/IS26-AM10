@@ -1,4 +1,47 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
-public class DiscountFood {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.DiscountFoodEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.exceptions.WrongPhaseException;
+import it.polimi.ingsw.model.entities.card.Card;
+import it.polimi.ingsw.model.player.Player;
+
+public class DiscountFood extends CardEffectInstant{
+    private final CardTypeEnum cat;
+    private final int foodAmount;
+    private final DiscountFoodEnum discountFoodType;
+
+    @JsonCreator
+    public DiscountFood(@JsonProperty("cat") CardTypeEnum cat,@JsonProperty("foodAmount") int foodAmount,@JsonProperty("discountFoodType") DiscountFoodEnum discountFoodType) {
+        this.cat = cat;
+        this.foodAmount = foodAmount;
+        this.discountFoodType = discountFoodType;
+    }
+
+    @Override
+    public void apply(Player p, GamePhaseEnum gamePhase){
+        discountFoodType.apply(p, this,  gamePhase);
+    }
+
+    @Override
+    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum currPhase){
+        if(trigger != currPhase)
+            throw new WrongPhaseException("aa");
+    }
+
+    @Override
+    public void displayEffect(){
+        System.out.printf("");
+    }
+
+    public CardTypeEnum getCat() {
+        return cat;
+    }
+
+    public int getFoodAmount() {
+        return foodAmount;
+    }
 }

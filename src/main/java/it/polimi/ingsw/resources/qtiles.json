@@ -1,0 +1,170 @@
+[
+  {
+    "type" : "TILE",
+    "id" : 0,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "GAIN_FOOD",
+        "foodAmount" : 1,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 1,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "LOSS_IF_BROKE",
+        "ppCost" : 2,
+        "foodCost" : 1,
+        "lossIfBrokeType" : "LOSS_IF_BROKE"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 2,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "GAIN_FOOD",
+        "foodAmount" : 2,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 3,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 4,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "LOSS_IF_BROKE",
+        "ppCost" : 2,
+        "foodCost" : 1,
+        "lossIfBrokeType" : "LOSS_IF_BROKE"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 5,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 2,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 6,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 7,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 8,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "LOSS_IF_BROKE",
+        "ppCost" : 2,
+        "foodCost" : 1,
+        "lossIfBrokeType" : "LOSS_IF_BROKE"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 9,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 3,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 10,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 11,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 12,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "TILE",
+    "id" : 13,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type" : "LOSS_IF_BROKE",
+        "ppCost" : 2,
+        "foodCost" : 1,
+        "lossIfBrokeType" : "LOSS_IF_BROKE"
+      }
+    ],
+    "interactiveEffects" : []
+  }
+]

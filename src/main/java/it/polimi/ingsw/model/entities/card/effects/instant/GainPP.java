@@ -1,4 +1,40 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
-public class GainPP {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.GainPPEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.entities.card.Card;
+import it.polimi.ingsw.model.player.Player;
+
+public class GainPP extends CardEffectInstant{
+    private final int ppAmount;
+    private final CardTypeEnum cat;
+    private final GainPPEnum gainPpType;
+
+    @JsonCreator
+    public GainPP(@JsonProperty("ppAmount") int ppAmount,@JsonProperty("cat") CardTypeEnum cat,@JsonProperty("gainPpType") GainPPEnum gainPpType) {
+        this.ppAmount = ppAmount;
+        this.cat = cat;
+        this.gainPpType = gainPpType;
+    }
+    @Override
+    public void apply(Player p, GamePhaseEnum gamePhase){
+        gainPpType.apply(p, this, gamePhase);
+    }
+
+    @Override
+    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
+
+    }
+
+    @Override
+    public void displayEffect(){
+        System.out.printf("");
+    }
+
+    public int getPpAmount() {
+        return ppAmount;
+    }
 }

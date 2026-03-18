@@ -1,0 +1,132 @@
+[
+  {
+    "type" : "TILE",
+    "id" : "A",
+    "minPlayers" : 5,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [
+      {
+        "type": "GAIN_FOOD",
+        "foodAmount" : 3,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ],
+    "interactiveEffects" :  []
+  },
+  {
+    "type" : "TILE",
+    "id" : "B",
+    "minPlayers" : 2,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "DOWN_DRAW",
+        "upDraw" : false
+      }
+    ]
+  },
+  {
+    "type" : "TILE",
+    "id" : "C",
+    "minPlayers" : 2,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+    }
+    ]
+  },
+  {
+    "type" : "TILE",
+    "id" : "D",
+    "minPlayers" : 3,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "DOWN_CARD",
+        "upDraw" : false
+      },
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "DOWN_CARD",
+        "upDraw" : false
+      }
+    ]
+  },
+  {
+    "type" : "TILE",
+    "id" : "E",
+    "minPlayers" : 2,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "DOWN_CARD",
+        "upDraw" : false
+      },
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+      }
+    ]
+  },
+  {
+    "type" : "TILE",
+    "id" : "F",
+    "minPlayers" : 2,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+      },
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+      }
+    ]
+  },
+  {
+    "type" : "TILE",
+    "id" : "G",
+    "minPlayers" : 4,
+    "occupied" : false,
+    "pawn" : null,
+    "instantEffects" : [],
+    "interactiveEffects" : [
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "DOWN_CARD",
+        "upDraw" : false
+      },
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+      },
+      {
+        "type" : "DRAW_CARD",
+        "drawCardType" : "UP_DRAW",
+        "upDraw" : true
+      }
+    ]
+  }
+]

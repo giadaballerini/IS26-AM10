@@ -1,10 +1,24 @@
 package it.polimi.ingsw.model.entities.card.types.character;
 
-public class Builder {
-    final private int discount;
-   final private int ppValue;
-    public Builder(int discount, int ppValue) {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
+import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
+
+import java.util.List;
+
+public class Builder extends Character {
+    private final int discount;
+
+    @JsonCreator
+    public Builder(@JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
+                   @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects,
+                   @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
+                   @JsonProperty("age") int age, @JsonProperty("discount") int discount,
+                   @JsonProperty("type") CardTypeEnum type) {
+        super(id,trigger, interactiveEffects, instantEffects, age, type);
         this.discount = discount;
-        this.ppValue = ppValue;
     }
 }
