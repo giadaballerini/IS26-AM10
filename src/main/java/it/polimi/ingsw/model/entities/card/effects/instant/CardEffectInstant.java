@@ -19,14 +19,22 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = GainStars.class, name = "GAIN_STARS"),
         @JsonSubTypes.Type(value = ProtectPP.class, name = "PROTECT_PP")
 })
-public abstract class CardEffectInstant {
+public abstract class  CardEffectInstant {
 
-    public void apply(Player p, GamePhaseEnum gamePhase) {}
-    public void canApply(GamePhaseEnum trigger,Player p, GamePhaseEnum currPhase){
+    public void apply(Player p) {}
 
+    public void apply(Player p, Card c) {}
+
+
+    public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase){
+        return trigger == currPhase;
     }
     public void displayEffect(){
 
     }
+    public int getPpAmount(){
+        return 0;
+    }
 
+    public boolean isOneTime(){return false;}
 }

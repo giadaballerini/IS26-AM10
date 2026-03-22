@@ -5,12 +5,15 @@ import it.polimi.ingsw.model.interfaces.DiscountFoodModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum DiscountFoodEnum implements DiscountFoodModifier {
-    DISCOUNT_CAT((p, e, g) -> {
+    DISCOUNT_CAT((p, e) -> {
         p.addFoodDiscount(p.getNumType(e.getCat()));
     }),
-    DISCOUNT_FLAT((p, e, g) -> {
-        p.addFoodDiscount(3);
-    });
+    DISCOUNT_FLAT((p, e) -> {
+        p.addFoodDiscount(e.getFoodAmount());
+    }){
+        public boolean isOneTime(){return true;}
+    };
+
 
 
     private final DiscountFoodModifier modifier;
@@ -18,7 +21,8 @@ public enum DiscountFoodEnum implements DiscountFoodModifier {
         this.modifier = modifier;
     }
     @Override
-    public void apply(Player p, DiscountFood effect, GamePhaseEnum g) {
-        modifier.apply(p, effect, g);
+    public void apply(Player p, DiscountFood effect) {
+        modifier.apply(p, effect);
     }
+    public boolean isOneTime(){return false;}
 }

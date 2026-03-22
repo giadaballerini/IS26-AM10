@@ -7,5 +7,5 @@ import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.player.Player;
 
 public interface InteractiveEffectModifier {
-    Action apply(Player p, GamePhaseEnum g, DrawCardEnum drawCard);
+    Action apply(Player p, DrawCardEnum drawCard);
 }

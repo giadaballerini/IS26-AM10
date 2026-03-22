@@ -16,17 +16,16 @@ public class ProtectPP extends CardEffectInstant{
     }
 
     @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        protectPpType.apply(p, this, gamePhase);
+    public void apply(Player p){
+        protectPpType.apply(p);
     }
 
-    @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
-
-    }
 
     @Override
     public void displayEffect(){
         System.out.printf("");
     }
+
+    @Override
+    public boolean isOneTime(){return protectPpType.isOneTime();}
 }

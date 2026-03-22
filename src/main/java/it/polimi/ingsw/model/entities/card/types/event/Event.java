@@ -6,7 +6,11 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
+import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
+import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
+import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
+import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
@@ -31,4 +35,11 @@ public abstract class Event extends Card {
     }
 
     public abstract void execEvent(List<Player> players, GamePhaseEnum phase);
+    public void accept(GainFoodVisitor visitor, Player p, GainFood e){
+        visitor.visit(this, p, e);
+    }
+
+    public void accept (GainPPVisitor visitor, Player p, GainPP e){
+        visitor.visit(this, p, e);
+    }
 }

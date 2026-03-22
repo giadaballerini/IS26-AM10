@@ -16,12 +16,15 @@ public class LossIfBroke extends CardEffectInstant{
         this.lossIfBrokeType = lossIfBrokeType;
     }
 
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        lossIfBrokeType.apply(p, this, gamePhase);
+    public void apply(Player p){
+        lossIfBrokeType.apply(p, this);
     }
+
+
+    public int getPpCost() {return ppCost;}
+
+    public int getFoodCost() {return foodCost;}
 
     @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
-
-    }
+    public boolean isOneTime(){return lossIfBrokeType.isOneTime();}
 }

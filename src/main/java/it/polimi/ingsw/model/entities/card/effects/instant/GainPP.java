@@ -20,14 +20,10 @@ public class GainPP extends CardEffectInstant{
         this.gainPpType = gainPpType;
     }
     @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        gainPpType.apply(p, this, gamePhase);
+    public void apply(Player p,Card c){
+        gainPpType.apply(p, this, c);
     }
 
-    @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
-
-    }
 
     @Override
     public void displayEffect(){
@@ -37,4 +33,9 @@ public class GainPP extends CardEffectInstant{
     public int getPpAmount() {
         return ppAmount;
     }
+
+    public CardTypeEnum getCat() {return cat;}
+
+    @Override
+    public boolean isOneTime(){return gainPpType.isOneTime();}
 }

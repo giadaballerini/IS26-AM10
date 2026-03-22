@@ -6,7 +6,9 @@ import it.polimi.ingsw.model.interfaces.ProtectPPModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum ProtectPPEnum implements ProtectPPModifier {
-    PP_PROTECTION ((p, e, g) -> {});
+    PP_PROTECTION ((p) -> {
+        p.addProtection();
+    });
 
 
     private final ProtectPPModifier modifier;
@@ -16,7 +18,8 @@ public enum ProtectPPEnum implements ProtectPPModifier {
 
 
     @Override
-    public void apply(Player p, ProtectPP effect, GamePhaseEnum g) {
-        modifier.apply(p, effect, g);
+    public void apply(Player p) {
+        modifier.apply(p);
     }
+    public boolean isOneTime(){return false;}
 }

@@ -28,13 +28,13 @@ public class Hunt extends Event {
     }
 
     public void execEvent(List<Player> players, GamePhaseEnum phase){
-    if (phase == this.trigger){
-        for (Player player : players){
-            CardTypeEnum t = CardTypeEnum.HUNTER;
-           int tmp = player.getNumType(t);
-            player.addFood(tmp * foodGain);
-            player.addPP(tmp * ppGain);
+        if (phase == this.trigger){
+            for (Player player : players){
+                CardTypeEnum t = CardTypeEnum.HUNTER;
+               int tmp = player.getNumType(t);
+                player.addFood(tmp * foodGain);
+                player.addPP(tmp * ppGain);
+            }
         }
-    }
     }
 }

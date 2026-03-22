@@ -13,7 +13,7 @@ import it.polimi.ingsw.model.player.Player;
         @JsonSubTypes.Type(value = DrawCard.class, name = "DRAW_CARD")
 })
 public abstract class CardEffectInteractive{
-    public void apply(Player p, GamePhaseEnum gamePhase){
+    public void apply(Player p){
 
     }
 

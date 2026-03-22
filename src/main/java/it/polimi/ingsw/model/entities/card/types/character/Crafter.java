@@ -6,7 +6,13 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
+import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
+import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
+import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
+import it.polimi.ingsw.model.interfaces.GainPPVisitor;
+import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Village;
 
 import java.util.List;
 
@@ -21,5 +27,21 @@ public class Crafter extends Character {
                    @JsonProperty("type") CardTypeEnum type) {
         super(id, trigger, interactiveEffects, instantEffects, age, type);
         this.symbol = symbol;
+    }
+
+    public CrafterSymbolEnum getSymbol() {
+        return this.symbol;
+    }
+
+    @Override
+    public void dispatch(Village v) {
+        v.add(this);
+    }
+    public void accept(GainFoodVisitor visitor, Player p, GainFood e){
+        visitor.visit(this, p, e);
+    }
+
+    public void accept (GainPPVisitor visitor, Player p, GainPP e){
+        visitor.visit(this, p, e);
     }
 }

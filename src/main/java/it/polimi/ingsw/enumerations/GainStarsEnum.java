@@ -5,7 +5,9 @@ import it.polimi.ingsw.model.interfaces.GainStarsModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum GainStarsEnum implements GainStarsModifier {
-    GAIN_STARS((p, e, g) -> {});
+    GAIN_STARS((p, e) -> {
+        p.addStars(e.getStarsAmount());
+    }){ public boolean isOneTime(){return true;}};
 
 
     private final GainStarsModifier modifier;
@@ -14,7 +16,9 @@ public enum GainStarsEnum implements GainStarsModifier {
     }
 
     @Override
-    public void apply(Player p, GainStars effect, GamePhaseEnum g) {
-        modifier.apply(p, effect, g);
+    public void apply(Player p, GainStars effect) {
+        modifier.apply(p, effect);
     }
+
+    public boolean isOneTime(){return false;};
 }

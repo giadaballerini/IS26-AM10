@@ -10,4 +10,12 @@ public class Action {
         this.owner = owner;
         this.type = type;
     }
+
+    public DrawCardEnum getType(){
+        return this.type;
+    }
+
+    public Player getOwner(){
+        return this.owner;
+    }
 }

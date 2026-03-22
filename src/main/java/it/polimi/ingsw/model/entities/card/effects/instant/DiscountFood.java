@@ -22,20 +22,16 @@ public class DiscountFood extends CardEffectInstant{
     }
 
     @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        discountFoodType.apply(p, this,  gamePhase);
+    public void apply(Player p){
+        discountFoodType.apply(p, this);
     }
 
-    @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum currPhase){
-        if(trigger != currPhase)
-            throw new WrongPhaseException("aa");
-    }
 
     @Override
     public void displayEffect(){
         System.out.printf("");
     }
+
 
     public CardTypeEnum getCat() {
         return cat;
@@ -44,4 +40,7 @@ public class DiscountFood extends CardEffectInstant{
     public int getFoodAmount() {
         return foodAmount;
     }
+
+    @Override
+    public boolean isOneTime(){return discountFoodType.isOneTime();}
 }

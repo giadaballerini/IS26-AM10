@@ -7,7 +7,8 @@ import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.entities.card.effects.interactive.DrawCard;
+import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Village;
 
 import java.util.List;
 
@@ -32,4 +33,7 @@ public abstract class Character extends Card {
     public Character(int id,GamePhaseEnum trigger, List<CardEffectInteractive> interactiveEffects, List<CardEffectInstant> instantEffects, int age, CardTypeEnum type) {
         super(id, trigger, interactiveEffects, instantEffects, age, type);
     }
+
+    public abstract void dispatch(Village v);
+
 }

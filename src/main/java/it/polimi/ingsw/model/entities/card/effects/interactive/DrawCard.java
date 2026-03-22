@@ -18,8 +18,8 @@ public class DrawCard extends CardEffectInteractive{
     }
 
     @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        drawCardType.apply(p, gamePhase, drawCardType);
+    public void apply(Player p){
+        drawCardType.apply(p,drawCardType);
     }
 
     @Override
@@ -31,5 +31,8 @@ public class DrawCard extends CardEffectInteractive{
     public void displayEffect(){
         System.out.printf("");
     }
+
+
+
 
 }

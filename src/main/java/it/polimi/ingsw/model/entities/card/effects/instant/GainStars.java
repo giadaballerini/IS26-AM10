@@ -18,14 +18,10 @@ public class GainStars extends CardEffectInstant{
     }
 
     @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        gainStarsType.apply(p, this, gamePhase);
+    public void apply(Player p){
+        gainStarsType.apply(p, this);
     }
 
-    @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
-
-    }
 
     @Override
     public void displayEffect(){
@@ -35,4 +31,8 @@ public class GainStars extends CardEffectInstant{
     public int getStarsAmount(){
         return starsAmount;
     }
+
+    @Override
+    public boolean isOneTime(){return gainStarsType.isOneTime();}
+
 }

@@ -15,15 +15,12 @@ public class GainFood extends CardEffectInstant{
         this.foodAmount = foodAmount;
         this.gainFoodType = gainFoodType;
     }
-    @Override
-    public void apply(Player p, GamePhaseEnum gamePhase){
-        gainFoodType.apply(p, this, gamePhase);
-    }
 
     @Override
-    public void canApply(GamePhaseEnum trigger, Player p, GamePhaseEnum phase){
-
+    public void apply(Player p, Card c){
+        gainFoodType.apply(p, this, c);
     }
+
 
     @Override
     public void displayEffect(){
@@ -33,4 +30,7 @@ public class GainFood extends CardEffectInstant{
     public int getFoodAmount(){
         return foodAmount;
     }
+
+    @Override
+    public boolean isOneTime(){return gainFoodType.isOneTime();}
 }
