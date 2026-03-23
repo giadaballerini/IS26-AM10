@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.entities.tile;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.entities.pawn.Pawn;
@@ -40,8 +41,17 @@ public class Tile {
     public void execInstantEffect(){
 
     }
-    public void execInteractiveEffect(){
-
+    public List<Action> execInteractiveEffect(){
+        List<Action> actions = new ArrayList<>();
+        if(interactiveEffects != null){
+            for(CardEffectInteractive e : interactiveEffects){
+                Action a = e.apply(getPawn().getP());
+                if(a != null){
+                    actions.add(a);
+                }
+            }
+        }
+        return actions;
     }
 
     public Pawn getPawn(){

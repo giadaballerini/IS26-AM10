@@ -21,17 +21,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public abstract class  CardEffectInstant {
 
-    public void apply(Player p) {}
+    public void apply(Player p){}
 
-    public void apply(Player p, Card c) {}
+    public void apply(Player p, Card c){}
 
 
     public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase){
         return trigger == currPhase;
     }
-    public void displayEffect(){
 
-    }
+    public abstract void displayEffect();
+
     public int getPpAmount(){
         return 0;
     }

@@ -27,7 +27,7 @@ public class GainPP extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.printf("");
+        System.out.println("Aggiunti" + ppAmount + "PP");
     }
 
     public int getPpAmount() {

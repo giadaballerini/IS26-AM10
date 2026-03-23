@@ -5,8 +5,8 @@ import it.polimi.ingsw.model.interfaces.InteractiveEffectModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum DrawCardEnum implements InteractiveEffectModifier {
-    DOWN_DRAW((p, self) -> {return new Action(p, self.DOWN_DRAW);}),
-    UP_DRAW((p, self) -> {return new Action(p, self.DOWN_DRAW);});
+    DOWN_DRAW(Action::new),
+    UP_DRAW(Action::new);
 
     private final InteractiveEffectModifier modifier;
     DrawCardEnum(InteractiveEffectModifier modifier){

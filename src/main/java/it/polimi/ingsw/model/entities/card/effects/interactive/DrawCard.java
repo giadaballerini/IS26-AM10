@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.DrawCardEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
@@ -18,8 +19,8 @@ public class DrawCard extends CardEffectInteractive{
     }
 
     @Override
-    public void apply(Player p){
-        drawCardType.apply(p,drawCardType);
+    public Action apply(Player p){
+        return drawCardType.apply(p,drawCardType);
     }
 
     @Override

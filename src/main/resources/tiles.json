@@ -54,12 +54,12 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_CARD",
+        "drawCardType" : "DOWN_DRAW",
         "upDraw" : false
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_CARD",
+        "drawCardType" : "DOWN_DRAW",
         "upDraw" : false
       }
     ]
@@ -74,7 +74,7 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_CARD",
+        "drawCardType" : "DOWN_DRAW",
         "upDraw" : false
       },
       {
@@ -114,7 +114,7 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_CARD",
+        "drawCardType" : "DOWN_DRAW",
         "upDraw" : false
       },
       {

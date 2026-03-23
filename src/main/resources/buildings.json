@@ -108,7 +108,7 @@
     "instantEffects" : [{
       "type" : "GAIN_FOOD",
       "foodAmount" : 1,
-      "gainFoodType" : "FOOD-FOR_HUNTER_HUNT"
+      "gainFoodType" : "FOOD_FOR_HUNTER_HUNT"
     }, {
       "type" : "GAIN_PP",
       "cat" : "HUNTER",
@@ -154,7 +154,7 @@
     "ppValue" : 4,
     "foodCost" : 6,
     "instantEffects" : [{
-      "type" : "PP_GAIN",
+      "type" : "GAIN_PP",
       "cat" : null,
       "ppAmount": null,
       "ppGainType" : "DOUBLE_BUILDER"
@@ -169,7 +169,7 @@
     "ppValue" : 6,
     "foodCost" : 5,
     "instantEffects" : [{
-      "type" : "PP_GAIN",
+      "type" : "GAIN_PP",
       "cat" : null,
       "ppAmount" : 6,
       "ppGainType" : "PP_FOR_SET"

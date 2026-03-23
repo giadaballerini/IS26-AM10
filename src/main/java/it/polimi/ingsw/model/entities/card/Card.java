@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
@@ -13,6 +14,8 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.entities.card.types.event.*;
 import it.polimi.ingsw.model.entities.card.types.character.*;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
+import it.polimi.ingsw.model.player.Village;
+
 import java.util.List;
 
 
@@ -45,8 +48,8 @@ import java.util.List;
 public abstract class Card {
     private int id;
     protected GamePhaseEnum trigger;
-    private List <CardEffectInteractive> interactiveEffects;
-    private List<CardEffectInstant> instantEffects;
+    protected List <CardEffectInteractive> interactiveEffects;
+    protected List<CardEffectInstant> instantEffects;
     private int age;
     private CardTypeEnum type;
 
@@ -58,6 +61,7 @@ public abstract class Card {
         this.age = age;
         this.type = type;
     }
+
 
     public int getAge(){
         return this.age;
@@ -95,7 +99,8 @@ public abstract class Card {
     public int getId(){
         return this.id;
     }
-    public void execInteractiveEffect(Player p, GamePhaseEnum gamePhase){
+    public List<Action> execInteractiveEffect(Player p, GamePhaseEnum gamePhase){
+        return null;
     }
 
     public CardTypeEnum getType(){

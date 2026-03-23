@@ -25,6 +25,7 @@ public class LossIfBroke extends CardEffectInstant{
 
     public int getFoodCost() {return foodCost;}
 
+    public void displayEffect(){System.out.println("Detratti " + ppCost + "PP" + ppCost);}
     @Override
     public boolean isOneTime(){return lossIfBrokeType.isOneTime();}
 }

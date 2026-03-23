@@ -3,6 +3,7 @@ package it.polimi.ingsw.model.player;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.entities.pawn.Pawn;
@@ -81,6 +82,9 @@ public class Player {
     public void addFood(int nFood){
         this.nFood += nFood;
     }
+    public void addBuilding(Building building){
+        this.myBuilds.add(building);
+    }
 
     public void addPP(int pp){
         this.pps += pp;
@@ -122,10 +126,16 @@ public class Player {
         return this.myPawn;
     }
 
-    public void checkBuildsEffects(GamePhaseEnum currPhase){
+    public List<Action> checkBuildsEffects(GamePhaseEnum currPhase){
+        List<Action> actions = new ArrayList<>();
         for(Building b: myBuilds){
             b.execInstantEffect(this, currPhase);
+
+            List<Action> buildingActions = b.execInteractiveEffect(this);
+            if(buildingActions != null)
+                actions.addAll(buildingActions);
         }
+        return actions;
     }
 
 }

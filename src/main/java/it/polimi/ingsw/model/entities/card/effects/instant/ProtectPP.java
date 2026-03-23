@@ -23,7 +23,7 @@ public class ProtectPP extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.printf("");
+        System.out.println("Ricevuta protezione");
     }
 
     @Override

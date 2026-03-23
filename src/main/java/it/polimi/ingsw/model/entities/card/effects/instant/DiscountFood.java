@@ -29,7 +29,7 @@ public class DiscountFood extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.printf("");
+        System.out.println("Aggiunto discount di " + foodAmount);
     }
 
 

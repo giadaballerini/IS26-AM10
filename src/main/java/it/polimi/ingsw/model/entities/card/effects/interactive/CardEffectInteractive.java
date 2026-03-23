@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.entities.card.effects.interactive;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 @JsonTypeInfo(
@@ -13,9 +14,7 @@ import it.polimi.ingsw.model.player.Player;
         @JsonSubTypes.Type(value = DrawCard.class, name = "DRAW_CARD")
 })
 public abstract class CardEffectInteractive{
-    public void apply(Player p){
-
-    }
+    public abstract Action apply(Player p);
 
     public void canApply(Card c, Player p, GamePhaseEnum phase){
 

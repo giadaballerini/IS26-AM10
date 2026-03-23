@@ -24,7 +24,7 @@ public class GainFood extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.printf("");
+        System.out.println("Aggiunto" + foodAmount + "di cibo" + foodAmount);
     }
 
     public int getFoodAmount(){
