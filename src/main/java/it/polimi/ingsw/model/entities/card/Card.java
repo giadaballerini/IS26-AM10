@@ -14,8 +14,10 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.entities.card.types.event.*;
 import it.polimi.ingsw.model.entities.card.types.character.*;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
-import it.polimi.ingsw.model.player.Village;
+import it.polimi.ingsw.visitors.DrawCardVisitor;
+import it.polimi.ingsw.visitors.PlayEventVisitor;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -76,31 +78,24 @@ public abstract class Card {
     }
 
     public void execInstantEffect(Player p, GamePhaseEnum currPhase) {
-        for (CardEffectInstant e : instantEffects) {
+        for (int i = 0; i < instantEffects.size(); i++) {
+            CardEffectInstant e = instantEffects.get(i);
             if (e.canApply(trigger, currPhase)) {
                 e.apply(p, this);
-                if(e.isOneTime())
+                if(e.isOneTime()) {
                     instantEffects.remove(e);
+                    i -= 1;
+                }
             }
         }
     }
-/*
-    - il controllo e.canApply(trigger, currPhase); viene eseguito per tutti
-    gli effetti ritornando sempre lo stesso risultato (inutile), il trigger
-    dovrebbe essere relativo all'effetto e non alla carta, ci potrebbero
-    essere più effetti di una stessa carta che hanno trigger diversi =>
-    modifica json(?)
-    - effetti come FOOD_FLAT dovrebbero tenere un flag per indicare che
-     l'effetto è già stato eseguito, essendo una tantum
-    - dato che esecuzione degli effetti è automatica e non dipende
-    da input del player dovremmo togliere le exception e rendere canApply boolean
-*/
 
     public int getId(){
         return this.id;
     }
-    public List<Action> execInteractiveEffect(Player p, GamePhaseEnum gamePhase){
-        return null;
+
+    public List<Action> execInteractiveEffect(Player p){
+        return Collections.emptyList();
     }
 
     public CardTypeEnum getType(){
@@ -109,4 +104,6 @@ public abstract class Card {
 
     public abstract void accept(GainFoodVisitor visitor, Player p, GainFood effect);
     public abstract void accept(GainPPVisitor visitor, Player p, GainPP effect);
+    public abstract void accept(PlayEventVisitor visitor);
+    public abstract void accept(DrawCardVisitor visitor);
 }

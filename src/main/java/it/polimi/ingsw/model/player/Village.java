@@ -23,7 +23,6 @@ public class Village {
     private List<Gatherer> gatherers;
     private List<Shaman> shamans;
 
-
     public Village() {
         this.crafters = new ArrayList<Crafter>();
         this.builders = new ArrayList<Builder>();
@@ -75,6 +74,7 @@ public class Village {
         };
 
     }
+
     public int getNumSymbolsForCrafter(CrafterSymbolEnum c){
         int num = 0;
         for(Crafter crafter : crafters){

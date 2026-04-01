@@ -2,10 +2,11 @@ package it.polimi.ingsw.model.entities.tile;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.entities.pawn.Pawn;
+import it.polimi.ingsw.model.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,56 +15,48 @@ public class Tile {
     private boolean occupied;
     private char id;
     private int minPlayers;
-    private Pawn pawn;
+    private Player player;
     private final List<CardEffectInstant> autoEffects;
     private final List<CardEffectInteractive> interactiveEffects;
 
     @JsonCreator
     public Tile(@JsonProperty("id") char id,@JsonProperty("minPlayers") int minPlayers,
-                @JsonProperty("autoEffects") List<CardEffectInstant> autoEffects,
+                @JsonProperty("instantEffects") List<CardEffectInstant> autoEffects,
                 @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects){
         this.id = id;
         this.minPlayers = minPlayers;
         this.occupied = false;
-        this.pawn = null;
+        this.player = null;
         this.autoEffects = autoEffects;
         this.interactiveEffects = interactiveEffects;
     }
 
-    public Tile(Tile other){
-        occupied = false;
-        id = other.id;
-        minPlayers = other.minPlayers;
-        pawn = null;
-        autoEffects = new ArrayList<>(other.autoEffects);
-        interactiveEffects = new ArrayList<>(other.interactiveEffects);
+    public void execInstantEffect(GamePhaseEnum currPhase){
+        for (int i = 0; i < autoEffects.size(); i++) {
+            CardEffectInstant instant = autoEffects.get(i);
+            instant.apply(player);
+        }
     }
-    public void execInstantEffect(){
 
-    }
     public List<Action> execInteractiveEffect(){
         List<Action> actions = new ArrayList<>();
-        if(interactiveEffects != null){
             for(CardEffectInteractive e : interactiveEffects){
-                Action a = e.apply(getPawn().getP());
-                if(a != null){
-                    actions.add(a);
-                }
+                Action a = e.apply(getPlayer());
+                actions.add(a);
             }
-        }
         return actions;
     }
 
-    public Pawn getPawn(){
-        return pawn;
+    public Player getPlayer(){
+        return player;
     }
 
     public boolean isOccupied(){
         return occupied;
     }
 
-    public void setPawn(Pawn p){
-        this.pawn = p;
+    public void setPlayer(Player p){
+        this.player = p;
         occupied = true;
     }
 
@@ -75,4 +68,8 @@ public class Tile {
         return id;
     }
 
+    public void removePlayer(){
+        this.setPlayer(null);
+        occupied = false;
+    }
 }

@@ -10,21 +10,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Questo deve corrispondere al "type" dentro l'effetto nel JSON
+        property = "type" // deve corrispondere al "type" dentro l'effetto nel JSON
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DiscountFood.class, name = "DISCOUNT_FOOD"),
         @JsonSubTypes.Type(value = GainFood.class, name = "GAIN_FOOD"),
         @JsonSubTypes.Type(value = GainPP.class, name = "GAIN_PP"),
         @JsonSubTypes.Type(value = GainStars.class, name = "GAIN_STARS"),
-        @JsonSubTypes.Type(value = ProtectPP.class, name = "PROTECT_PP")
+        @JsonSubTypes.Type(value = ProtectPP.class, name = "PROTECT_PP"),
+        @JsonSubTypes.Type(value = LossIfBroke.class, name = "LOSS_IF_BROKE")
 })
 public abstract class  CardEffectInstant {
 
     public void apply(Player p){}
 
-    public void apply(Player p, Card c){}
-
+    public void apply(Player p, Card c){apply(p);}
 
     public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase){
         return trigger == currPhase;

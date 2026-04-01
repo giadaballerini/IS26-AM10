@@ -24,8 +24,7 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_DRAW",
-        "upDraw" : false
+        "drawCardType" : "DOWN_DRAW"
       }
     ]
   },
@@ -39,9 +38,8 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
-    }
+        "drawCardType" : "UP_DRAW"
+      }
     ]
   },
   {
@@ -54,13 +52,11 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_DRAW",
-        "upDraw" : false
+        "drawCardType" : "DOWN_DRAW"
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_DRAW",
-        "upDraw" : false
+        "drawCardType" : "DOWN_DRAW"
       }
     ]
   },
@@ -74,13 +70,11 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_DRAW",
-        "upDraw" : false
+        "drawCardType" : "DOWN_DRAW"
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
+        "drawCardType" : "UP_DRAW"
       }
     ]
   },
@@ -94,13 +88,11 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
+        "drawCardType" : "UP_DRAW"
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
+        "drawCardType" : "UP_DRAW"
       }
     ]
   },
@@ -114,18 +106,15 @@
     "interactiveEffects" : [
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "DOWN_DRAW",
-        "upDraw" : false
+        "drawCardType" : "DOWN_DRAW"
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
+        "drawCardType" : "UP_DRAW"
       },
       {
         "type" : "DRAW_CARD",
-        "drawCardType" : "UP_DRAW",
-        "upDraw" : true
+        "drawCardType" : "UP_DRAW"
       }
     ]
   }

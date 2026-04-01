@@ -14,7 +14,7 @@ public class DrawCard extends CardEffectInteractive{
 
 
     @JsonCreator
-    public DrawCard(@JsonProperty("drawCardType") DrawCardEnum drawCardType,@JsonProperty("upDraw") boolean upDraw) {
+    public DrawCard(@JsonProperty("drawCardType") DrawCardEnum drawCardType) {
         this.drawCardType = drawCardType;
     }
 
@@ -24,13 +24,8 @@ public class DrawCard extends CardEffectInteractive{
     }
 
     @Override
-    public void canApply(Card c, Player p, GamePhaseEnum phase){
-
-    }
-
-    @Override
     public void displayEffect(){
-        System.out.printf("");
+        System.out.printf("Pescata effettuata");
     }
 
 

@@ -6,9 +6,7 @@ import it.polimi.ingsw.model.interfaces.ProtectPPModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum ProtectPPEnum implements ProtectPPModifier {
-    PP_PROTECTION ((p) -> {
-        p.addProtection();
-    });
+    PP_PROTECTION (Player::addProtection);
 
 
     private final ProtectPPModifier modifier;
@@ -21,5 +19,5 @@ public enum ProtectPPEnum implements ProtectPPModifier {
     public void apply(Player p) {
         modifier.apply(p);
     }
-    public boolean isOneTime(){return false;}
+    public boolean isOneTime(){return true;}
 }

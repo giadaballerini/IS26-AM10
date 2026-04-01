@@ -12,6 +12,7 @@ public enum DrawCardEnum implements InteractiveEffectModifier {
     DrawCardEnum(InteractiveEffectModifier modifier){
         this.modifier = modifier;
     }
+
     @Override
     public Action apply(Player p,DrawCardEnum drawCard) {
         return modifier.apply(p, this);

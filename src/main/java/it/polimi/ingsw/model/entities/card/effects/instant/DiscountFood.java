@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.DiscountFoodEnum;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
-import it.polimi.ingsw.exceptions.WrongPhaseException;
-import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
 public class DiscountFood extends CardEffectInstant{
@@ -29,7 +26,7 @@ public class DiscountFood extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.println("Aggiunto discount di " + foodAmount);
+        System.out.println("\nAggiunto discount di " + foodAmount);
     }
 
 

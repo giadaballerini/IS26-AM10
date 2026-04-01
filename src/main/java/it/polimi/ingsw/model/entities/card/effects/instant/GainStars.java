@@ -25,7 +25,7 @@ public class GainStars extends CardEffectInstant{
 
     @Override
     public void displayEffect(){
-        System.out.println("Aggiunte " + starsAmount + "stelle");
+        System.out.println("\nAggiunte " + starsAmount + " stelle");
     }
 
     public int getStarsAmount(){

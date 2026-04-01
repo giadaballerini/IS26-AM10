@@ -10,7 +10,7 @@ import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
 
-public class StonePainting extends Event {
+public class StonePainting extends Event{
     private final int nPainterSup;
     private final int ppGain;
     private final int ppLoss;

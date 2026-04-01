@@ -7,7 +7,7 @@ import it.polimi.ingsw.model.player.Player;
 public enum GainStarsEnum implements GainStarsModifier {
     GAIN_STARS((p, e) -> {
         p.addStars(e.getStarsAmount());
-    }){ public boolean isOneTime(){return true;}};
+    });
 
 
     private final GainStarsModifier modifier;
@@ -20,5 +20,5 @@ public enum GainStarsEnum implements GainStarsModifier {
         modifier.apply(p, effect);
     }
 
-    public boolean isOneTime(){return false;};
+    public boolean isOneTime(){return true;}
 }

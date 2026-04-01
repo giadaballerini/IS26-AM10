@@ -34,10 +34,18 @@ public class Ritual extends Event {
             minStars = players.stream().map(Player::getNStars).min(Integer::compareTo).get();
             for (Player player : players) {
                 if (player.getNStars() == maxStars) {
-                    player.addPP(ppGain);
+                    if(player.getHasDoubleShamanIncome())
+                        player.addPP(ppGain * 2);
+                    else
+                        player.addPP(ppGain);
                 }
                 if (player.getNStars() == minStars) {
-                    player.addPP(-ppLoss);
+                    if(!player.getHasProtection()) {
+                        if (player.getHasDoubleShamanIncome())
+                            player.addPP(-ppLoss * 2);
+                        else
+                            player.addPP(-ppLoss);
+                    }
                 }
 
             }

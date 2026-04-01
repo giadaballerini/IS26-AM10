@@ -8,7 +8,7 @@ import it.polimi.ingsw.model.player.Player;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Il campo "type" che hai messo dentro l'oggetto effect nel JSON
+        property = "type" // Il campo "type" che si trova dentro l'oggetto effect nel JSON
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DrawCard.class, name = "DRAW_CARD")
@@ -16,11 +16,6 @@ import it.polimi.ingsw.model.player.Player;
 public abstract class CardEffectInteractive{
     public abstract Action apply(Player p);
 
-    public void canApply(Card c, Player p, GamePhaseEnum phase){
+    public abstract void displayEffect();
 
-    }
-
-    public void displayEffect(){
-        System.out.printf("");
-    }
 }

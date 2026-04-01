@@ -14,11 +14,13 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
         int newNSets = Integer.MAX_VALUE;
         int oldNSets = Integer.MAX_VALUE;
         for(CardTypeEnum type : CardTypeEnum.values()){
-            newNSets = Math.min(newNSets, p.getNumType(type));
-            if(type.equals(c.getType()))
-                oldNSets = Math.min(oldNSets, p.getNumType(type)-1);
-            else
-                oldNSets = Math.min(oldNSets, p.getNumType(type));
+            if(type.isCharacter()) {
+                newNSets = Math.min(newNSets, p.getNumType(type));
+                if (type.equals(c.getType()))
+                    oldNSets = Math.min(oldNSets, p.getNumType(type) - 1);
+                else
+                    oldNSets = Math.min(oldNSets, p.getNumType(type));
+            }
         }
         if(newNSets > oldNSets)
             p.addFood(e.getFoodAmount());
@@ -34,14 +36,14 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
 
         int count = p.getNumSymbolsForCrafter(symbol);
 
-        if(count > 0 && count % 2 == 0)
+        if(count != 0 && count % 2 == 0)
             p.addFood(gainFood.getFoodAmount());
 
     }
     },
     FOOD_FOR_HUNTER_HUNT((p, e, c ) -> {
-        p.addFood(p.getNumType(CardTypeEnum.HUNTER));
-    }),
+        p.setHuntFlag(true);
+    }){public boolean isOneTime(){return true;}},
     FOOD_FOR_ARTIST_PAINT((p, e, c) -> {
         p.addFood(p.getNumType(CardTypeEnum.PAINTER) * e.getFoodAmount());
     }),

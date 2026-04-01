@@ -30,18 +30,16 @@ public class Feast extends Event {
     }
 
     public void execEvent(List<Player> players, GamePhaseEnum phase){
-        if(phase == GamePhaseEnum.END_ROUND || phase == GamePhaseEnum.PLAY_EVENT){
-            for(Player playerRef : players){
-                int totalCost = playerRef.getNumCharacters() - playerRef.getFoodDiscount();
-                for(int k = 0; k < totalCost; k++){
-                    if(playerRef.getNFood() > 0){
-                        playerRef.addFood(this.foodCost);
-                    } else {
-                        playerRef.addPP(this.ppCost);
-                    }
+        for(Player playerRef : players){
+            int totalCost = playerRef.getNumCharacters() - playerRef.getFoodDiscount();
+            for(int k = 0; k < totalCost; k++){
+                if(playerRef.getNFood() > 0){
+                    playerRef.addFood(-this.foodCost);
+                } else {
+                    playerRef.addPP(-this.ppCost);
                 }
             }
-
         }
     }
+
 }

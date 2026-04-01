@@ -12,13 +12,15 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInterac
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.DrawCardVisitor;
+import it.polimi.ingsw.visitors.PlayEventVisitor;
 
 import java.util.List;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Il campo "type" che hai messo dentro l'oggetto effect nel JSON
+        property = "type" // Il campo "type" che si trova dentro l'oggetto effect nel JSON
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Feast.class, name = "FEAST"),
@@ -41,5 +43,11 @@ public abstract class Event extends Card {
 
     public void accept (GainPPVisitor visitor, Player p, GainPP e){
         visitor.visit(this, p, e);
+    }
+    public void accept(PlayEventVisitor visitor){
+        visitor.visit(this);
+    }
+    public void accept(DrawCardVisitor visitor){
+        visitor.visit(this);
     }
 }

@@ -17,14 +17,16 @@ public enum GainPPEnum implements GainPPModifier, GainPPVisitor {
         int newNSets = Integer.MAX_VALUE;
         int oldNSets = Integer.MAX_VALUE;
         for(CardTypeEnum type : CardTypeEnum.values()){
-            newNSets = Math.min(newNSets, p.getNumType(type));
-            if(type.equals(c.getType()))
-                oldNSets = Math.min(oldNSets, p.getNumType(type)-1);
-            else
-                oldNSets = Math.min(oldNSets, p.getNumType(type));
+            if(type.isCharacter()) {
+                newNSets = Math.min(newNSets, p.getNumType(type));
+                if (type.equals(c.getType()))
+                    oldNSets = Math.min(oldNSets, p.getNumType(type) - 1);
+                else
+                    oldNSets = Math.min(oldNSets, p.getNumType(type));
+            }
         }
         if(newNSets > oldNSets)
-            p.addFood(e.getPpAmount());
+            p.addPP(e.getPpAmount());
     }),
     PP_FLAT((p, e, c) -> {
         p.addPP(e.getPpAmount());
@@ -34,21 +36,7 @@ public enum GainPPEnum implements GainPPModifier, GainPPVisitor {
     }),
     DOUBLE_BUILDER((p, e, c) -> {
         p.addPP(p.getBuilderPoints());
-    }),
-    /*PP_CRAFTER((p, e,  c) -> {}){
-        @Override
-        public void apply (Player p, GainPP gainPP, Card c) {
-            c.accept(this,p,gainPP);
-        }
-        @Override
-        public void visit(Crafter c, Player p, GainPP gainPP) {
-            int numCrafters = p.getNumType(c.getType());
-            int numSymbols = p.getTotSymbolsForCrafter();
-            p.addPP(numCrafters * numSymbols);
-
-        }
-
-    }*/;
+    });
 
     private final GainPPModifier modifier;
     GainPPEnum(GainPPModifier modifier) {

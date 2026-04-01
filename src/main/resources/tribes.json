@@ -127,12 +127,17 @@
     "id" : 36,
     "trigger" : "DRAW_PHASE",
     "age" : 1,
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 2,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -142,12 +147,17 @@
     "id" : 37,
     "trigger" : "DRAW_PHASE",
     "age" : 1,
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 3,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -157,12 +167,17 @@
     "id" : 38,
     "trigger" : "DRAW_PHASE",
     "age" : 1,
-    "discount" : 2,
     "instantEffects" : [
       { "type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 0,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -196,7 +211,12 @@
     "id" : 42,
     "trigger" : null,
     "age" : 1,
-    "instantEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
     "interactiveEffects" : []
   },
   {
@@ -204,7 +224,12 @@
     "id" : 43,
     "trigger" : null,
     "age" : 1,
-    "instantEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
     "interactiveEffects" : []
   },
   {
@@ -307,12 +332,17 @@
     "id" : 53,
     "trigger" : "DRAW_PHASE",
     "age" : 2,
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 1,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -322,12 +352,17 @@
     "id" : 54,
     "trigger" : "DRAW_PHASE",
     "age" : 2,
-    "discount" : 3,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 3,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -337,12 +372,17 @@
     "id" : 55,
     "trigger" : "DRAW_PHASE",
     "age" : 2,
-    "discount" : 4,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 4,
         "gainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -376,7 +416,12 @@
     "id" : 59,
     "trigger" : null,
     "age" : 2,
-    "instantEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
     "interactiveEffects" : []
   },
   {
@@ -496,12 +541,17 @@
     "id" : 71,
     "trigger" : "DRAW_PHASE",
     "age" : 3,
-    "discount" : 2,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 3,
         "GainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -511,12 +561,17 @@
     "id" : 72,
     "trigger" : "DRAW_PHASE",
     "age" : 3,
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 5,
         "GainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -526,12 +581,17 @@
     "id" : 73,
     "trigger" : "DRAW_PHASE",
     "age" : 3,
-    "discount" : 2,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "cat" : null,
         "ppAmount" : 2,
         "GainPPType" : "PP_FLAT"
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -565,7 +625,12 @@
     "id" : 77,
     "trigger" : null,
     "age" : 3,
-    "instantEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
     "interactiveEffects" : []
   },
   {
@@ -649,7 +714,12 @@
     "id" : 86,
     "age" : 1,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "HUNTER",
@@ -674,12 +744,17 @@
     "id" : 89,
     "trigger": "DRAW_PHASE",
     "age" : 2,
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "gainPpType" : "PP_FLAT",
         "ppAmount" : 1,
         "cat": null
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -698,7 +773,12 @@
     "trigger": null,
     "age" : 2,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "HUNTER",
@@ -798,7 +878,12 @@
     "age" : 2,
     "trigger": null,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "HUNTER",
@@ -842,7 +927,12 @@
     "trigger" : null,
     "age" : 3,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "CRAFTER",
@@ -870,12 +960,17 @@
     "id" : 108,
     "trigger" : "DRAW_PHASE",
     "age" : 1,
-    "discount" : 2,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "gainPpType" : "PP_FLAT",
         "ppAmount" : 1,
         "cat": null
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -886,7 +981,12 @@
     "trigger" : null,
     "age" : 1,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "SHAMAN",
@@ -917,7 +1017,14 @@
     "type" : "GATHERER",
     "id" : 112,
     "trigger" : null,
-    "age" : 2
+    "age" : 2,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "HUNTER",
@@ -933,11 +1040,16 @@
     "id" : 114,
     "age" : 3,
     "trigger" : "DRAW_PHASE",
-    "discount" : 1,
     "instantEffects" : [
       {	"type" : "GAIN_PP",
         "gainPpType" : "PP_FLAT",
         "pp" : 4
+      },
+      {
+        "type" : "DISCOUNT_FOOD",
+        "cat" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
       }
     ],
     "interactiveEffects" : []
@@ -956,7 +1068,12 @@
     "id" : 116,
     "age" : 3,
     "interactiveEffects" : [],
-    "instantEffects" : []
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "cat" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
   },
   {
     "type" : "HUNTER",
@@ -974,5 +1091,3 @@
     ]
   }
 ]
-
-

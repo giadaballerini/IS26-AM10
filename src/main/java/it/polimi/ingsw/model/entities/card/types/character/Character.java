@@ -9,13 +9,15 @@ import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Village;
+import it.polimi.ingsw.visitors.DrawCardVisitor;
+import it.polimi.ingsw.visitors.PlayEventVisitor;
 
 import java.util.List;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Il campo "type" che hai messo dentro l'oggetto effect nel JSON
+        property = "type" // Il campo "type" che si trova dentro l'oggetto effect nel JSON
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Builder.class, name = "BUILDER"),
@@ -36,4 +38,6 @@ public abstract class Character extends Card {
 
     public abstract void dispatch(Village v);
 
+    public void accept(DrawCardVisitor visitor){visitor.visit(this);}
+    public void accept(PlayEventVisitor visitor){}
 }

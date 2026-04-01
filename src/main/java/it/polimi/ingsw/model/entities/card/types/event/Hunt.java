@@ -31,9 +31,13 @@ public class Hunt extends Event {
         if (phase == this.trigger){
             for (Player player : players){
                 CardTypeEnum t = CardTypeEnum.HUNTER;
-               int tmp = player.getNumType(t);
+                int tmp = player.getNumType(t);
                 player.addFood(tmp * foodGain);
                 player.addPP(tmp * ppGain);
+                if(player.hasHuntFlag()){
+                    player.addFood(tmp);
+                    player.addPP(tmp);
+                }
             }
         }
     }

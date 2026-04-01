@@ -13,6 +13,8 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInterac
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.DrawCardVisitor;
+import it.polimi.ingsw.visitors.PlayEventVisitor;
 import javafx.scene.control.ListView;
 
 import java.util.ArrayList;
@@ -46,20 +48,21 @@ public class Building extends Card {
         visitor.visit(this, p, e);
     }
 
-    public void accept (GainPPVisitor visitor, Player p, GainPP e){
+    public void accept(GainPPVisitor visitor, Player p, GainPP e){
         visitor.visit(this, p, e);
     }
 
+    public void accept(PlayEventVisitor visitor){}
+
+    public void accept(DrawCardVisitor visitor){visitor.visit(this);}
+
+    @Override
     public List<Action> execInteractiveEffect(Player p){
         List<Action> actions = new ArrayList<>();
-        if(interactiveEffects != null){
             for(CardEffectInteractive e : interactiveEffects){
                 Action a = e.apply(p);
-                if(a != null){
-                    actions.add(a);
-                }
+                actions.add(a);
             }
-        }
         return actions;
     }
 }

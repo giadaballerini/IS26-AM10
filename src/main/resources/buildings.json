@@ -101,7 +101,7 @@
   {
     "type" : "BUILDING",
     "id" : 8,
-    "trigger" :  "END_ROUND",
+    "trigger" :  "DRAW_PHASE",
     "age" : 2,
     "ppValue" : 2,
     "foodCost" : 7,

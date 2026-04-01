@@ -16,16 +16,14 @@ import it.polimi.ingsw.model.player.Village;
 import java.util.List;
 
 public class Builder extends Character {
-    private final int discount;
 
     @JsonCreator
     public Builder(@JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
                    @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects,
                    @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
-                   @JsonProperty("age") int age, @JsonProperty("discount") int discount,
+                   @JsonProperty("age") int age,
                    @JsonProperty("type") CardTypeEnum type) {
         super(id,trigger, interactiveEffects, instantEffects, age, type);
-        this.discount = discount;
     }
 
     @Override
@@ -40,4 +38,5 @@ public class Builder extends Character {
     public void accept (GainPPVisitor visitor, Player p, GainPP e){
         visitor.visit(this, p, e);
     }
+
 }
