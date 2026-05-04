@@ -1,60 +1,80 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
-import it.polimi.ingsw.exceptions.InvalidDrawException;
-import it.polimi.ingsw.exceptions.InvalidPhaseException;
-import it.polimi.ingsw.exceptions.InvalidPlayerException;
-import it.polimi.ingsw.model.entities.card.Card;
-import it.polimi.ingsw.model.entities.tile.Tile;
+import it.polimi.ingsw.model.gamemanager.ApplicableActions;
 import it.polimi.ingsw.model.gamemanager.GameManager;
-import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.observer.GameEventListener;
+import it.polimi.ingsw.network.messages.client.*;
+
+import it.polimi.ingsw.network.messages.service.PongMessage;
+import it.polimi.ingsw.visitors.ClientMessageVisitor;
 
 import java.util.Objects;
 
 
-public class Controller implements GameEventListener{
+public class Controller implements ClientMessageVisitor {
 
-    private final GameManager gameManager;
-
-    public Controller(GameManager gameManager) {
-
-        Objects.requireNonNull(gameManager, "GameManager non può essere null!");
-        this.gameManager = gameManager;
-        subscribeListener(gameManager);
-    }
-
-    public void onCardDrawRequested(Card c, Player p) throws InvalidPhaseException, InvalidPlayerException {
-        if (!gameManager.checkCorrectPhase(GamePhaseEnum.DRAW_PHASE))
-            throw new InvalidPhaseException("FASE INVALIDA");
-        else if (!(gameManager.checkCorrectPlayer(p))) {
-            throw new InvalidPlayerException("GIOCATORE INVALIDO");
-        }
-        try {
-            gameManager.drawCard(c);
-        } catch (InvalidDrawException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public void subscribeListener(GameManager gm){
-        if(gm != null)
-            gm.addListener(this);
-    }
-
-    public void onMovePawnRequested(Tile t, Player p) throws InvalidPhaseException, InvalidPlayerException {
-        if (!gameManager.checkCorrectPhase(GamePhaseEnum.SETUP_PHASE))
-            throw new InvalidPhaseException("FASE INVALIDA");
-        else if (!(gameManager.checkCorrectPlayer(p))) {
-            throw new InvalidPlayerException("GIOCATORE INVALIDO");
-        }
-        try {
-            gameManager.move(t);
-        } catch (InvalidDrawException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    private final ApplicableActions gameManager;
+    private final int numPlayers;
+    /*
     public void onGameStartRequested(){
         gameManager.initGame();
     }
+    */
+
+    public Controller(GameManager gameManager, int numPlayers) {
+        Objects.requireNonNull(gameManager, "GameManager non può essere null!");
+        this.gameManager = gameManager;
+        this.numPlayers = numPlayers;
+    }
+
+    public void visit(MoveMessage moveMessage) {
+        gameManager.onMoveRequested(moveMessage.getPlayer(), moveMessage.getTilePos());
+
+    }
+    public void visit(DrawMessage drawMessage){
+        gameManager.onDrawCardRequested(drawMessage.getNickname(), drawMessage.getCardId());
+    }
+
+    public void visit(SkipMessage skipMessage){
+        gameManager.onSkipRequested(skipMessage.getNickname());
+    }
+
+    @Override
+    public void visit(CreateGameMessage createGameMessage) {
+
+    }
+
+    @Override
+    public void visit(JoinGameMessage joinGameMessage) {
+
+    }
+
+    @Override
+    public void visit(LoginMessage loginMessage) {
+
+    }
+
+    @Override
+    public void visit(AskLobbiesMessage askLobbiesMessage) {
+
+    }
+
+    @Override
+    public void visit(PongMessage pongMessage) {
+
+    }
+
+    @Override
+    public void visit(QuitMessage quitMessage) {
+
+    }
+
+    @Override
+    public void visit(ExitMessage exitMessage) {
+
+    }
+
+    public int getNumPlayers(){
+        return numPlayers;
+    }
+
 }

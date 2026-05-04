@@ -14,7 +14,7 @@ public class GainPP extends CardEffectInstant{
     private final GainPPEnum gainPpType;
 
     @JsonCreator
-    public GainPP(@JsonProperty("ppAmount") int ppAmount,@JsonProperty("cat") CardTypeEnum cat,@JsonProperty("gainPpType") GainPPEnum gainPpType) {
+    public GainPP(@JsonProperty("category") CardTypeEnum cat,@JsonProperty("ppAmount") int ppAmount,@JsonProperty("gainPpType") GainPPEnum gainPpType) {
         this.ppAmount = ppAmount;
         this.cat = cat;
         this.gainPpType = gainPpType;

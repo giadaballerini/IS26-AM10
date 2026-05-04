@@ -110,7 +110,7 @@ public class GameInitializer {
         }
     }
 
-    public Queue<Tile> initQueue(int numPlayers) {
+    public List<Tile> initQueue(int numPlayers) {
 
         int minId = switch(numPlayers) {
             case 2 -> 0;

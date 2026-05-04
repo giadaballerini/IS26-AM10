@@ -8,4 +8,5 @@ import it.polimi.ingsw.model.player.Player;
 public interface GainFoodModifier {
 
     void apply(Player p, GainFood effect, Card c);
+    default void apply(Player p, GainFood effect){}
 }

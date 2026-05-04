@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="37f167a1-9c71-45f5-b7f3-fdb543cefbba" name="Changes" comment="Feat: started socket socket implementation and continued CLI implementation.">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.zipper" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/am10.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/IS26-AM10.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/CardData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/CardRegistry.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/Client.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/CommandParser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/CardColorMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/CardInfoHelper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/TUIColorMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/ViewTUI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/UserInterface.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/VirtualModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/Command.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/CreateGameCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/DrawCardCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/ExitCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/InfoCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/JoinGameCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/MoveCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/QuitCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/ShowLobbiesCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/SkipDrawCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/exceptions/GameException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/exceptions/InvalidCardException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/exceptions/InvalidLobbySizeException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/exceptions/InvalidTimingException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/exceptions/WrongPasswordException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/MainClientRmi.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/MainClientSocket.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/socket/ClientSocketMessageVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/ChangeAgeDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/EventDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/LobbyDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/AskLobbiesMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/ClientMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/CreateGameMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/ExitMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/JoinGameMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/LoginMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/QuitMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/SkipMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/AvailableLobbiesMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/ChangeAgeUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/CurrPlayerUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/DrawUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/ErrorMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/EventMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/GameCreatedMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/GameEndingUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/MoveUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/NotifyDrawableMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/NotifySkipMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/PhaseUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/RequestLeaderboardUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/ReturnToQueueUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/ServerMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/ShowBoardMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/StatsUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/server/StatusUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/service/PingMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/service/PongMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/rmi/DisconnectionListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ServerSocket.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/ClientMessageVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/ServerMessageVisitorImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/clientCards.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/buildings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/clientCards.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/CardData.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/CardRegistry$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/CardRegistry.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/Client.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/CommandParser.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/CardColorMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/CardInfoHelper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/HelpScreen$Explanation.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/HelpScreen.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/TUIColorMapper$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/TUIColorMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/TuiCompleter.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/ViewTUI$1Etichetta.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/TUI/ViewTUI.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/UserInterface.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/VirtualModel.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/Command.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/CreateGameCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/DrawCardCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/ExitCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/HelpCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/InfoCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/JoinGameCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/MoveCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/QuitCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/ShowLobbiesCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/commands/SkipDrawCommand.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/rmi/VirtualViewRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/client/socket/VirtualView.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/controller/Controller.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$10.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$2.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$3.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$4.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$5.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$6.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$7.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$8.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum$9.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CardTypeEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/ColorPawnEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/CrafterSymbolEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DiscountFoodEnum$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DiscountFoodEnum$2.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DiscountFoodEnum$3.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DiscountFoodEnum$4.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DiscountFoodEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/DrawCardEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum$2.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum$3.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum$4.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum$5.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainFoodEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainPPEnum$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainPPEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GainStarsEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/GamePhaseEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/LossIfBrokeEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/enumerations/ProtectPPEnum.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/AlreadyExistingUsernameException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/GameException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidCardException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidDrawException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidLobbyException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidLobbySizeException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidMoveException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidPhaseException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidPlayerException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidSkipException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/InvalidTimingException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/OccupiedTileException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/exceptions/WrongPasswordException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/GameInitializer$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/GameInitializer$2.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/GameInitializer$3.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/GameInitializer$4.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/GameInitializer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/action/Action.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/Card.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/CardEffectInstant.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/DiscountFood.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/GainFood.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/GainPP.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/GainStars.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/LossIfBroke.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/instant/ProtectPP.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/interactive/CardEffectInteractive.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/effects/interactive/DrawCard.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/building/Building.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Builder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Character.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Crafter.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Gatherer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Hunter.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Painter.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/character/Shaman.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/event/Event.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/event/Feast.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/event/Hunt.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/event/Ritual.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/card/types/event/StonePainting.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/entities/tile/Tile.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/ApplicableActions.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/DrawPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/EndGamePhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/EndRoundPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/EndTurnPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/GameManager.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/GamePhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/OptionalDrawPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/PlayEventPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/gamemanager/SetupPhaseState.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/CardVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/DiscountFoodModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/GainFoodModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/GainFoodVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/GainPPModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/GainPPVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/GainStarsModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/InteractiveEffectModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/LossIfBrokeModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/interfaces/ProtectPPModifier.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/persistence/DBManager.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/persistence/RankingDAO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/player/Player.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/player/Village$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/model/player/Village.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/ClientToServerActions.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/MainClientRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/MainClientSocket.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/ServerHandler.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/rmi/ClientRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/socket/ClientSocket.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/socket/ClientSocketMessageVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/client/socket/ServerHandlerSocket.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/ActionsDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/BoardDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/CardDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/ChangeAgeDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/EventDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/GameEventDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/LobbyDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/PhaseDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/PlayerDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/PlayerStatsDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/PlayerStatusDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/dto/TileDTO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/AskLobbiesMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/ClientMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/CreateGameMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/DrawMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/ExitMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/JoinGameMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/LoginMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/MoveMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/QuitMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/client/SkipMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/AvailableLobbiesMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/ChangeAgeUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/CurrPlayerUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/DrawUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/ErrorMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/EventMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/GameCreatedMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/GameEndingUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/MoveUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/NotifyDrawableMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/NotifySkipMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/PhaseUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/RequestLeaderboardUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/ReturnToQueueUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/ServerMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/ShowBoardMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/StatsUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/server/StatusUpdateMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/service/PingMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/messages/service/PongMessage.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/ClientHandler.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/Lobby.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/MatchManager.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/ServerMain.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/VirtualServer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/VirtualServerRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/rmi/ClientHandlerRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/rmi/DisconnectionListener.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/rmi/ServerRmi.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/network/server/socket/ServerSocket.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/observer/GameEventListener.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/observer/ModelObserver.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/CanDrawVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/ClientMessageVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/ClientMessageVisitorImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/DrawCardVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/PlayEventVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/ServerMessageVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/it/polimi/ingsw/visitors/ServerMessageVisitorImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/module-info.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/qtiles.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/tiles.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/tribes.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/CardTypeEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/DiscountFoodEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/DrawCardEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/GainFoodEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/GainPPEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/GainStarsEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/LossIfBrokeEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/enumerations/ProtectPPEnumTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/GameInitializerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/action/ActionTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/CardTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/CardEffectInstantTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/DiscountFoodTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/GainFoodTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/GainStarsTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/LossIfBrokeTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/instant/ProtectPPTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/effects/interactive/DrawCardTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/BuilderTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/CharacterTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/CrafterTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/GathererTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/HunterTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/PainterTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/character/ShamanTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/EventTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/FeastTest$PlayerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/FeastTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/HuntTest$PlayerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/HuntTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/RitualTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/card/types/event/StonePaintingTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/entities/tile/TileTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/gamemanager/GameManagerTest$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/gamemanager/GameManagerTest$TestableGameManager.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/gamemanager/GameManagerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/interfaces/CardVisitorTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/interfaces/GainFoodVisitorTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/interfaces/GainPPVisitorTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/player/PlayerTest$TestablePlayer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/player/PlayerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/model/player/VillageTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/visitors/DrawCardVisitorTest$TestableDrawCardVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/visitors/DrawCardVisitorTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/visitors/PlayEventVisitorTest$TestablePlayEventVisitor.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/it/polimi/ingsw/visitors/PlayEventVisitorTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.run/java in am10.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.run/java in am10.run.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deliveries/uml/UML_model.png" beforeDir="false" afterPath="$PROJECT_DIR$/deliveries/uml/UML_model.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/controller/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/controller/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/enumerations/GainFoodEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/enumerations/GainFoodEnum.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/GameInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/GameInitializer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/Card.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/DiscountFood.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/DiscountFood.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainFood.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainFood.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainPP.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainPP.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainStars.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/effects/instant/GainStars.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/types/building/Building.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/card/types/building/Building.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/tile/Tile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/entities/tile/Tile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/EndGamePhaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/EndGamePhaseState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/GameManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/GameManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/OptionalDrawPhaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/OptionalDrawPhaseState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/SetupPhaseState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/SetupPhaseState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/interfaces/GainFoodModifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/interfaces/GainFoodModifier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/persistence/RankingDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/persistence/RankingDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/player/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/player/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/ClientToServerActions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/ClientToServerActions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/MainClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/MainClient2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/rmi/ClientRmi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/rmi/ClientRmi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/socket/ClientSocket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/client/socket/ClientSocket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/ActionsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/ActionsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/BoardDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/BoardDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerStatsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerStatsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerStatusDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/PlayerStatusDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/TileDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/dto/TileDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/ClientMessage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/DrawMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/DrawMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/MoveMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/client/MoveMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/messages/SkipMessage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/MatchManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/MatchManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/ServerMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/ServerMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/VirtualServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/VirtualServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/VirtualServerRmi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/VirtualServerRmi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/rmi/ClientHandlerRmi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/rmi/ClientHandlerRmi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/rmi/ServerRmi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/rmi/ServerRmi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/observer/ModelObserver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/observer/ModelObserver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/view/client/VirtualView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/socket/VirtualView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/view/client/rmi/VirtualViewRmi.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/rmi/VirtualViewRmi.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/MessageVisitor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/PlayEventVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/PlayEventVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/buildings.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/buildings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tiles.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tiles.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tribes.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tribes.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/GameInitializerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/GameInitializerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/gamemanager/GameManagerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/gamemanager/GameManagerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/player/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/player/PlayerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/visitors/DrawCardVisitorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/visitors/DrawCardVisitorTest.java" afterDir="false" />
+    </list>
+    <list id="c12eef40-4288-4e47-9aff-2a6359afe7e4" name="Changes by berna" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/TuiCompleter.java" afterDir="false" />
+    </list>
+    <list id="58fd7fed-6673-4f0e-b5ff-2e97936ed157" name="Changes by Dani" comment="" />
+    <list id="0bb2a3ec-10e0-4e54-baa6-88d75b219344" name="Changes by FIlippo Bianchi" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/ClientMessageVisitorImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/visitors/ServerMessageVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/gamemanager/GameManagerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/gamemanager/GameManagerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/player/PlayerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/player/PlayerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/it/polimi/ingsw/visitors/DrawCardVisitorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/it/polimi/ingsw/visitors/DrawCardVisitorTest.java" afterDir="false" />
+    </list>
+    <list id="4ec10851-4149-4b13-8338-645008d54c8c" name="Changes by giada" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/TUI/HelpScreen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/client/commands/HelpCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/GameManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/GameManager.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="242" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/../2026-04-22_21-34-44\exportToHTML" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Exception" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;DanieleAmodio04&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/giadaballerini/IS26-AM10.git&quot;,
+    &quot;accountId&quot;: &quot;dc76121c-0ea5-4849-a3f4-b5ea2c2a00b9&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/gamemanager/GameManagerTest.java">
+      <ranges>
+        <range start1="19" end1="21" start2="19" end2="19" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="23" end1="26" start2="21" end2="22" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="27" end1="29" start2="23" end2="24" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="35" end1="37" start2="30" end2="30" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="45" end1="46" start2="38" end2="39" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="56" end1="57" start2="49" end2="50" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="69" end1="70" start2="62" end2="63" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="83" end1="84" start2="76" end2="77" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="99" end1="100" start2="92" end2="93" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="131" end1="132" start2="124" end2="125" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="155" end1="156" start2="148" end2="149" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="158" end1="159" start2="151" end2="152" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="178" end1="179" start2="171" end2="172" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="196" end1="197" start2="189" end2="190" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="488" end1="489" start2="481" end2="482" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="559" end1="561" start2="552" end2="554" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="564" end1="566" start2="557" end2="559" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="666" end1="667" start2="659" end2="660" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="671" end1="672" start2="664" end2="665" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="676" end1="676" start2="669" end2="671" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="677" end1="677" start2="672" end2="673" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="713" end1="714" start2="709" end2="710" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="721" end1="721" start2="717" end2="721" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="732" end1="732" start2="732" end2="736" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="745" end1="746" start2="749" end2="750" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="749" end1="750" start2="753" end2="754" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="879" end1="880" start2="883" end2="884" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/network/server/socket/ClientHandlerSocket.java">
+      <ranges>
+        <range start1="3" end1="7" start2="3" end2="10" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="8" end1="8" start2="11" end2="15" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="11" end1="12" start2="18" end2="22" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="13" end1="14" start2="23" end2="26" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="15" end1="18" start2="27" end2="30" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="19" end1="20" start2="31" end2="54" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="23" end1="24" start2="57" end2="57" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="25" end1="27" start2="58" end2="60" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="30" end1="31" start2="63" end2="64" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="34" end1="35" start2="67" end2="69" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="38" end1="39" start2="72" end2="74" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="42" end1="42" start2="77" end2="79" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="43" end1="43" start2="80" end2="88" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="44" end1="46" start2="89" end2="89" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="47" end1="47" start2="90" end2="93" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="50" end1="51" start2="96" end2="97" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="54" end1="55" start2="100" end2="101" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="61" end1="61" start2="107" end2="111" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="62" end1="63" start2="112" end2="113" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="65" end1="65" start2="115" end2="116" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="68" end1="69" start2="119" end2="120" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="71" end1="76" start2="122" end2="122" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="81" end1="82" start2="127" end2="128" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="84" end1="84" start2="130" end2="173" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/player/PlayerTest.java">
+      <ranges>
+        <range start1="171" end1="172" start2="171" end2="172" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="253" end1="254" start2="253" end2="254" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="255" end1="256" start2="255" end2="256" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="273" end1="274" start2="273" end2="274" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/effects/instant/GainPPTest.java">
+      <ranges>
+        <range start1="24" end1="25" start2="24" end2="25" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="32" end1="33" start2="32" end2="33" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="42" end1="43" start2="42" end2="43" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="48" end1="49" start2="48" end2="49" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="54" end1="55" start2="54" end2="55" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="56" end1="57" start2="56" end2="57" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="60" end1="60" start2="60" end2="61" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/test/it/polimi/ingsw/model/entities/card/types/building/BuildingTest.java">
+      <ranges>
+        <range start1="56" end1="57" start2="56" end2="57" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="62" end1="63" start2="62" end2="63" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="69" end1="70" start2="69" end2="70" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+        <range start1="93" end1="94" start2="93" end2="94" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/test/it/polimi/ingsw/visitors/DrawCardVisitorTest.java">
+      <ranges>
+        <range start1="41" end1="42" start2="41" end2="42" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="51" end1="52" start2="51" end2="52" changelist="0bb2a3ec-10e0-4e54-baa6-88d75b219344" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/main/java/it/polimi/ingsw/model/gamemanager/GameManager.java">
+      <ranges>
+        <range start1="2" end1="2" start2="2" end2="3" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="10" end1="10" start2="11" end2="12" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="13" end1="14" start2="15" end2="16" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="27" end1="28" start2="29" end2="30" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="37" end1="38" start2="39" end2="40" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="41" end1="42" start2="43" end2="44" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="84" end1="84" start2="86" end2="88" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="105" end1="106" start2="109" end2="110" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="107" end1="107" start2="111" end2="112" changelist="4ec10851-4149-4b13-8338-645008d54c8c" />
+        <range start1="112" end1="113" start2="117" end2="118" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="131" end1="131" start2="136" end2="138" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="157" end1="157" start2="164" end2="165" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="179" end1="180" start2="187" end2="188" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="190" end1="191" start2="198" end2="199" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="192" end1="192" start2="200" end2="202" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="236" end1="238" start2="246" end2="246" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="258" end1="259" start2="266" end2="267" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="314" end1="315" start2="322" end2="323" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="318" end1="319" start2="326" end2="327" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="338" end1="338" start2="346" end2="351" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="340" end1="340" start2="353" end2="357" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="346" end1="347" start2="363" end2="364" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="349" end1="349" start2="366" end2="367" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="365" end1="366" start2="383" end2="384" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="368" end1="368" start2="386" end2="387" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="374" end1="374" start2="393" end2="394" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="390" end1="391" start2="410" end2="410" changelist="4ec10851-4149-4b13-8338-645008d54c8c" />
+        <range start1="392" end1="395" start2="411" end2="411" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="396" end1="396" start2="412" end2="414" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="397" end1="413" start2="415" end2="416" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="414" end1="431" start2="417" end2="430" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="434" end1="435" start2="433" end2="438" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="452" end1="452" start2="455" end2="456" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="456" end1="457" start2="460" end2="461" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="480" end1="481" start2="484" end2="485" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="482" end1="483" start2="486" end2="487" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="485" end1="486" start2="489" end2="491" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="489" end1="489" start2="494" end2="495" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="514" end1="515" start2="520" end2="521" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="550" end1="550" start2="556" end2="560" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="554" end1="554" start2="564" end2="565" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="556" end1="556" start2="567" end2="568" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="558" end1="560" start2="570" end2="572" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="589" end1="590" start2="601" end2="602" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="596" end1="597" start2="608" end2="609" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="604" end1="605" start2="616" end2="617" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="611" end1="612" start2="623" end2="624" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="618" end1="618" start2="630" end2="631" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="619" end1="619" start2="632" end2="646" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="623" end1="626" start2="650" end2="652" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="632" end1="633" start2="658" end2="659" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="637" end1="638" start2="663" end2="664" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="639" end1="640" start2="665" end2="666" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="642" end1="642" start2="668" end2="669" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="643" end1="643" start2="670" end2="674" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="652" end1="653" start2="683" end2="684" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="657" end1="657" start2="688" end2="695" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="658" end1="659" start2="696" end2="697" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="665" end1="666" start2="703" end2="704" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+        <range start1="671" end1="673" start2="709" end2="719" changelist="37f167a1-9c71-45f5-b7f3-fdb543cefbba" />
+      </ranges>
+    </file>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3CfTzASJBcg3wf5ykT3Yux3AGYZ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.MainClient.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainClient2.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainClientRmi.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainClientSocket.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ServerMain.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="it.polimi.ingsw.client.commands" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.ServerMain">
+    <configuration name="MainClientRmi" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="it.polimi.ingsw.network.client.MainClientRmi" />
+      <module name="am10" />
+      <option name="VM_PARAMETERS" value="--enable-native-access=org.jline,ALL-UNNAMED" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="it.polimi.ingsw.network.client.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MainClientRmi" type="Application" factoryName="Application" singleton="false">
+      <option name="MAIN_CLASS_NAME" value="it.polimi.ingsw.network.client.MainClientRmi" />
+      <module name="am10" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MainClientSocket" type="Application" factoryName="Application" singleton="false">
+      <option name="MAIN_CLASS_NAME" value="it.polimi.ingsw.network.client.MainClientSocket" />
+      <module name="am10" />
+      <option name="VM_PARAMETERS" value="--enable-native-access=org.jline,ALL-UNNAMED" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ServerMain" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="it.polimi.ingsw.network.server.ServerMain" />
+      <module name="am10" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.ServerMain" />
+      <item itemvalue="Application.MainClientSocket" />
+      <item itemvalue="Application.MainClientRmi" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.MainClientRmi" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="37f167a1-9c71-45f5-b7f3-fdb543cefbba" name="Changes" comment="" />
+      <created>1776775885358</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776775885358</updated>
+      <workItem from="1776775886679" duration="62000" />
+      <workItem from="1776776003502" duration="55000" />
+      <workItem from="1776776094158" duration="5031000" />
+      <workItem from="1776781439947" duration="5139000" />
+      <workItem from="1776887390668" duration="5130000" />
+      <workItem from="1776893120233" duration="4433000" />
+      <workItem from="1776931349811" duration="1585000" />
+      <workItem from="1776932960964" duration="15725000" />
+      <workItem from="1777046178355" duration="704000" />
+      <workItem from="1777074419379" duration="14000" />
+      <workItem from="1777407184734" duration="887000" />
+      <workItem from="1777408265717" duration="7745000" />
+      <workItem from="1777453840175" duration="7501000" />
+      <workItem from="1777490776136" duration="9896000" />
+      <workItem from="1777541158268" duration="7577000" />
+      <workItem from="1777578094433" duration="12768000" />
+      <workItem from="1777623581321" duration="2103000" />
+      <workItem from="1777630232732" duration="6350000" />
+      <workItem from="1777647270988" duration="2066000" />
+      <workItem from="1777652447012" duration="20280000" />
+      <workItem from="1777717053910" duration="4271000" />
+      <workItem from="1777736559997" duration="6827000" />
+      <workItem from="1777748830200" duration="10206000" />
+      <workItem from="1777813124925" duration="8196000" />
+      <workItem from="1777836282833" duration="11134000" />
+      <workItem from="1777847674287" duration="135000" />
+      <workItem from="1777876439635" duration="1646000" />
+      <workItem from="1777879041083" duration="133000" />
+      <workItem from="1777902412305" duration="2884000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="3b6c29c8-8638-4d29-b7c8-e7e1c1905b06" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="3b6c29c8-8638-4d29-b7c8-e7e1c1905b06">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Feat: started socket socket implementation and continued CLI implementation." />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: started socket socket implementation and continued CLI implementation." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

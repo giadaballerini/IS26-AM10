@@ -12,6 +12,7 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInterac
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
 
@@ -50,4 +51,6 @@ public abstract class Event extends Card {
     public void accept(DrawCardVisitor visitor){
         visitor.visit(this);
     }
+    public void accept(CanDrawVisitor visitor){visitor.visit(this);}
+
 }

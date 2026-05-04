@@ -169,7 +169,7 @@ class PlayerTest {
 
     @Test
     void addBuilding() {
-        Building building = new Building(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, 3, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 3, new ArrayList<>(), new ArrayList<>());
         Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
         realPlayer.addBuilding(building);
         assertEquals(1, realPlayer.getBuildings().size());
@@ -251,9 +251,9 @@ class PlayerTest {
 
     @Test
     void testShouldCheckBuildsEffectsNoEffect() {
-        Building building = new Building(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, 7, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING,1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7,  new ArrayList<>(), new ArrayList<>());
 
-        Building building2 = new Building(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, 7, CardTypeEnum.BUILDING);
+        Building building2 = new Building( CardTypeEnum.BUILDING,1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(), new ArrayList<>());
 
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
 
@@ -271,7 +271,7 @@ class PlayerTest {
         List<CardEffectInteractive> effs = new ArrayList<>();
         effs.add(eff);
 
-        Building building = new Building(1, GamePhaseEnum.DRAW_PHASE, effs, new ArrayList<>(), 1, 2, 7, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(),  effs);
 
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
 

@@ -30,6 +30,7 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
         public void apply (Player p,GainFood gainFood, Card c) {
          c.accept(this,p,gainFood);
     }
+
     @Override
     public void visit(Crafter c, Player p, GainFood gainFood) {
         CrafterSymbolEnum symbol = c.getSymbol();
@@ -44,11 +45,21 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
     FOOD_FOR_HUNTER_HUNT((p, e, c ) -> {
         p.setHuntFlag(true);
     }){public boolean isOneTime(){return true;}},
+
     FOOD_FOR_ARTIST_PAINT((p, e, c) -> {
-        p.addFood(p.getNumType(CardTypeEnum.PAINTER) * e.getFoodAmount());
-    }),
+       p.setPaintFlag(true);
+    }){ public boolean isOneTime(){return true;}},
+
     FOOD_FLAT((p, e, c) -> {
         p.addFood(e.getFoodAmount());
+    }){ public boolean isOneTime(){return true;}
+    public void apply(Player p, GainFood gainFood){
+        p.addFood(gainFood.getFoodAmount());
+    }},
+
+    FOOD_EXTRA((p, e, c) -> {
+        p.setExtraFlag(true);
+        //creare flag in player per abilitare il +1 quando torna in queue. In remove from board bisogna controllare, se il player ha la flag a true, allora controllare se la tile su cui si posiziona ha un effetto di tipo GAIN_FOOD E FARE +1 al cibo del player
     }){ public boolean isOneTime(){return true;}};
 
     private final GainFoodModifier modifier;
@@ -61,5 +72,8 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
         modifier.apply(p, effect, c);
     }
 
+    public void apply(Player p, GainFood gainFood){
+        modifier.apply(p, gainFood);
+    }
     public boolean isOneTime(){return false;}
 }

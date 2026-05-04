@@ -1,0 +1,810 @@
+[
+  {
+    "type" : "BUILDING",
+    "id" : 1,
+    "cost" : 5,
+    "age" : 1,
+    "PP" : 3,
+    "caption" : "Questo edificio ti garantisce uno sconto di un cibo per ogni artista nella tua tribù durante il sostentamento."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 2,
+    "cost" : 5,
+    "age" : 1,
+    "PP" : 2,
+    "caption" : "Questo edificio ti garantisce di non perdere PP quando hai meno stelle degli altri giocatori durante il rituale sciamanico."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 3,
+    "cost" : 4,
+    "age" : 1,
+    "PP" : 4,
+    "caption" : "Questo edificio ti garantisce uno sconto di un cibo per ogni raccoglitore nella tua tribù durante il sostentamento."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 4,
+    "cost" : 4,
+    "age" : 1,
+    "PP" : 3,
+    "caption" : "Dal momento in cui hai questo Edificio, prendi 5 Cibo ogni volta che completi un set di 6 carte Personaggio di tipo diverso."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 5,
+    "cost" : 3,
+    "age" : 1,
+    "PP" : 3,
+    "caption" : "Se alla fine del turno quando sposti il totem sulla tessera Ordine di Turno lo metti in uno spazio che ti garantisce del cibo, prendi un cibo in più."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 6,
+    "cost" : 3,
+    "age" : 1,
+    "PP" : 4,
+    "caption" : "Prendi 3 cibo ogni volta che ottieni una coppia di inventori con la stessa icona invenzione."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 7,
+    "cost" : 7,
+    "age" : 2,
+    "PP" : 4,
+    "caption" :  "Questo edificio ti garantisce uno sconto di un cibo per ogni inventore nella tua tribù durante il sostentamento."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 8,
+    "cost" : 7,
+    "age" : 2,
+    "PP" : 2,
+    "caption" : "Durante l’Evento Caccia, per ogni Cacciatore nella tua tribù, prendi 1 Cibo e guadagni 1 Punto Prestigio addizionali."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 9,
+    "cost" : 6,
+    "age" : 2,
+    "PP" : 4,
+    "caption" : "Durante l'evento rituale sciamanico la tua tribù possiede tre stelle addizionali."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 10,
+    "cost" : 7,
+    "age" : 2,
+    "PP" : 0,
+    "caption" : "Durante l'evento rituale sciamanico se hai più stelle degli altri giocatori ottieni doppi punti, anche in caso di parità."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 11,
+    "cost" : 6,
+    "age" : 2,
+    "PP" : 4,
+    "caption" : "I PP dati dai costruttori vengo raddoppiati alla fine della partita."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 12,
+    "cost" : 5,
+    "age" : 2,
+    "PP" : 6,
+    "caption" : "Alla fine della partita ottieni 6 PP per ogni set di 6 carte Personaggio di tipo diverso."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 13,
+    "cost" : 5,
+    "age" : 2,
+    "PP" : 6,
+    "caption" : "Durante l'evento pitture rupestri ottieni 1 di Cibo per ogni artista nella tua tribù."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 14,
+    "cost" : 10,
+    "age" : 3,
+    "PP" : 0,
+    "caption" : "Alla fine della partita ottieni 25 PP."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 15,
+    "cost" : 9,
+    "age" : 3,
+    "PP" : 3,
+    "caption" : "Alla fine del round puoi pescare una carta dalla fila superiore."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 16,
+    "cost" : 8,
+    "age" : 3,
+    "PP" : 8,
+    "caption" : "Alla fine della partita ottieni tre PP per ogni cacciatore nella tua tribù."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 17,
+    "cost" : 7,
+    "age" : 3,
+    "PP" : 4,
+    "caption" : "Alla fine della partita ottieni quattro PP per ogni sciamano nella tua tribù."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 18,
+    "cost" : 7,
+    "age" : 3,
+    "PP" : 6,
+    "caption" : "Alla fine della partita ottieni quattro PP per ogni raccoglitore nella tua tribù."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 19,
+    "cost" : 7,
+    "age" : 3,
+    "PP" : 4,
+    "caption" : "Alla fine della partita ottieni quattro PP per ogni artista nella tua tribù."
+  },
+  {
+    "type" : "BUILDING",
+    "id" : 20,
+    "cost" : 6,
+    "age" : 3,
+    "PP" : 3,
+    "caption" : "Alla fine della partita ottieni quattro PP per ogni costruttore nella tua tribù."
+  },
+
+  {
+    "type" : "BUILDING",
+    "id" : 21,
+    "cost" : 6,
+    "age" : 3,
+    "PP" : 6,
+    "caption" : "Alla fine della partita ottieni quattro PP per ogni inventore nella tua tribù."
+  },
+  {
+    "type" : "HUNT",
+    "id" : 22,
+    "age" : 1,
+    "food" : 1,
+    "PP" : 1,
+    "caption" : "Ottieni 1 PP e 1 Cibo per ogni cacciatore nella tua tribù."
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 23,
+    "age" : 1,
+    "ppGain" : 5,
+    "ppLoss" : 3,
+    "caption" : "Ottieni 5 PP se hai più stelle degli altri giocatori, perdi 3 PP se ne hai meno degli altri."
+  },
+  {
+    "type" : "FEAST",
+    "id" : 24,
+    "age" : 1,
+    "food" : 1,
+    "PP" : 1,
+    "caption" : "Paga 1 Cibo per ogni personaggio nella tua tribù. Per ogni personaggio per cui non puoi pagare, perdi 1 PP."
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 25,
+    "age" : 1,
+    "thresh" : 0,
+    "ppGain" : 1,
+    "ppLoss" : 2,
+    "caption" : "Se hai più di 0 artisti nella tua tribù ottieni 1 PP per ognuno di essi, altrimenti perdi 2 PP."
+  },
+  {
+    "type" : "HUNT",
+    "id" : 26,
+    "age" : 2,
+    "food" : 1,
+    "PP" : 2,
+    "caption" : "Ottieni 2 PP e 1 Cibo per ogni cacciatore nella tua tribù."
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 27,
+    "age" : 2,
+    "ppGain" : 10,
+    "ppLoss" : 5,
+    "caption" : "Ottieni 10 PP se hai più stelle degli altri giocatori, perdi 5 PP se ne hai meno degli altri."
+  },
+  {
+    "type" : "FEAST",
+    "id" : 28,
+    "age" : 2,
+    "food" : 1,
+    "PP" : 2,
+    "caption" : "Paga 1 Cibo per ogni personaggio nella tua tribù. Per ogni personaggio per cui non puoi pagare, perdi 2 PP."
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 29,
+    "age" : 2,
+    "thresh" : 1,
+    "ppGain" : 2,
+    "ppLoss" : 2,
+    "caption" : "Se hai più di 1 artisti nella tua tribù ottieni 2 PP per ognuno di essi, altrimenti perdi 2 PP."
+  },
+  {
+    "type" : "HUNT",
+    "id" : 30,
+    "age" : 3,
+    "food" : 1,
+    "PP" : 3,
+    "caption" : "Ottieni 3 PP e 1 Cibo per ogni cacciatore nella tua tribù."
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 31,
+    "age" : 3,
+    "ppGain" : 15,
+    "ppLoss" : 7,
+    "caption" : "Ottieni 15 PP se hai più stelle degli altri giocatori, perdi 7 PP se ne hai meno degli altri."
+  },
+  {
+    "type" : "FEAST",
+    "id" : 32,
+    "age" : 3,
+    "food" : 1,
+    "PP" : 3,
+    "caption" : "Paga 1 Cibo per ogni personaggio nella tua tribù. Per ogni personaggio per cui non puoi pagare, perdi 3 PP."
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 33,
+    "age" : 3,
+    "thresh" : 2,
+    "ppGain" : 3,
+    "ppLoss" : 2,
+    "caption" : "Se hai più di 2 artisti nella tua tribù ottieni 3 PP per ognuno di essi, altrimenti perdi 2 PP."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 34,
+    "age" : 1,
+    "caption" : "Aggiunge 1 stella alla tua tribù."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 35,
+    "age" : 1,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 36,
+    "age" : 1,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 2 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 37,
+    "age" : 1,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 3 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 38,
+    "age" : 1,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 0 PP."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 39,
+    "age" : 1,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 40,
+    "age" : 1,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 41,
+    "age" : 1,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 42,
+    "age" : 1,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 43,
+    "age" : 1,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 44,
+    "age" : 1,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 45,
+    "age" : 1,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 46,
+    "age" : 1,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 47,
+    "age" : 1,
+    "symbol" : "AMIGDALA",
+    "caption" : "Invenzione: Amigdala"
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 48,
+    "age" : 1,
+    "symbol" : "ARROWHEAD",
+    "caption" : "Invenzione: Punta di freccia"
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 49,
+    "age" : 1,
+    "symbol" : "LEATHER",
+    "caption" : "Invenzione: Pelle"
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 50,
+    "age" : 1,
+    "symbol" : "BREAD",
+    "caption" : "Invenzione: Pane"
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 51,
+    "age" : 2,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 52,
+    "age" : 2,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 53,
+    "age" : 2,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 1 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 54,
+    "age" : 2,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 3 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 55,
+    "age" : 2,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 4 PP."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 56,
+    "age" : 2,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 57,
+    "age" : 2,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 58,
+    "age" : 2,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 59,
+    "age" : 2,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 60,
+    "age" : 2,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 61,
+    "age" : 2,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 62,
+    "age" : 1,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 63,
+    "age" : 2,
+    "symbol" : "LEATHER",
+    "caption" : "Invenzione: Pelle."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 64,
+    "age" : 2,
+    "symbol" : "FLUTE",
+    "caption" : "Invenzione: Flauto."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 65,
+    "age" : 2,
+    "symbol" : "BOWL",
+    "caption" : "Invenzione: Ciotola."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 66,
+    "age" : 2,
+    "symbol" : "ROPE",
+    "caption" : "Invenzione: Corda."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 67,
+    "age" : 2,
+    "symbol" : "DOLL",
+    "caption" : "Invenzione: Bambola."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 68,
+    "age" : 3,
+    "caption" : "Aggiunge 3 stelle alla tua tribù."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 69,
+    "age" : 3,
+    "caption" : "Aggiunge 3 stelle alla tua tribù."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 70,
+    "age" : 3,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 71,
+    "age" : 3,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 3 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 72,
+    "age" : 3,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 5 PP."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 73,
+    "age" : 3,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 2 PP."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 74,
+    "age" : 3,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 75,
+    "age" : 3,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 76,
+    "age" : 3,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 77,
+    "age" : 3,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 78,
+    "age" : 3,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 79,
+    "age" : 3,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 80,
+    "age" : 3,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 81,
+    "age" : 3,
+    "symbol" : "NECKLACE",
+    "caption" : "Invenzione: Collana."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 82,
+    "age" : 3,
+    "symbol" : "BREAD",
+    "caption" : "Invenzione: Pane."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 83,
+    "age" : 3,
+    "symbol" : "HOOK",
+    "caption" : "Invenzione: Amo."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 84,
+    "age" : 1,
+    "symbol" : "DOLL",
+    "caption" : "Invenzione: Bambola."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 85,
+    "age" : 1,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 86,
+    "age" : 1,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 87,
+    "age" : 1,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 88,
+    "age" : 1,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 89,
+    "age" : 2,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 2 PP."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 90,
+    "age" : 2,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 91,
+    "age" : 2,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 92,
+    "age" : 2,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+
+  {
+    "type" : "SHAMAN",
+    "id" : 93,
+    "age" : 3,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 94,
+    "age" : 3,
+    "symbol" : "AMIGDALA",
+    "caption" : "Invenzione: Amigdala"
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 95,
+    "age" : 1,
+    "symbol" : "ARROWHEAD",
+    "caption" : "Invenzione: Punta di Freccia."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 96,
+    "age" : 1,
+    "caption" : "Aggiunge 1 stella alla tua tribù."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 97,
+    "age" : 1,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 98,
+    "age" : 1,
+    "symbol" : "ROPE",
+    "caption" : "Invenzione: Rope."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 99,
+    "age" : 1,
+    "symbol" : "BOWL",
+    "caption" : "Invenzione: Ciotola."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 100,
+    "age" : 1,
+    "symbol" : "FLUTE",
+    "caption" : "Invenzione: Flauto."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 101,
+    "age" : 2,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 102,
+    "age" : 2,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 103,
+    "age" : 2,
+    "symbol" : "HOOK",
+    "caption" : "Invenzione: Amo."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 104,
+    "age" : 3,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 105,
+    "age" : 3,
+    "caption": "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 106,
+    "age" : 3,
+    "symbol" : "NECKLACE",
+    "caption" : "Invenzione: Collana."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 107,
+    "age" : 1,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 108,
+    "age" : 1,
+    "caption" : "Ti garantisce uno sconto di 2 cibo sul prezzo degli edifici e 1 PP."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 109,
+    "age" : 1,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 110,
+    "age" : 2,
+    "caption" : "Aggiunge 1 stella alla tua tribù."
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 111,
+    "age" : 2,
+    "caption" : "Aggiunge 2 stelle alla tua tribù."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 112,
+    "age" : 2,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 113,
+    "age" : 2,
+    "mark" : false,
+    "caption" : "Un cacciatore senza marchio."
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 114,
+    "age" : 3,
+    "caption" : "Ti garantisce uno sconto di 1 cibo sul prezzo degli edifici e 4 PP."
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 115,
+    "age" : 3,
+    "caption" : "Un pittore, il loro numero nella tua tribù durante le pitture rupestri ti porta bonus o malus."
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 116,
+    "age" : 3,
+    "caption" : "Un raccoglitore, ti garantisce uno sconto di 3 di Cibo durante il sostentamento."
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 117,
+    "age" : 3,
+    "mark" : true,
+    "caption" : "Un cacciatore con marchio, quando lo aggiungi alla tua tribù ottieni 1 Cibo."
+  }
+]

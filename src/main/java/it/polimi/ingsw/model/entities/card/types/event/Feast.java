@@ -31,7 +31,18 @@ public class Feast extends Event {
 
     public void execEvent(List<Player> players, GamePhaseEnum phase){
         for(Player playerRef : players){
-            int totalCost = playerRef.getNumCharacters() - playerRef.getFoodDiscount();
+            int tempDisc = 0;
+            if(playerRef.hasDiscountPainter()){
+                tempDisc += playerRef.getNumType(CardTypeEnum.PAINTER);
+            }
+            if(playerRef.hasDiscountGatherer()){
+                tempDisc += playerRef.getNumType(CardTypeEnum.GATHERER);
+            }
+            if(playerRef.hasDiscountCrafter()){
+                tempDisc += playerRef.getNumType(CardTypeEnum.CRAFTER);
+            }
+            tempDisc += playerRef.getFoodDiscount();
+            int totalCost = playerRef.getNumCharacters() - tempDisc;
             for(int k = 0; k < totalCost; k++){
                 if(playerRef.getNFood() > 0){
                     playerRef.addFood(-this.foodCost);

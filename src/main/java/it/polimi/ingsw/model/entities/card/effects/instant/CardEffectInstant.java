@@ -37,4 +37,5 @@ public abstract class  CardEffectInstant {
     }
 
     public boolean isOneTime(){return false;}
+    public boolean isFoodEffect(){return false;}
 }

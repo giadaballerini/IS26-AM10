@@ -9,6 +9,7 @@ class EndGamePhaseState implements GamePhaseState{
     public void onEntry(GameManager context){
         context.finalScoreCount();
         context.gameWinners();
+        context.notifyGameEnding();
     }
 
     @Override

@@ -22,7 +22,7 @@ class GainPPTest {
     @Test
     void apply() {
     Player p = new Player("Player", ColorPawnEnum.ORANGE);
-    GainPP eff = new GainPP(1, null, GainPPEnum.PP_FLAT);
+    GainPP eff = new GainPP(null, 1, GainPPEnum.PP_FLAT);
     Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.BUILDER);
     eff.apply(p, builder);
     assertEquals(1, p.getPP());
@@ -30,7 +30,7 @@ class GainPPTest {
 
     @Test
     void displayEffect() {
-        GainPP eff = new GainPP(1, null, GainPPEnum.PP_FLAT);
+        GainPP eff = new GainPP(null,1, GainPPEnum.PP_FLAT);
 
         mockEff.displayEffect();
         eff.displayEffect();
@@ -40,21 +40,21 @@ class GainPPTest {
 
     @Test
     void getPpAmount() {
-        GainPP eff = new GainPP(1, null, GainPPEnum.PP_FLAT);
+        GainPP eff = new GainPP(null, 1, GainPPEnum.PP_FLAT);
         assertEquals(1, eff.getPpAmount());
     }
 
     @Test
     void getCat() {
-        GainPP eff = new GainPP(1, CardTypeEnum.BUILDER, GainPPEnum.PP_FLAT);
+        GainPP eff = new GainPP(CardTypeEnum.BUILDER, 1, GainPPEnum.PP_FLAT);
         assertEquals(CardTypeEnum.BUILDER, eff.getCat());
     }
 
     @Test
     void isOneTime() {
-        GainPP eff = new GainPP(1, CardTypeEnum.BUILDER, GainPPEnum.PP_FLAT);
+        GainPP eff = new GainPP(CardTypeEnum.BUILDER, 1, GainPPEnum.PP_FLAT);
         assertTrue(eff.isOneTime());
-        GainPP eff1 = new GainPP(1, CardTypeEnum.BUILDER, GainPPEnum.PP_FOR_CAT);
+        GainPP eff1 = new GainPP(CardTypeEnum.BUILDER, 1,  GainPPEnum.PP_FOR_CAT);
         assertFalse(eff1.isOneTime());
     }
 }

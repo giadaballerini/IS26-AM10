@@ -5,8 +5,10 @@ import it.polimi.ingsw.enumerations.ColorPawnEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
+import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Character;
+import it.polimi.ingsw.network.dto.*;
 
 import java.util.*;
 
@@ -23,6 +25,12 @@ public class Player {
     private boolean hasDoubleShamanIncome;
     private ColorPawnEnum  colorPawn;
     private boolean huntFlag;
+    private boolean discountPainter;
+    private boolean discountCrafter;
+    private boolean discountGatherer;
+    private boolean paintFlag;
+    private boolean extraFlag;
+
 
     public Player(String nickname, ColorPawnEnum colorPawn) {
         this.pps = 0;
@@ -37,6 +45,11 @@ public class Player {
         this.hasDoubleShamanIncome = false;
         this.colorPawn = colorPawn;
         this.huntFlag = false;
+        this.discountPainter = false;
+        this.discountCrafter = false;
+        this.discountGatherer = false;
+        this.paintFlag = false;
+        this.extraFlag = false;
     }
 
     public int getPP(){
@@ -134,4 +147,49 @@ public class Player {
     public boolean getHasDoubleShamanIncome(){return hasDoubleShamanIncome;}
 
     public void addTotBuildDiscount(int disc){this.totBuildDisc += disc;}
+
+    public String getNickname() {
+        return this.nickname;
+    }
+
+    public void setDiscountGatherer(boolean flag){
+        this.discountGatherer = flag;
+    }
+
+    public void setDiscountCrafter(boolean flag){
+        this.discountCrafter = flag;
+    }
+
+    public void setDiscountPainter(boolean flag){
+        this.discountPainter = flag;
+    }
+
+    public void setPaintFlag(boolean flag){
+        this.paintFlag = flag;
+    }
+
+    public void setExtraFlag(boolean flag){this.extraFlag = flag;}
+
+    public boolean hasExtraFlag(){return this.extraFlag;}
+
+    public boolean hasPaintFlag(){return this.paintFlag;}
+    public boolean hasDiscountGatherer(){return this.discountGatherer;}
+    public boolean hasDiscountPainter(){return this.discountPainter;}
+    public boolean hasDiscountCrafter(){return this.discountCrafter;}
+
+    public PlayerDTO toDTO(){
+        return new  PlayerDTO(
+                nickname,
+                colorPawn,
+                myBuilds.stream().map(Card::toDTO).toList(),
+                myVillage.getCharactersDTO());
+    }
+
+    public PlayerStatusDTO toStatusDTO(){
+        return new PlayerStatusDTO(nickname, hasProtection, hasDoubleShamanIncome, extraFlag, paintFlag, discountPainter, discountCrafter, discountGatherer, huntFlag);
+    }
+
+    public PlayerStatsDTO toStatsDTO(){
+        return new PlayerStatsDTO(nickname, nFood, pps, nStars);
+    }
 }

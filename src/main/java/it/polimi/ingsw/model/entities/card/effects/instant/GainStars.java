@@ -12,7 +12,7 @@ public class GainStars extends CardEffectInstant{
     private final GainStarsEnum gainStarsType;
 
     @JsonCreator
-    public GainStars(@JsonProperty("starsAmount") int starsAmount,@JsonProperty("gainStarsType") GainStarsEnum gainStarsType) {
+    public GainStars(@JsonProperty("starsAmount") int starsAmount,@JsonProperty("gainStarsEnum") GainStarsEnum gainStarsType) {
         this.starsAmount = starsAmount;
         this.gainStarsType = gainStarsType;
     }

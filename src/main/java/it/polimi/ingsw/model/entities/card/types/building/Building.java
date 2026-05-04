@@ -13,6 +13,7 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInterac
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
 import javafx.scene.control.ListView;
@@ -25,12 +26,13 @@ public class Building extends Card {
     private final int foodCost;
 
     @JsonCreator
-    public Building(@JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
-                    @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects,
-                    @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
+    public Building(@JsonProperty("type") CardTypeEnum type,
+                    @JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
                     @JsonProperty("age") int age,@JsonProperty("ppValue") int ppValue,
                     @JsonProperty("foodCost") int foodCost,
-                    @JsonProperty("type") CardTypeEnum type) {
+                    @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
+                    @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects
+                    ) {
         super(id, trigger, interactiveEffects, instantEffects, age, type);
         this.ppValue = ppValue;
         this.foodCost = foodCost;
@@ -53,6 +55,8 @@ public class Building extends Card {
     }
 
     public void accept(PlayEventVisitor visitor){}
+
+    public void accept(CanDrawVisitor visitor){visitor.visit(this);}
 
     public void accept(DrawCardVisitor visitor){visitor.visit(this);}
 

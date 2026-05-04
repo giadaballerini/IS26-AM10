@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Village;
+import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
 
@@ -39,5 +40,6 @@ public abstract class Character extends Card {
     public abstract void dispatch(Village v);
 
     public void accept(DrawCardVisitor visitor){visitor.visit(this);}
+    public void accept(CanDrawVisitor visitor){visitor.visit(this);}
     public void accept(PlayEventVisitor visitor){}
 }

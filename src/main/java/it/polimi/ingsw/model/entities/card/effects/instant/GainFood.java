@@ -20,7 +20,8 @@ public class GainFood extends CardEffectInstant{
     public void apply(Player p, Card c){
         gainFoodType.apply(p, this, c);
     }
-
+    @Override
+    public void apply(Player p){gainFoodType.apply(p, this);}
 
     @Override
     public void displayEffect(){
@@ -33,4 +34,8 @@ public class GainFood extends CardEffectInstant{
 
     @Override
     public boolean isOneTime(){return gainFoodType.isOneTime();}
+
+    @Override
+    public boolean isFoodEffect(){return true;}
+
 }

@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.player;
 
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
+import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.types.character.Crafter;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
@@ -9,10 +10,12 @@ import it.polimi.ingsw.model.entities.card.types.character.Painter;
 import it.polimi.ingsw.model.entities.card.types.character.Gatherer;
 import it.polimi.ingsw.model.entities.card.types.character.Hunter;
 import it.polimi.ingsw.model.entities.card.types.character.Shaman;
+import it.polimi.ingsw.network.dto.CardDTO;
 import javafx.scene.effect.Effect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Village {
 
@@ -94,5 +97,13 @@ public class Village {
         return points;
     }
 
+    public List<CardDTO> getCharactersDTO(){
+        List<CardDTO> allCharactersDTO = Stream.of(crafters, builders, painters, hunters, shamans, gatherers)
+                .flatMap(List::stream)
+                .map(Card::toDTO)
+                .toList();
+
+        return new ArrayList<CardDTO>(allCharactersDTO);
+    }
 
 }

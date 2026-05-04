@@ -5,9 +5,11 @@ import it.polimi.ingsw.enumerations.GamePhaseEnum;
 class DrawPhaseState implements GamePhaseState{
     public GamePhaseState nextPhase(GameManager context){
         if(context.getToDoActions().isEmpty()) {
+            context.setSkippableDraw(false);
             return new EndTurnPhaseState();
-        }else
+        }else {
             return this;
+        }
     }
 
     @Override
@@ -18,5 +20,7 @@ class DrawPhaseState implements GamePhaseState{
     public void onEntry(GameManager context){
         context.nextPlayer();
         context.checkBoardTileEffects();
+        context.checkCanDraw();
+        nextPhase(context);
     }
 }

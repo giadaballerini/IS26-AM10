@@ -12,6 +12,7 @@ public class PlayEventVisitor implements CardVisitor {
     Event feastEvent = null;
     private List<Player> players;
     private GamePhaseEnum currPhase;
+    private String eventType = "";
     public PlayEventVisitor(List<Player> players, GamePhaseEnum currPhase) {
         this.players = players;
         this.currPhase = currPhase;
@@ -19,14 +20,21 @@ public class PlayEventVisitor implements CardVisitor {
     public void visit(Event e){
         if(e.getType() == CardTypeEnum.FEAST)
             feastEvent = e;
-        else
+        else {
             e.execEvent(players, currPhase);
+            eventType = e.getType().toString();
+        }
     }
 
     public void feastIfPresent(){
+        resetEvent();
         if(feastEvent != null){
+            eventType = feastEvent.getType().toString();
             feastEvent.execEvent(players, currPhase);
         }
     }
 
+    public String getEventType(){return eventType;}
+
+    public void resetEvent(){eventType = "";}
 }

@@ -54,20 +54,20 @@ class BuildingTest {
 
     @Test
     void testShouldGetPpValue() {
-        Building building = new Building(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING, 2, GamePhaseEnum.DRAW_PHASE, 2, 1, 1, new ArrayList<>(), new ArrayList<>());
         assertEquals(1, building.getPpValue());
     }
 
     @Test
     void testShouldGetFoodCost() {
-        Building building = new Building(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING, 2, GamePhaseEnum.DRAW_PHASE, 2, 1, 1, new ArrayList<>(), new ArrayList<>());
         assertEquals(1, building.getFoodCost());
     }
 
     @Test
     void testShouldAccept() {
 
-        Building building = new Building(67, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.BUILDING);
+        Building building = new Building(CardTypeEnum.BUILDING,67, GamePhaseEnum.DRAW_PHASE, 2, 1, 1, new ArrayList<>(), new ArrayList<>());
 
         building.accept(visitorGFood, mockPlayer, GainFoodMock);
         building.accept(visitorEv);
@@ -91,7 +91,7 @@ class BuildingTest {
         Action mockAction1 = mock(Action.class);
         Action mockAction2 = mock(Action.class);
 
-        Building sut = spy(new Building(1,GamePhaseEnum.DRAW_PHASE, Arrays.asList(mockEffect1, mockEffect2), new ArrayList<>(), 3, 5, 4, CardTypeEnum.BUILDING));
+        Building sut = spy(new Building(CardTypeEnum.BUILDING, 1,GamePhaseEnum.DRAW_PHASE, 3, 5, 4, new ArrayList<>(), Arrays.asList(mockEffect1, mockEffect2)));
 
 
         when(mockEffect1.apply(mockPlayer)).thenReturn(mockAction1);

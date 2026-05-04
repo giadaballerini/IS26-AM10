@@ -13,8 +13,6 @@ public interface GameEventListener {
 
     public void onCardDrawRequested(Card c, Player p);
 
-    public void subscribeListener(GameManager gm);
-
     public void onMovePawnRequested(Tile t, Player p);
 
     public void onGameStartRequested();

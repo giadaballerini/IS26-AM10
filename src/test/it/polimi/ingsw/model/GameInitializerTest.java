@@ -82,7 +82,7 @@ class GameInitializerTest {
             default -> -1;
         };
 
-        Queue<Tile> queue = gameInitializer.initQueue(num);
+        List<Tile> queue = gameInitializer.initQueue(num);
         assertEquals(num,queue.size());
         for(Tile t: queue){
             assertTrue(t.getId() >= minId && t.getId() <= maxId);
@@ -93,7 +93,7 @@ class GameInitializerTest {
     @ValueSource(ints= {0,1})
     void testInitQueueInvalid(int num) {
         GameInitializer gameInitializer = new GameInitializer();
-        Queue<Tile> queue = gameInitializer.initQueue(num);
+        List<Tile> queue = gameInitializer.initQueue(num);
         assertEquals(0,queue.size());
     }
 

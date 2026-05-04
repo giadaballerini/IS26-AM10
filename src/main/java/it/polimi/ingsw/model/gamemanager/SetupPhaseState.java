@@ -5,7 +5,6 @@ import it.polimi.ingsw.enumerations.GamePhaseEnum;
 class SetupPhaseState implements GamePhaseState{
     @Override
     public GamePhaseState nextPhase(GameManager context){
-
         if(context.isQueueEmpty()) {
             return new DrawPhaseState();
         }
@@ -13,6 +12,11 @@ class SetupPhaseState implements GamePhaseState{
             context.nextPlayer();
             return this;
         }
+    }
+
+    @Override
+    public void onEntry(GameManager context) {
+        context.showBoard();
     }
 
     @Override

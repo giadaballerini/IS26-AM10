@@ -7,20 +7,21 @@ import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.network.dto.TileDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Tile {
     private boolean occupied;
-    private char id;
+    private int id;
     private int minPlayers;
     private Player player;
     private final List<CardEffectInstant> autoEffects;
     private final List<CardEffectInteractive> interactiveEffects;
 
     @JsonCreator
-    public Tile(@JsonProperty("id") char id,@JsonProperty("minPlayers") int minPlayers,
+    public Tile(@JsonProperty("id") int id,@JsonProperty("minPlayers") int minPlayers,
                 @JsonProperty("instantEffects") List<CardEffectInstant> autoEffects,
                 @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects){
         this.id = id;
@@ -31,7 +32,7 @@ public class Tile {
         this.interactiveEffects = interactiveEffects;
     }
 
-    public void execInstantEffect(GamePhaseEnum currPhase){
+    public void execInstantEffect(){
         for (int i = 0; i < autoEffects.size(); i++) {
             CardEffectInstant instant = autoEffects.get(i);
             instant.apply(player);
@@ -64,12 +65,24 @@ public class Tile {
         return minPlayers;
     }
 
-    public char getId(){
+    public int getId(){
         return id;
     }
 
     public void removePlayer(){
         this.setPlayer(null);
         occupied = false;
+    }
+
+    public boolean hasGainFoodEffect(){
+        return (this.player.hasExtraFlag()  && this.autoEffects.stream().anyMatch(CardEffectInstant::isFoodEffect));
+    }
+
+    public TileDTO toDTO(){
+
+        if(isOccupied()){
+            return new TileDTO(occupied, id, minPlayers, player.getNickname());
+        }
+        return new TileDTO(occupied, id, minPlayers, "");
     }
 }

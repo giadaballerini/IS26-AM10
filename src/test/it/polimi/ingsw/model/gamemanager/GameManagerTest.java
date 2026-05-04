@@ -17,17 +17,17 @@ import it.polimi.ingsw.model.entities.card.types.character.Painter;
 import it.polimi.ingsw.model.entities.card.types.event.Event;
 import it.polimi.ingsw.model.entities.card.types.event.Feast;
 import it.polimi.ingsw.model.entities.tile.Tile;
-import it.polimi.ingsw.model.gamemanager.GameManager;
-import it.polimi.ingsw.model.gamemanager.GamePhaseState;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.observer.GameEventListener;
+import it.polimi.ingsw.network.dto.*;
+import it.polimi.ingsw.network.messages.client.ClientMessage;
+import it.polimi.ingsw.observer.ModelObserver;
+import it.polimi.ingsw.visitors.ClientMessageVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 class GameManagerTest{
 
     private static class TestableGameManager extends GameManager {
-        public TestableGameManager(List<GameEventListener> l, List<Player> p, int n) {
+        public TestableGameManager(List<ModelObserver> l, List<Player> p, int n) {
             super(l, p, n);
         }
         public List<Tile> getBoard() { return this.board; }
@@ -47,7 +47,7 @@ class GameManagerTest{
 
         public List<Card> getLowerList(){return this.lowerList;}
 
-        public Queue<Tile> getQueue(){return this.queue;}
+        public List<Tile> getQueue(){return this.queue;}
 
         public List<Card> getBuildings(){return this.buildings;}
 
@@ -60,7 +60,7 @@ class GameManagerTest{
                 getToDoActions().removeFirst();
             }
         }
-        public List<GameEventListener> getListeners() {
+        public List<ModelObserver> getListeners() {
             return this.listeners;
         }
 
@@ -74,7 +74,7 @@ class GameManagerTest{
     private TestableGameManager tgm;
     @BeforeEach
     void setUp() {
-        List<GameEventListener> listeners = new ArrayList<GameEventListener>();
+        List<ModelObserver> listeners = new ArrayList<ModelObserver>();
         List<Player> players = new ArrayList<Player>();
         players.add(new Player("Player1", ColorPawnEnum.BLUE));
         players.add(new Player("Player2", ColorPawnEnum.ORANGE));
@@ -90,7 +90,7 @@ class GameManagerTest{
     void testShouldInitGameForValidValues(int value) {
 
         List<Player> players = new ArrayList<>();
-        List<GameEventListener> listeners = new ArrayList<>();
+        List<ModelObserver> listeners = new ArrayList<>();
         for(int i = 0; i < value; i++)
             players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
         tgm = new TestableGameManager(listeners, players, value);
@@ -122,7 +122,7 @@ class GameManagerTest{
     void testShouldNotInitGameForInvalidValues(int value) {
 
         List<Player> players = new ArrayList<>();
-        List<GameEventListener> listeners = new ArrayList<>();
+        List<ModelObserver> listeners = new ArrayList<>();
         for(int i = 0; i < value; i++)
             players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
         tgm = new TestableGameManager(listeners, players, value);
@@ -146,10 +146,10 @@ class GameManagerTest{
     void testShouldChangeAge1to2() {
         tgm.initGame();
 
-        Building build1 = new Building(1,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 4,2,CardTypeEnum.BUILDING);
+        Building build1 = new Building(CardTypeEnum.BUILDING, 1,GamePhaseEnum.SETUP_PHASE, 1, 4,2, new ArrayList<>(), new ArrayList<>());
         tgm.getUpperList().add(build1);
 
-        Building build2 = new Building(1,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 4,2,CardTypeEnum.BUILDING);
+        Building build2 = new Building(CardTypeEnum.BUILDING, 1,GamePhaseEnum.SETUP_PHASE, 2, 4,2, new ArrayList<>(), new ArrayList<>());
         tgm.getBuildings().add(build2);
 
         tgm.changeAge();
@@ -169,7 +169,7 @@ class GameManagerTest{
 
         tgm.changeAge();
 
-        Building build3 = new Building(3,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 3, 4,2,CardTypeEnum.BUILDING);
+        Building build3 = new Building(CardTypeEnum.BUILDING,3,GamePhaseEnum.SETUP_PHASE, 3, 4,2,new ArrayList<>(), new ArrayList<>());
         tgm.getLowerList().add(build3);
 
         tgm.changeAge();
@@ -187,7 +187,7 @@ class GameManagerTest{
 
         tgm.changeAge();
 
-        Building build3 = new Building(3,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 3, 4,2,CardTypeEnum.BUILDING);
+        Building build3 = new Building(CardTypeEnum.BUILDING, 3,GamePhaseEnum.SETUP_PHASE,3, 4,2,new ArrayList<>(), new ArrayList<>());
         tgm.getLowerList().add(build3);
 
         tgm.changeAge();
@@ -479,7 +479,7 @@ class GameManagerTest{
     void testShouldRefillBoardChangeAge(int value) {
 
         List<Player> players = new ArrayList<>();
-        List<GameEventListener> listeners = new ArrayList<>();
+        List<ModelObserver> listeners = new ArrayList<>();
         for(int i = 0; i < value; i++)
             players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
 
@@ -550,13 +550,13 @@ class GameManagerTest{
         players.add(p2);
         GameManager gm = new GameManager(new ArrayList<>(), players, 2);
         
-        CardEffectInstant e1 = new GainPP(3,CardTypeEnum.BUILDER, GainPPEnum.PP_FOR_CAT);
-        
+        CardEffectInstant e1 = new GainPP(CardTypeEnum.BUILDER, 3, GainPPEnum.PP_FOR_CAT);
+
         List<CardEffectInstant> eff = new ArrayList<>();
         eff.add(e1);
 
-        Building build1 = new Building(1,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), eff, 2, 4,2,CardTypeEnum.BUILDING);
-        Building build2 = new Building(12,null,new ArrayList<>(), new ArrayList<>(), 2, 5,2,CardTypeEnum.BUILDING);
+        Building build1 = new Building(CardTypeEnum.BUILDING,1,GamePhaseEnum.SETUP_PHASE, 2, 4,2, eff, new ArrayList<>());
+        Building build2 = new Building(CardTypeEnum.BUILDING,12,null, 2, 5,2,new ArrayList<>(), new ArrayList<>());
         Builder b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, CardTypeEnum.BUILDER);
         Builder b2 = new Builder(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, CardTypeEnum.BUILDER);
         Builder b3 = new Builder(5, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.BUILDER);
@@ -657,19 +657,103 @@ class GameManagerTest{
     @Test
     void testShouldGetCurrentPlayer() {
         tgm.initGame();
-        assertEquals(tgm.getQueue().peek().getPlayer(), tgm.getCurrentPlayer());
+        assertEquals(tgm.getQueue().getFirst().getPlayer(), tgm.getCurrentPlayer());
     }
 
     @Test
     void testShouldAddListener() {
-        GameEventListener l = new GameEventListener(){
-            public void onCardDrawRequested(Card c, Player p){};
+        ModelObserver l = new ModelObserver(){
+            @Override
+            public void onErrorMessage(String errorMsg) {
 
-            public void subscribeListener(GameManager gm){};
+            }
+            @Override
+            public void onEvent(String e){
 
-            public void onMovePawnRequested(Tile t, Player p){};
+            }
+            @Override
+            public void onClientMessage(ClientMessage m) {
 
-            public void onGameStartRequested(){};
+            }
+
+            @Override
+            public String getNickname() {
+                return "";
+            }
+
+            @Override
+            public void onCurrPlayerUpdate(String nickname) {
+
+            }
+
+            @Override
+            public void onMoveUpdate(TileDTO tile, String nextPlayer) {
+
+            }
+
+            @Override
+            public void onPhaseUpdate(PhaseDTO phaseDTO) {
+
+            }
+
+            @Override
+            public void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks) {
+
+            }
+
+            @Override
+            public void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos) {
+
+            }
+
+            @Override
+            public void onDrawUpdate(CardDTO cardDTO, String nickname) {
+
+            }
+
+            @Override
+            public void onStatusUpdate(PlayerStatusDTO status) {
+
+            }
+            @Override
+            public void onChangeAge(ChangeAgeDTO ageDTO) {
+
+            }
+
+            @Override
+            public void onStatsUpdate(PlayerStatsDTO stats, int cardId) {
+
+            }
+
+            @Override
+            public void refresh(List<PlayerDTO> listPlayers, BoardDTO board) {
+
+            }
+
+            @Override
+            public void showBoard(BoardDTO board) {
+
+            }
+
+
+            @Override
+            public void notifySkip(String nickname) {
+
+            }
+
+            @Override
+            public void notifyDrawable(ActionsDTO actions) {
+
+            }
+
+            @Override
+            public void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO stats) {
+
+            }
+            @Override
+            public void setVisitor(ClientMessageVisitor v){
+
+            }
         };
         assertEquals(0, tgm.getListeners().size());
         tgm.addListener(l);
@@ -797,7 +881,7 @@ class GameManagerTest{
         CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
         List<CardEffectInteractive> effs = new ArrayList<>();
         effs.add(eff);
-        Building build1 = new Building(1,GamePhaseEnum.SETUP_PHASE, effs, new ArrayList<>(), 2, 4,2,CardTypeEnum.BUILDING);
+        Building build1 = new Building(CardTypeEnum.BUILDING, 1,GamePhaseEnum.SETUP_PHASE,2, 4,2, new ArrayList<>(), effs);
         tgm.getCurrentPlayer().addBuilding(build1);
         tgm.checkEffects();
 
@@ -805,4 +889,5 @@ class GameManagerTest{
         assertSame(DrawCardEnum.UP_DRAW, tgm.getToDoActions().getFirst().getType());
 
     }
+
 }

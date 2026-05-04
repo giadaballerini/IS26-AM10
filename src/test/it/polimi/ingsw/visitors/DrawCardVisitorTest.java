@@ -39,7 +39,7 @@ class DrawCardVisitorTest {
     @Test
     void testVisitBuildingIfBranch() {
         dcv.getCurrentPlayer().addFood(2);
-        Building b = new Building(3,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 3, 4,2,CardTypeEnum.BUILDING);
+        Building b = new Building(CardTypeEnum.BUILDING,3,GamePhaseEnum.SETUP_PHASE, 3, 4,2, new ArrayList<>(), new ArrayList<>());
         dcv.visit(b);
 
         assertEquals(0, dcv.getCurrentPlayer().getNFood());
@@ -49,7 +49,7 @@ class DrawCardVisitorTest {
 
     @Test
     void testVisitBuildingElseBranch() {
-        Building b = new Building(3,GamePhaseEnum.SETUP_PHASE, new ArrayList<>(), new ArrayList<>(), 3, 4,2,CardTypeEnum.BUILDING);
+        Building b = new Building(CardTypeEnum.BUILDING,3,GamePhaseEnum.SETUP_PHASE, 3, 4,2, new ArrayList<>(), new ArrayList<>());
         dcv.visit(b);
         assertTrue(dcv.hasErrorMessage());
         assertEquals("Non disponi del cibo necessario per acquistare l'edificio scelto!", dcv.getErrorMessage());

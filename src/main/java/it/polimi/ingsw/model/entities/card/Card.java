@@ -14,6 +14,9 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.entities.card.types.event.*;
 import it.polimi.ingsw.model.entities.card.types.character.*;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
+import it.polimi.ingsw.network.dto.BoardDTO;
+import it.polimi.ingsw.network.dto.CardDTO;
+import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
 
@@ -106,4 +109,9 @@ public abstract class Card {
     public abstract void accept(GainPPVisitor visitor, Player p, GainPP effect);
     public abstract void accept(PlayEventVisitor visitor);
     public abstract void accept(DrawCardVisitor visitor);
+    public abstract void accept(CanDrawVisitor visitor);
+
+    public CardDTO toDTO(){
+        return new CardDTO(id, age, type);
+    }
 }
