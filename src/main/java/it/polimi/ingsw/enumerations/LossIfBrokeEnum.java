@@ -8,8 +8,8 @@ public enum LossIfBrokeEnum implements LossIfBrokeModifier{
 
     LOSS_IF_BROKE((p, e) -> {
         if(p.getNFood() == 0){
-            p.addPP(-2);
-        } else p.addFood(-1);
+            p.addPP(-e.getPpCost());
+        } else p.addFood(-e.getFoodCost());
     });
 
     private final LossIfBrokeModifier modifier;

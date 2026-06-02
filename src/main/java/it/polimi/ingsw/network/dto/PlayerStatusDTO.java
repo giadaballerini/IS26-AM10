@@ -1,57 +1,52 @@
 package it.polimi.ingsw.network.dto;
 
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+
 import java.io.Serializable;
+import java.util.EnumSet;
+import java.util.Set;
 
 public class PlayerStatusDTO implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String nickname;
-    private boolean huntFlag;
-    private boolean discountPainter;
-    private boolean discountCrafter;
-    private boolean discountGatherer;
+    private final String nickname;
+    private boolean huntBonus;
+    private final Set<CardTypeEnum> categoryDiscounts;
     private boolean paintFlag;
     private boolean extraFlag;
     private boolean hasProtection;
     private boolean hasDoubleShamanIncome;
 
     public PlayerStatusDTO(String nickname, boolean hasProtection, boolean hasDoubleShamanIncome, boolean extraFlag, boolean paintFlag,
-                           boolean discountPainter, boolean discountCrafter, boolean discountGatherer, boolean huntFlag){
+                           Set<CardTypeEnum> categoryDiscounts, boolean huntBonus){
         this.nickname = nickname;
         this.hasProtection = hasProtection;
         this.hasDoubleShamanIncome = hasDoubleShamanIncome;
+        this.categoryDiscounts = Set.copyOf(categoryDiscounts);
         this.extraFlag = extraFlag;
         this.paintFlag = paintFlag;
-        this.discountPainter = discountPainter;
-        this.discountCrafter = discountCrafter;
-        this.discountGatherer = discountGatherer;
-        this.huntFlag = huntFlag;
+        this.huntBonus = huntBonus;
     }
 
     public PlayerStatusDTO(String nickname){
         this.nickname = nickname;
         this.hasProtection = false;
         this.hasDoubleShamanIncome = false;
+        this.categoryDiscounts = EnumSet.noneOf(CardTypeEnum.class);
         this.extraFlag = false;
         this.paintFlag = false;
-        this.discountPainter = false;
-        this.discountCrafter = false;
-        this.discountGatherer = false;
+
     }
 
-    public boolean isHuntFlag() {
-        return huntFlag;
+    public boolean isHuntBonus() {
+        return huntBonus;
     }
 
-    public boolean isDiscountPainter() {
-        return discountPainter;
+    public boolean hasDiscountFor(CardTypeEnum type) {
+        return categoryDiscounts.contains(type);
     }
 
-    public boolean isDiscountCrafter() {
-        return discountCrafter;
-    }
-
-    public boolean isDiscountGatherer() {
-        return discountGatherer;
+    public Set<CardTypeEnum> getCategoryDiscounts() {
+        return categoryDiscounts;
     }
 
     public boolean isPaintFlag() {

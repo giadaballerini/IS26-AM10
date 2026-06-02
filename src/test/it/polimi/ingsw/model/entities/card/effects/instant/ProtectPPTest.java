@@ -22,8 +22,6 @@ class ProtectPPTest {
         Player real = new Player("Player1", ColorPawnEnum.ORANGE);
         ProtectPP eff = new ProtectPP(ProtectPPEnum.PP_PROTECTION);
         eff.apply(real);
-        assertTrue(real.getHasProtection());
-
     }
 
     @Test

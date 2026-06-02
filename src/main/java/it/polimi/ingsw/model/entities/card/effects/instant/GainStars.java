@@ -2,11 +2,12 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.GainStarsEnum;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
-import it.polimi.ingsw.model.entities.card.Card;
+
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class GainStars extends CardEffectInstant{
     private final int starsAmount;
     private final GainStarsEnum gainStarsType;

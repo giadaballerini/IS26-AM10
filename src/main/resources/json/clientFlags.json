@@ -1,0 +1,34 @@
+[
+  {
+    "name": "protection",
+    "description" : "Non perdi PP se hai meno stelle degli altri giocatori durante il rituale sciamanico"
+  },
+  {
+    "name" : "double",
+    "description" : "Ottieni doppi PP se hai più stelle degli altri giocatori durante il rituale sciamanico"
+  },
+  {
+    "name" : "extra",
+    "description" : "Se alla fine del tuo turno il totem ritorna sulla casella di ordine turno in uno spazio che ti conferisce cibo, prendine una unitàin più"
+  },
+  {
+    "name" : "paint",
+    "description" : "Durante l'evento pitture rupestri ottieni una unità di cibo per ogni artista nella tua tribù"
+  },
+  {
+    "name" : "painter",
+    "description" : "Durante l'evento sostentamento paghi una unità di cibo in meno per ogni artista nella tua tribù"
+  },
+  {
+    "name" : "crafter",
+    "description" : "Durante l'evento sostentamento paghi una unità di cibo in meno per ogni inventore nella tua tribù"
+  },
+  {
+    "name" : "gatherer",
+    "description" : "Durante l'evento sostentamento paghi una unità di cibo in meno per ogni raccoglitore nella tua tribù"
+  },
+  {
+    "name" : "hunt",
+    "description" : "Durante l'evento di caccia prendi un PP e una unità di cibo per ogni cacciatore nella tua tribù"
+  }
+]

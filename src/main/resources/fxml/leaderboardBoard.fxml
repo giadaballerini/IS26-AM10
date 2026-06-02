@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="testo-personalizzato" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.GUI.LeaderboardController">
+    <children>
+        <AnchorPane>
+            <children>
+                <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="140.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                    <children>
+
+                        <StackPane maxWidth="600.0">
+                            <children>
+                                <TableView fx:id="rankingTable" fixedCellSize="45.0" maxHeight="600.0">
+                                    <columns>
+                                        <TableColumn fx:id="colPos" prefWidth="90.0" text="Posizione" />
+                                        <TableColumn fx:id="colNickname" prefWidth="170.0" text="Nickname" />
+                                        <TableColumn fx:id="colPP" prefWidth="130.0" text="Punti Prestigio" />
+                                        <TableColumn fx:id="colFood" prefWidth="90.0" text="Cibo" />
+                                    </columns>
+                                </TableView>
+
+                                <TableView fx:id="globalTable" fixedCellSize="45.0" managed="false" maxHeight="600" visible="false">
+                                    <columns>
+                                        <TableColumn fx:id="globalColPos" prefWidth="90.0" text="Posizione" />
+                                        <TableColumn fx:id="globalColNickname" prefWidth="170.0" text="Nickname" />
+                                        <TableColumn fx:id="globalColPoints" prefWidth="90.0" text="Punti" />
+                                    </columns>
+                                </TableView>
+                            </children>
+                        </StackPane>
+
+                        <Label fx:id="txtPlayerRank" style="-fx-background-color: rgba(0, 0, 0, 0.6); -fx-background-radius: 5; -fx-padding: 5 10 5 10; -fx-text-fill: white;" styleClass="testo-personalizzato" text="Maledizione" />
+
+                    </children>
+                </VBox>
+            </children>
+        </AnchorPane>
+
+        <StackPane alignment="BOTTOM_CENTER">
+            <children>
+                <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="30.0">
+                    <children>
+                        <Button fx:id="mainMenuBtn" onAction="#onMainMenu" prefHeight="40.0" prefWidth="250.0" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="Menù principale" />
+                        <Button fx:id="globalLeaderboardBtn" onAction="#onGlobalLeaderboard" prefHeight="40.0" prefWidth="250.0" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="Classifica globale" />
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets bottom="40.0" />
+            </padding>
+        </StackPane>
+    </children>
+    <stylesheets>
+        <URL value="@../css/style.css" />
+        <URL value="@../css/tableStyle.css" />
+    </stylesheets>
+    <styleClass>
+        <String fx:value="leaderboard_backgroud" />
+    </styleClass>
+</StackPane>

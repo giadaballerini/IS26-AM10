@@ -6,20 +6,7 @@ import it.polimi.ingsw.model.player.Player;
 
 public enum DiscountFoodEnum implements DiscountFoodModifier {
     DISCOUNT_CAT((p, e) -> {
-        switch (e.getCat())
-            {
-                case CardTypeEnum.PAINTER:
-                    p.setDiscountPainter(true);
-                    break;
-
-                case CardTypeEnum.CRAFTER:
-                    p.setDiscountCrafter(true);
-                    break;
-
-                case CardTypeEnum.GATHERER:
-                    p.setDiscountGatherer(true);
-                    break;
-            }
+        p.addCategoryDiscount(e.getCat());
     }){public boolean isOneTime(){return true;}},
     DISCOUNT_FLAT((p, e) -> {
         p.addFoodDiscount(e.getFoodAmount());

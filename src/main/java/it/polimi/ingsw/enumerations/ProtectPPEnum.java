@@ -1,12 +1,11 @@
 package it.polimi.ingsw.enumerations;
 
 
-import it.polimi.ingsw.model.entities.card.effects.instant.ProtectPP;
 import it.polimi.ingsw.model.interfaces.ProtectPPModifier;
 import it.polimi.ingsw.model.player.Player;
 
 public enum ProtectPPEnum implements ProtectPPModifier {
-    PP_PROTECTION (Player::addProtection);
+    PP_PROTECTION (Player::activatePpProtection);
 
 
     private final ProtectPPModifier modifier;

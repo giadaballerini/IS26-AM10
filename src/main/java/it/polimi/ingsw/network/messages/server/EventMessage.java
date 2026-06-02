@@ -1,13 +1,14 @@
 package it.polimi.ingsw.network.messages.server;
 
+import it.polimi.ingsw.network.dto.EventDTO;
 import it.polimi.ingsw.visitors.ServerMessageVisitor;
 
 public class EventMessage implements ServerMessage{
-    private final String event;
-    public EventMessage(String event){
+    private final EventDTO event;
+    public EventMessage(EventDTO event){
         this.event = event;
     }
-    public String getEvent() {
+    public EventDTO getEvent() {
         return event;
     }
 

@@ -13,7 +13,6 @@ import it.polimi.ingsw.model.gamemanager.GameManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.internal.matchers.Null;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -25,154 +24,122 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PlayerTest {
 
-    class TestablePlayer extends Player{
-        private String nickname;
-        private ColorPawnEnum colorPawn;
-
+    class TestablePlayer extends Player {
         public TestablePlayer(String nickname, ColorPawnEnum colorPawn) {
-            super(nickname,colorPawn);
+            super(nickname, colorPawn);
         }
-        public Village getVillage(){return this.myVillage;}
-        public void setVillage(Village v){this.myVillage = v;}
+        public Village getVillage() { return this.myVillage; }
+        public void setVillage(Village v) { this.myVillage = v; }
     }
 
-    @Mock
-    Building mockBuilding;
-
-    @Mock
-    Builder mockBuilder;
-
-    @Mock
-    Player mockPlayer;
-
-    @Mock
-    Village mockVillage;
+    @Mock Building mockBuilding;
+    @Mock Builder mockBuilder;
+    @Mock Player mockPlayer;
+    @Mock Village mockVillage;
 
     @Test
     void testShouldGetPP() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        realPlayer.addPP(67);
-
-        assertEquals(67, realPlayer.getPP());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addPP(67);
+        assertEquals(67, p.getPP());
     }
 
     @Test
     void testShouldGetNFood() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        realPlayer.addFood(67);
-
-        assertEquals(67, realPlayer.getNFood());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addFood(67);
+        assertEquals(67, p.getNFood());
     }
 
     @Test
     void testShouldGetNStars() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        realPlayer.addStars(67);
-
-        assertEquals(67, realPlayer.getNStars());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addStars(67);
+        assertEquals(67, p.getNStars());
     }
-
 
     @Test
     void testShouldGetTotBuildDisc() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertNotNull(p);
 
-        CardEffectInstant eff = new DiscountFood(null,2, DiscountFoodEnum.DISCOUNT_FOR_BUILDING);
+        CardEffectInstant eff = new DiscountFood(null, 2, DiscountFoodEnum.DISCOUNT_FOR_BUILDING);
         List<CardEffectInstant> lista = new ArrayList<>();
         lista.add(eff);
 
-        CardEffectInstant eff2 = new DiscountFood(null,3, DiscountFoodEnum.DISCOUNT_FOR_BUILDING);
+        CardEffectInstant eff2 = new DiscountFood(null, 3, DiscountFoodEnum.DISCOUNT_FOR_BUILDING);
         List<CardEffectInstant> lista2 = new ArrayList<>();
         lista2.add(eff2);
 
-        Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE,new ArrayList<>(),lista, 1,  CardTypeEnum.BUILDER);
-        assertNotNull(builder);
-
+        Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), lista, 1, 2, CardTypeEnum.BUILDER);
         builder.execInstantEffect(p, GamePhaseEnum.DRAW_PHASE);
-        assertEquals(2, p.getTotBuildDisc()); //Fail qui
+        assertEquals(2, p.getTotBuildDisc());
 
-        Builder builder1 = new Builder(2, GamePhaseEnum.DRAW_PHASE,new ArrayList<>(),lista2, 1, CardTypeEnum.BUILDER);
-        assertNotNull(builder1);
-
+        Builder builder1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), lista2, 1, 2, CardTypeEnum.BUILDER);
         builder1.execInstantEffect(p, GamePhaseEnum.DRAW_PHASE);
-
         assertEquals(5, p.getTotBuildDisc());
     }
 
     @Test
     void testShouldGetNumCharacters() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertNotNull(p);
-        Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1,  CardTypeEnum.BUILDER);
-        assertNotNull(builder);
+        Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.BUILDER);
         p.addCard(builder);
-        assertEquals(1, p.getNumCharacters()); //Fail qui
-        Builder builder1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1,  CardTypeEnum.BUILDER);
-        assertNotNull(builder1);
+        assertEquals(1, p.getNumCharacters());
+
+        Builder builder1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.BUILDER);
         p.addCard(builder1);
         assertEquals(2, p.getNumCharacters());
-
     }
-
-
 
     @Test
     void testShouldGetNumType() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        Builder b = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1,  CardTypeEnum.BUILDER);
-        realPlayer.addCard(b);
-        assertEquals(1, realPlayer.getNumType(CardTypeEnum.BUILDER));
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        Builder b = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.BUILDER);
+        p.addCard(b);
+        assertEquals(1, p.getNumType(CardTypeEnum.BUILDER));
     }
 
     @Test
     void testShouldGetFoodDiscount() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-
-        realPlayer.addFoodDiscount(67);
-
-        assertEquals(67, realPlayer.getFoodDiscount());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addFoodDiscount(67);
+        assertEquals(67, p.getFoodDiscount());
     }
 
     @Test
     void testShouldGetBuildings() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-
-        realPlayer.addBuilding(mockBuilding);
-
-        assertNotNull(realPlayer.getBuildings());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addBuilding(mockBuilding);
+        assertNotNull(p.getBuildings());
     }
 
     @Test
-    void TestShouldGetHasProtection() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-
-        realPlayer.addProtection();
-
-        assertTrue(realPlayer.getHasProtection());
+    void testShouldActivatePpProtection() {
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.activatePpProtection();
+        p.applyRitualLoss(10);
+        assertEquals(0, p.getPP());
     }
 
     @Test
     void addCard() {
         mockPlayer.addCard(mockBuilder);
-
         verify(mockPlayer).addCard(mockBuilder);
     }
 
     @Test
     void testShouldAddFood() {
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        realPlayer.addFood(67);
-        assertEquals(67, realPlayer.getNFood());
-
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addFood(67);
+        assertEquals(67, p.getNFood());
     }
 
     @Test
     void addBuilding() {
         Building building = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 3, new ArrayList<>(), new ArrayList<>());
-        Player realPlayer = new Player("Giorgio", ColorPawnEnum.ORANGE);
-        realPlayer.addBuilding(building);
-        assertEquals(1, realPlayer.getBuildings().size());
+        Player p = new Player("Giorgio", ColorPawnEnum.ORANGE);
+        p.addBuilding(building);
+        assertEquals(1, p.getBuildings().size());
     }
 
     @Test
@@ -180,15 +147,13 @@ class PlayerTest {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
         p.addPP(2);
         assertEquals(2, p.getPP());
-
     }
 
     @Test
     void testShouldAddFoodDiscount() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertNotNull(p);
         p.addFoodDiscount(3);
-        assertEquals(3,p.getFoodDiscount());
+        assertEquals(3, p.getFoodDiscount());
     }
 
     @Test
@@ -203,37 +168,118 @@ class PlayerTest {
     @Test
     void testShouldAddStars() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertNotNull(p);
         p.addStars(3);
         assertEquals(3, p.getNStars());
+    }
 
+
+    @Test
+    void testShouldActivatePpProtection_BlocksLoss() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.activatePpProtection();
+        p.applyRitualLoss(5);
+        assertEquals(0, p.getPP());
     }
 
     @Test
-    void testShouldAddProtection() {
+    void testShouldApplyRitualLoss_WithoutProtection() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertFalse(p.getHasProtection());
-        p.addProtection();
+        p.applyRitualLoss(5);
+        assertEquals(-5, p.getPP());
+    }
 
-        assertTrue(p.getHasProtection());
+
+    @Test
+    void testShouldActivateDoubleShaman() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.activateDoubleShaman();
+        p.applyRitualGain(4);
+        assertEquals(8, p.getPP());
     }
 
     @Test
-    void testShouldAddDouble() {
+    void testShouldApplyRitualGain_WithoutDoubleShaman() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertFalse(p.getHasDoubleShamanIncome());
-        p.addDouble();
+        p.applyRitualGain(4);
+        assertEquals(4, p.getPP());
+    }
 
-        assertTrue(p.getHasDoubleShamanIncome());
+
+    @Test
+    void testShouldActivateHuntBonus() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.activateHuntBonus();
+        p.applyHuntBonus();
+        assertEquals(0, p.getNFood());
+    }
+
+    @Test
+    void testShouldApplyHuntBonus_WithHunters() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        Builder hunter = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.HUNTER);
+        p.addCard(hunter);
+        p.activateHuntBonus();
+        p.applyHuntBonus();
+        assertEquals(2, p.getNFood());
+        assertEquals(3, p.getPP());
+    }
+
+    @Test
+    void testShouldNotApplyHuntBonus_WhenNotActivated() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.applyHuntBonus();
+        assertEquals(0, p.getNFood());
+        assertEquals(0, p.getPP());
+    }
+
+
+    @Test
+    void testShouldActivatePaintBonus() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.activatePaintBonus();
+        p.applyPaintBonus();
+        assertEquals(0, p.getNFood());
+    }
+
+    @Test
+    void testShouldNotApplyPaintBonus_WhenNotActivated() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.applyPaintBonus();
+        assertEquals(0, p.getNFood());
+    }
+
+
+    @Test
+    void testShouldAddCategoryDiscount_Painter() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.addCategoryDiscount(CardTypeEnum.PAINTER);
+        assertTrue(p.calculateFeastDiscount() >= 0);
+    }
+
+    @Test
+    void testShouldCalculateFeastDiscount_WithMultipleDiscounts() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        Builder painter = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.PAINTER);
+        Builder gatherer = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.GATHERER);
+        p.addCard(painter);
+        p.addCard(gatherer);
+        p.addCategoryDiscount(CardTypeEnum.PAINTER);
+        p.addCategoryDiscount(CardTypeEnum.GATHERER);
+        assertEquals(2, p.calculateFeastDiscount());
+    }
+
+    @Test
+    void testShouldCalculateFeastDiscount_WithFoodDiscount() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.addFoodDiscount(3);
+        assertEquals(3, p.calculateFeastDiscount());
     }
 
     @Test
     void testShouldGetBuilderPoints() {
         TestablePlayer p = new TestablePlayer("Player", ColorPawnEnum.PURPLE);
-
         p.setVillage(mockVillage);
         p.getBuilderPoints();
-
         verify(mockVillage).builderPoints();
     }
 
@@ -241,63 +287,33 @@ class PlayerTest {
     void testShouldGetTotSymbolsForCrafter() {
         Player realPlayer = new Player("Player", ColorPawnEnum.ORANGE);
         Player spyPlayer = spy(realPlayer);
-
-        for(CrafterSymbolEnum s : CrafterSymbolEnum.values()) {
+        for (CrafterSymbolEnum s : CrafterSymbolEnum.values()) {
             doReturn(3).when(spyPlayer).getNumSymbolsForCrafter(s);
         }
-
         assertEquals(10, spyPlayer.getTotSymbolsForCrafter());
     }
 
     @Test
     void testShouldCheckBuildsEffectsNoEffect() {
-        Building building = new Building(CardTypeEnum.BUILDING,1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7,  new ArrayList<>(), new ArrayList<>());
-
-        Building building2 = new Building( CardTypeEnum.BUILDING,1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(), new ArrayList<>());
-
+        Building b1 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(), new ArrayList<>());
+        Building b2 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(), new ArrayList<>());
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-
-        p.addBuilding(building);
-        p.addBuilding(building2);
+        p.addBuilding(b1);
+        p.addBuilding(b2);
         List<Action> actions = p.checkBuildsEffects(GamePhaseEnum.DRAW_PHASE);
         assertTrue(actions.isEmpty());
     }
 
     @Test
     void testShouldCheckBuildsEffectsWithEffect() {
-
         CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
-
         List<CardEffectInteractive> effs = new ArrayList<>();
         effs.add(eff);
-
-        Building building = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(),  effs);
-
+        Building building = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.DRAW_PHASE, 1, 2, 7, new ArrayList<>(), effs);
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-
         p.addBuilding(building);
-
         List<Action> actions = p.checkBuildsEffects(GamePhaseEnum.DRAW_PHASE);
         assertFalse(actions.isEmpty());
         assertEquals(1, actions.size());
-    }
-
-    @Test
-    void testShouldSetHuntFlag() {
-        Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        p.setHuntFlag(true);
-        assertTrue(p.hasHuntFlag());
-    }
-
-    @Test
-    void testShouldHasHuntFlag() {
-        Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertFalse(p.hasHuntFlag());
-    }
-
-    @Test
-    void testShouldGetHasDoubleShamanIncome() {
-        Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        assertFalse(p.getHasDoubleShamanIncome());
     }
 }

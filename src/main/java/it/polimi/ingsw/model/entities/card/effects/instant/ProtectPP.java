@@ -2,11 +2,11 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.ProtectPPEnum;
-import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ProtectPP extends CardEffectInstant{
     private final ProtectPPEnum protectPpType;
 

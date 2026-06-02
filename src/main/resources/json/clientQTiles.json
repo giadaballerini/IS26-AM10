@@ -1,0 +1,46 @@
+[
+  {
+    "id": 2,
+    "slot0x": 37.0,
+    "slot0y": 8.0,
+    "slot1x": 37.0,
+    "slot1y": 37.0,
+    "caption": "Quando capiti sulla casella più in alto ricevi 1 di cibo,\n quando capiti sulla casella più in basso invece perdi 1 di cibo se ne hai, altrimenti perdi 2 PP"
+  },
+  {
+    "id": 3,
+    "slot0x": 36.0,
+    "slot0y": -3.0,
+    "slot1x": 36.0,
+    "slot1y": 27.0,
+    "slot2x": 36.0,
+    "slot2y": 57.0,
+    "caption": "Quando capiti sulla casella più in alto ricevi 2 di cibo, \n quando capiti sulla casella più in basso perdi 1 di cibo se ne hai, altrimenti perdi 2 PP"
+  },
+  {
+    "id": 4,
+    "slot0x": 37.0,
+    "slot0y": -8.0,
+    "slot1x": 37.0,
+    "slot1y": 21.0,
+    "slot2x": 37.0,
+    "slot2y": 50.0,
+    "slot3x": 37.0,
+    "slot3y": 79.0,
+    "caption": "Quando capiti sulla casella più in alto ricevi 2 di cibo, \n quando capiti sulla seconda casella dall'alto ricevi 1 di cibo, \n quando capiti sulla casella più in basso perdi 1 di cibo se ne hai, altrimenti perdi 2 PP"
+  },
+  {
+    "id": 5,
+    "slot0x": 36.0,
+    "slot0y": -20.0,
+    "slot1x": 36.0,
+    "slot1y": 9.0,
+    "slot2x": 36.0,
+    "slot2y": 38.0,
+    "slot3x": 36.0,
+    "slot3y": 77.0,
+    "slot4x": 36.0,
+    "slot4y": 106.0,
+    "caption": "Quando capiti sulla casella più in alto ricevi 3 di cibo, \n quando capiti sulla seconda casella dall'alto ricevi 1 di cibo, \n quando capiti sulla casella più in basso perdi 1 di cibo se ne hai, altrimenti perdi 2 PP"
+  }
+]

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model.entities.card;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
@@ -14,13 +15,12 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.entities.card.types.event.*;
 import it.polimi.ingsw.model.entities.card.types.character.*;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
-import it.polimi.ingsw.network.dto.BoardDTO;
 import it.polimi.ingsw.network.dto.CardDTO;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
-
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -49,7 +49,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = Shaman.class, name = "SHAMAN")
 })
 
-
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public abstract class Card {
     private int id;
     protected GamePhaseEnum trigger;
@@ -81,16 +81,19 @@ public abstract class Card {
     }
 
     public void execInstantEffect(Player p, GamePhaseEnum currPhase) {
-        for (int i = 0; i < instantEffects.size(); i++) {
-            CardEffectInstant e = instantEffects.get(i);
-            if (e.canApply(trigger, currPhase)) {
-                e.apply(p, this);
-                if(e.isOneTime()) {
-                    instantEffects.remove(e);
-                    i -= 1;
-                }
+        Iterator<CardEffectInstant> it = instantEffects.iterator();
+        while(it.hasNext()){
+            CardEffectInstant e = it.next();
+            if(e.canApply(trigger, currPhase)){
+                e.apply(p,this);
+                if(e.isOneTime())
+                    it.remove();
             }
         }
+    }
+
+    public GamePhaseEnum getTrigger() {
+        return trigger;
     }
 
     public int getId(){

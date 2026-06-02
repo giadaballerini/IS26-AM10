@@ -21,7 +21,7 @@ public class CardColorMapper {
             case "hunter":
                 return style.foreground(238, 78, 60);
             case "builder":
-                return style.foreground(72, 8, 31);
+                return style.foreground(129, 69, 89);
             case "painter":
                 return style.foreground(245, 203, 43);
             case "shaman":

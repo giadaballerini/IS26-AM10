@@ -29,5 +29,6 @@ public interface VirtualServerRmi extends Remote {
     Map<String, Integer> requestRanking(String nickname) throws RemoteException;
 
     void handleDisconnection(String nickname) throws RemoteException;
+    void ping() throws RemoteException;
 
 }

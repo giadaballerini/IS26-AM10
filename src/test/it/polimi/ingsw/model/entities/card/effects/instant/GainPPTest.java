@@ -23,7 +23,7 @@ class GainPPTest {
     void apply() {
     Player p = new Player("Player", ColorPawnEnum.ORANGE);
     GainPP eff = new GainPP(null, 1, GainPPEnum.PP_FLAT);
-    Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.BUILDER);
+    Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1,2, CardTypeEnum.BUILDER);
     eff.apply(p, builder);
     assertEquals(1, p.getPP());
     }

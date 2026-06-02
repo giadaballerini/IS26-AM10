@@ -26,7 +26,7 @@ class TileTest {
 
     @Test
     void testShouldSetPlayer(){
-        Tile tile = new Tile('A', 2, null, null);
+        Tile tile = new Tile(1, 2, null, null,false, "giorgio");
         Player player = new Player("Player", ColorPawnEnum.BLUE);
         tile.setPlayer(player);
         assertEquals(player, tile.getPlayer());
@@ -34,7 +34,7 @@ class TileTest {
 
     @Test
     void testShouldGetPlayer(){
-        Tile tile = new Tile('A', 2, null, null);
+        Tile tile = new Tile(2, 2, null, null,false, "giorgio");
         Player player = new Player("Player", ColorPawnEnum.BLUE);
         tile.setPlayer(player);
         assertEquals(player, tile.getPlayer());
@@ -42,7 +42,7 @@ class TileTest {
 
     @Test
     void testShouldIsOccupied(){
-        Tile tile = new Tile('A', 2, null, null);
+        Tile tile = new Tile(1, 2, null, null,false, "giorgio");
         Player player = new Player("Player", ColorPawnEnum.BLUE);
         assertFalse(tile.isOccupied());
         tile.setPlayer(player);
@@ -51,19 +51,19 @@ class TileTest {
 
     @Test
     void testShouldGetMinPlayers(){
-        Tile tile = new Tile('A', 2, null, null);
+        Tile tile = new Tile(2, 2, null, null,false, "giorgio");
         assertEquals(2, tile.getMinPlayers());
     }
 
     @Test
     void testShouldGetId(){
-        Tile tile = new Tile('A', 2, null, null);
-        assertEquals('A', tile.getId());
+        Tile tile = new Tile(1, 2, null, null,false, "giorgio");
+        assertEquals(1, tile.getId());
     }
 
     @Test
     void testShouldRemovePlayer(){
-        Tile tile = new Tile('A', 2, null, null);
+        Tile tile = new Tile(2, 2, null, null,false, "giorgio");
         Player player = new Player("Player", ColorPawnEnum.BLUE);
         tile.removePlayer();
         assertNull(tile.getPlayer());
@@ -78,7 +78,7 @@ class TileTest {
         Action mockAction1 = mock(Action.class);
         Action mockAction2 = mock(Action.class);
 
-        Tile sut = spy(new Tile('A', 2, new ArrayList<>(), Arrays.asList(mockEffect1, mockEffect2)));
+        Tile sut = spy(new Tile(3, 2, new ArrayList<>(), Arrays.asList(mockEffect1, mockEffect2),false, "giorgio"));
 
         doReturn(mockPlayer).when(sut).getPlayer();
 

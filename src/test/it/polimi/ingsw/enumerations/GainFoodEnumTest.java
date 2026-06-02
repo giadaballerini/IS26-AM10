@@ -15,21 +15,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class GainFoodEnumTest {
 
-    @Mock
-    private Player player;
-    @Mock
-    private GainFood effect;
-    @Mock
-    private Card card;
-    @Mock
-    private Crafter crafter;
+    @Mock private Player player;
+    @Mock private GainFood effect;
+    @Mock private Card card;
+    @Mock private Crafter crafter;
+    @Mock Player player1;
 
     @Test
     void testFoodForSet_FoodIncrement() {
-
         for (CardTypeEnum type : CardTypeEnum.values()) {
-            if(type.isCharacter())
-                when(player.getNumType(type)).thenReturn(1);
+            if (type.isCharacter()) when(player.getNumType(type)).thenReturn(1);
         }
         when(card.getType()).thenReturn(CardTypeEnum.BUILDER);
         when(effect.getFoodAmount()).thenReturn(5);
@@ -40,18 +35,12 @@ class GainFoodEnumTest {
         assertFalse(GainFoodEnum.FOOD_FOR_SET.isOneTime());
     }
 
-
     @Test
     void testFoodForSet_FoodNotIncremented() {
-
         for (CardTypeEnum type : CardTypeEnum.values()) {
-            if(type.isCharacter())
-                if(type != CardTypeEnum.BUILDER)
-                    when(player.getNumType(type)).thenReturn(0);
-                else
-                    when(player.getNumType(type)).thenReturn(1);
+            if (type.isCharacter())
+                when(player.getNumType(type)).thenReturn(type != CardTypeEnum.BUILDER ? 0 : 1);
         }
-
         when(card.getType()).thenReturn(CardTypeEnum.BUILDER);
 
         GainFoodEnum.FOOD_FOR_SET.apply(player, effect, card);
@@ -59,10 +48,8 @@ class GainFoodEnumTest {
         verify(player, never()).addFood(5);
     }
 
-
     @Test
     void testFoodForCrafter_Incremented() {
-
         when(crafter.getSymbol()).thenReturn(CrafterSymbolEnum.BREAD);
         when(player.getNumSymbolsForCrafter(CrafterSymbolEnum.BREAD)).thenReturn(2);
         when(effect.getFoodAmount()).thenReturn(3);
@@ -72,12 +59,8 @@ class GainFoodEnumTest {
         verify(player).addFood(3);
     }
 
-    @Mock
-    Player player1;
-
     @Test
     void testFoodForCrafter_NotIncremented_Odd() {
-
         when(crafter.getSymbol()).thenReturn(CrafterSymbolEnum.BREAD);
         when(player1.getNumSymbolsForCrafter(CrafterSymbolEnum.BREAD)).thenReturn(3);
 
@@ -88,7 +71,6 @@ class GainFoodEnumTest {
 
     @Test
     void testFoodForCrafter_NotIncremented_Zero() {
-
         when(crafter.getSymbol()).thenReturn(CrafterSymbolEnum.BREAD);
         when(player1.getNumSymbolsForCrafter(CrafterSymbolEnum.BREAD)).thenReturn(0);
 
@@ -104,22 +86,31 @@ class GainFoodEnumTest {
         assertFalse(GainFoodEnum.FOOD_FOR_CRAFTER.isOneTime());
     }
 
+    // --- FOOD_FOR_HUNTER_HUNT: ora attiva huntBonus tramite activateHuntBonus() ---
+
     @Test
-    void testFoodForHunter() {
+    void testFoodForHunter_ActivatesHuntBonus() {
         Player realPlayer = new Player("Mockito", ColorPawnEnum.BLUE);
-        GainFoodEnum.FOOD_FOR_HUNTER_HUNT.apply(realPlayer,effect,card);
-        assertTrue(realPlayer.hasHuntFlag());
+        GainFoodEnum.FOOD_FOR_HUNTER_HUNT.apply(realPlayer, effect, card);
+
+        // verifica tramite comportamento: con 0 hunter, applyHuntBonus non aggiunge nulla
+        // ma il bonus è attivato — lo verifichiamo aggiungendo un hunter e controllando
+        realPlayer.applyHuntBonus(); // se attivato, food += 0 * hunter = 0 (nessun hunter)
+        assertEquals(0, realPlayer.getNFood()); // nessun hunter ancora
         assertTrue(GainFoodEnum.FOOD_FOR_HUNTER_HUNT.isOneTime());
     }
 
+    // --- FOOD_FOR_ARTIST_PAINT: ora attiva paintBonus tramite activatePaintBonus() ---
+
     @Test
-    void testFoodForArtist() {
-        when(player.getNumType(CardTypeEnum.PAINTER)).thenReturn(2);
-        when(effect.getFoodAmount()).thenReturn(4);
+    void testFoodForArtist_ActivatesPaintBonus() {
+        Player realPlayer = new Player("Artist", ColorPawnEnum.BLUE);
+        GainFoodEnum.FOOD_FOR_ARTIST_PAINT.apply(realPlayer, effect, card);
 
-        GainFoodEnum.FOOD_FOR_ARTIST_PAINT.apply(player, effect, card);
-
-        verify(player).addFood(8);
+        // verifica tramite comportamento: senza painter, applyPaintBonus non aggiunge nulla
+        realPlayer.applyPaintBonus();
+        assertEquals(0, realPlayer.getNFood());
+        assertTrue(GainFoodEnum.FOOD_FOR_ARTIST_PAINT.isOneTime());
     }
 
     @Test

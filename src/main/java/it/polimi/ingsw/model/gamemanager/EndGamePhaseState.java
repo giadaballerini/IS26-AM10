@@ -8,8 +8,9 @@ class EndGamePhaseState implements GamePhaseState{
 
     public void onEntry(GameManager context){
         context.finalScoreCount();
-        context.gameWinners();
-        context.notifyGameEnding();
+        if(context.getOnGameEndedCallback() != null){
+            context.getOnGameEndedCallback().run();
+        }
     }
 
     @Override

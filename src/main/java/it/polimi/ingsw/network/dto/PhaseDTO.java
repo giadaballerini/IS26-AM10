@@ -1,7 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
-
 import java.io.Serial;
 import java.io.Serializable;
 

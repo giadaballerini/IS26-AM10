@@ -8,9 +8,11 @@ import java.util.List;
 public class GameEndingUpdateMessage implements ServerMessage {
     private final List<PlayerStatsDTO> stats;
     private final int rankingPos;
-    public GameEndingUpdateMessage(List<PlayerStatsDTO> stats, int rankingPos) {
+    private final int globalRankingPos;
+    public GameEndingUpdateMessage(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos) {
         this.stats = stats;
         this.rankingPos = rankingPos;
+        this.globalRankingPos = globalRankingPos;
     }
     public List<PlayerStatsDTO> getStats() {
         return stats;
@@ -18,8 +20,9 @@ public class GameEndingUpdateMessage implements ServerMessage {
     public int getRankingPos() {
         return rankingPos;
     }
-
-    // TODO non è ancora stato fatto nemmeno per rmi, fare brainstorming su come
+    public int getGlobalRankingPos() {
+        return globalRankingPos;
+    }
 
     @Override
     public void accept(ServerMessageVisitor visitor) {

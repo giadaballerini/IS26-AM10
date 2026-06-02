@@ -19,8 +19,7 @@ public class ServerSocket {
     }
     public void start(){
         try(java.net.ServerSocket server = new java.net.ServerSocket(port)) {
-            System.out.println("Server avviato sulla porta " + port);
-            ExecutorService pool = Executors.newFixedThreadPool(100);
+            ExecutorService pool = Executors.newFixedThreadPool(1000);
             while(true){
                 Socket clientSocket = server.accept();
 

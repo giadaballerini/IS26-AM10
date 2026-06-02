@@ -1,25 +1,34 @@
 package it.polimi.ingsw.network.dto;
 
-import it.polimi.ingsw.enumerations.CardTypeEnum;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class EventDTO {
-    CardTypeEnum type;
-    List<PlayerStatsDTO> stats;
-    List<CardDTO> upper;
-    List<CardDTO> lower;
+public class EventDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private final List<PlayerStatsDTO> stats;
+    private final List<CardDTO> events;
 
-    public String getType() {
-        return type.toString();
+    public EventDTO(){
+        stats = new ArrayList<>();
+        events = new ArrayList<>();
     }
     public List<PlayerStatsDTO> getStats() {
         return stats;
     }
-    public List<CardDTO> getUpper() {
-        return upper;
+    public List<CardDTO> getEvents() {
+        return events;
     }
-    public List<CardDTO> getLower() {
-        return lower;
+
+    public void addStats(PlayerStatsDTO stats) {
+        this.stats.add(stats);
+    }
+
+    public void addEvents(CardDTO lowerEvent) {
+        this.events.add(lowerEvent);
+    }
+    public boolean isEmpty(){
+        return events.isEmpty();
     }
 }

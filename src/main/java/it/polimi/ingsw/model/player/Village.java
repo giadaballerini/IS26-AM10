@@ -1,9 +1,11 @@
 package it.polimi.ingsw.model.player;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
 import it.polimi.ingsw.model.entities.card.Card;
-import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.types.character.Crafter;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.entities.card.types.character.Painter;
@@ -11,20 +13,20 @@ import it.polimi.ingsw.model.entities.card.types.character.Gatherer;
 import it.polimi.ingsw.model.entities.card.types.character.Hunter;
 import it.polimi.ingsw.model.entities.card.types.character.Shaman;
 import it.polimi.ingsw.network.dto.CardDTO;
-import javafx.scene.effect.Effect;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Village {
 
-    private List<Crafter> crafters;
-    private List<Builder> builders;
-    private List<Painter> painters;
-    private List<Hunter> hunters;
-    private List<Gatherer> gatherers;
-    private List<Shaman> shamans;
+    private final List<Crafter> crafters;
+    private final List<Builder> builders;
+    private final List<Painter> painters;
+    private final List<Hunter> hunters;
+    private final List<Gatherer> gatherers;
+    private final List<Shaman> shamans;
 
     public Village() {
         this.crafters = new ArrayList<Crafter>();
@@ -34,6 +36,24 @@ public class Village {
         this.gatherers = new ArrayList<Gatherer>();
         this.shamans = new ArrayList<Shaman>();
     }
+
+    @JsonCreator
+    public Village(
+            @JsonProperty("crafters")  List<Crafter>  crafters,
+            @JsonProperty("builders")  List<Builder>  builders,
+            @JsonProperty("painters")  List<Painter>  painters,
+            @JsonProperty("hunters")   List<Hunter>   hunters,
+            @JsonProperty("gatherers") List<Gatherer> gatherers,
+            @JsonProperty("shamans")   List<Shaman>   shamans) {
+
+        this.crafters  = crafters != null ? crafters : new ArrayList<>();
+        this.builders  = builders != null ? builders : new ArrayList<>();
+        this.painters  = painters != null ? painters : new ArrayList<>();
+        this.hunters   = hunters != null ? hunters : new ArrayList<>();
+        this.gatherers = gatherers != null ? gatherers : new ArrayList<>();
+        this.shamans   = shamans != null ? shamans : new ArrayList<>();
+    }
+
 
     public void add(Crafter c) {
         crafters.add(c);
@@ -73,7 +93,7 @@ public class Village {
             case CardTypeEnum.HUNTER -> hunters.size();
             case CardTypeEnum.SHAMAN -> shamans.size();
             case CardTypeEnum.GATHERER -> gatherers.size();
-            default -> -1;
+            default -> 0;
         };
 
     }
@@ -88,13 +108,9 @@ public class Village {
     }
 
     public int builderPoints(){
-        int points = 0;
-        for(Builder b : builders){
-            for(CardEffectInstant e : b.getInstantEffects()){
-                 points += e.getPpAmount();
-            }
-        }
-        return points;
+        return builders.stream()
+                .mapToInt(Builder::getPpAmount)
+                .sum();
     }
 
     public List<CardDTO> getCharactersDTO(){

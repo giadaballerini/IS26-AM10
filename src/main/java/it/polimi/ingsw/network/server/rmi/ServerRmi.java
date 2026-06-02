@@ -2,7 +2,6 @@ package it.polimi.ingsw.network.server.rmi;
 
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.network.dto.LobbyDTO;
-import it.polimi.ingsw.network.server.Lobby;
 import it.polimi.ingsw.network.server.MatchManager;
 import it.polimi.ingsw.network.server.VirtualServerRmi;
 import it.polimi.ingsw.client.rmi.VirtualViewRmi;
@@ -60,5 +59,9 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServerRmi, 
 
     public void handleDisconnection(String nickname){   // non servono le exception, le catchiamo già
         matchManager.disconnect(nickname);
+    }
+
+    public void ping(){
+        
     }
 }

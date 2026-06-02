@@ -24,7 +24,7 @@ class GainFoodTest {
     void apply() {
         Player p = new Player("Player1", ColorPawnEnum.ORANGE);
         CardEffectInstant eff = new GainFood(2, GainFoodEnum.FOOD_FLAT);
-        Card c = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.BUILDER);
+        Card c = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1,2, CardTypeEnum.BUILDER);
         eff.apply(p, c);
         assertEquals(2, p.getNFood());
     }

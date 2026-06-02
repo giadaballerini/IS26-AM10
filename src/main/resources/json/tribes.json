@@ -1,0 +1,1046 @@
+[
+  {
+    "type" : "HUNT",
+    "id" : 22,
+    "trigger" : "END_ROUND",
+    "age" : 1,
+    "foodGain" : 1,
+    "ppGain" : 1
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 23,
+    "trigger" : "END_ROUND",
+    "age" : 1,
+    "ppGain" : 5,
+    "ppLoss" : 3
+  },
+  {
+    "type" : "FEAST",
+    "id" : 24,
+    "trigger" : "END_ROUND",
+    "age" : 1,
+    "foodCost" : 1,
+    "ppCost" : 1
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 25,
+    "trigger" : "END_ROUND",
+    "age" : 1,
+    "nPainterSup" : 0,
+    "ppGain" : 1,
+    "ppLoss" : 2
+  },
+  {
+    "type" : "HUNT",
+    "id" : 26,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "foodGain" : 1,
+    "ppGain" : 2
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 27,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "ppGain" : 10,
+    "ppLoss" : 5
+  },
+  {
+    "type" : "FEAST",
+    "id" : 28,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "foodCost" : 1,
+    "ppCost" : 2
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 29,
+    "trigger" : "END_ROUND",
+    "age" : 2,
+    "nPainterSup" : 1,
+    "ppGain" : 2,
+    "ppLoss" : 2
+  },
+  {
+    "type" : "HUNT",
+    "id" : 30,
+    "trigger" : "END_ROUND",
+    "age" : 3,
+    "foodGain" : 1,
+    "ppGain" : 3
+  },
+  {
+    "type" : "RITUAL",
+    "id" : 31,
+    "trigger" : "PLAY_EVENT",
+    "age" : 3,
+    "ppGain" : 15,
+    "ppLoss" : 7
+  },
+  {
+    "type" : "FEAST",
+    "id" : 32,
+    "trigger" : "PLAY_EVENT",
+    "age" : 3,
+    "foodCost" : 1,
+    "ppCost" : 3
+  },
+  {
+    "type" : "STONE_PAINTING",
+    "id" : 33,
+    "trigger" : "END_ROUND",
+    "age" : 3,
+    "nPainterSup" : 2,
+    "ppGain" : 3,
+    "ppLoss" : 2
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 34,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 1,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 35,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 36,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppAmount" : 2,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 37,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppAmount" : 3,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 38,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppAmount" : 0,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 39,
+    "trigger" : "NONE",
+    "age" : 1,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 40,
+    "trigger" : "NONE",
+    "age" : 1,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 41,
+    "trigger" : "NONE",
+    "age" : 1,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 42,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 43,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 44,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "flagSymbol" : true,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 45,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "flagSymbol" : true,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 46,
+    "trigger" : "NONE",
+    "age" : 1,
+    "flagSymbol" : false,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 47,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "AMIGDALA",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 48,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "ARROWHEAD",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 49,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "LEATHER",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 50,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "BREAD",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 51,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 52,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 53,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "ppAmount" : 1,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 54,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "ppAmount" : 3,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 55,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "ppAmount" : 4,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 56,
+    "trigger" : "NONE",
+    "age" : 2,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 57,
+    "trigger" : "NONE",
+    "age" : 2,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 58,
+    "trigger" : "NONE",
+    "age" : 2,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 59,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 60,
+    "trigger" : "NONE",
+    "age" : 2,
+    "flagSymbol" : false,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 61,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "flagSymbol" : true,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 62,
+    "trigger" : "NONE",
+    "age" : 1,
+    "flagSymbol" : false,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 63,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "LEATHER",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 64,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "FLUTE",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 65,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "BOWL",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 66,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "ROPE",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 67,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "DOLL",
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 68,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 3,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 69,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 3,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 70,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum" :  "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 71,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "ppAmount" : 3,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 72,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "ppAmount" : 5,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 73,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "ppAmount" : 2,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 74,
+    "trigger" : "NONE",
+    "age" : 3,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 75,
+    "trigger" : "NONE",
+    "age" : 3,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 76,
+    "trigger" : "NONE",
+    "age" : 3,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 77,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 78,
+    "trigger" : "NONE",
+    "age" : 3,
+    "flagSymbol" : false,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 79,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "flagSymbol" : true,
+    "instantEffects" : [{
+      "type" : "GAIN_FOOD",
+      "foodAmount" : 1,
+      "gainFoodType" : "FOOD_FLAT"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 80,
+    "trigger" : "NONE",
+    "age" : 3,
+    "flagSymbol" : false,
+    "instantEffects" : [],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 81,
+    "trigger" : "NONE",
+    "age" : 3,
+    "symbol" : "NECKLACE",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 82,
+    "trigger" : "NONE",
+    "age" : 3,
+    "symbol" : "BREAD",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 83,
+    "trigger" : "NONE",
+    "age" : 3,
+    "symbol" : "HOOK",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 84,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "DOLL",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 85,
+    "trigger" : "NONE",
+    "age" : 1,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "trigger": "DRAW_PHASE",
+    "id" : 86,
+    "age" : 1,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 87,
+    "trigger": "DRAW_PHASE",
+    "age" : 1,
+    "flagSymbol" : false,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 88,
+    "trigger": "DRAW_PHASE",
+    "age" : 1,
+    "flagSymbol" : false,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 89,
+    "trigger": "DRAW_PHASE",
+    "age" : 2,
+    "ppAmount" : 2,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "trigger" : "NONE",
+    "id" : 90,
+    "age" : 2,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 91,
+    "trigger": "DRAW_PHASE",
+    "age" : 2,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 92,
+    "trigger": "DRAW_PHASE",
+    "age" : 2,
+    "flagSymbol" : true,
+    "instantEffects" : [
+      {
+        "type" : "GAIN_FOOD",
+        "foodAmount" : 1,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ],
+    "interactiveEffects":  []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 93,
+    "trigger": "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum": "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 94,
+    "trigger": "NONE",
+    "age" : 3,
+    "symbol" : "AMIGDALA",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 95,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "ARROWHEAD",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 96,
+    "trigger": "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 1,
+      "gainStarsEnum": "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 97,
+    "trigger" : "NONE",
+    "age" : 1,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 98,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "ROPE",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 99,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "BOWL",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 100,
+    "trigger" : "NONE",
+    "age" : 1,
+    "symbol" : "FLUTE",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 101,
+    "age" : 2,
+    "trigger": "DRAW_PHASE",
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 102,
+    "age" : 2,
+    "flagSymbol" : true,
+    "trigger": "DRAW_PHASE",
+    "instantEffects" : [
+      {
+        "type" : "GAIN_FOOD",
+        "foodAmount" : 1,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ],
+    "interactiveEffects":  []
+  },
+  {
+    "type" : "CRAFTER",
+    "id" : 103,
+    "trigger" : "NONE",
+    "age" : 2,
+    "symbol" : "HOOK",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 104,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum": "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 105,
+    "trigger" : "DRAW_PHASE",
+    "age" : 3,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "CRAFTER",
+    "trigger" : "NONE",
+    "id" : 106,
+    "age" : 3,
+    "symbol" : "NECKLACE",
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 107,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum": "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 108,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "ppAmount" : 1,
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 2,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 109,
+    "trigger" : "DRAW_PHASE",
+    "age" : 1,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 110,
+    "age" : 2,
+    "trigger": "DRAW_PHASE",
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 1,
+      "gainStarsEnum": "GAIN_STARS"
+    }],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "SHAMAN",
+    "id" : 111,
+    "age" : 2,
+    "trigger" : "DRAW_PHASE",
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type" : "GAIN_STARS",
+      "starsAmount" : 2,
+      "gainStarsEnum": "GAIN_STARS"
+    }]
+
+  },
+  {
+    "type" : "GATHERER",
+    "id" : 112,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 113,
+    "trigger" : "DRAW_PHASE",
+    "age" : 2,
+    "flagSymbol" : false,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "BUILDER",
+    "id" : 114,
+    "age" : 3,
+    "ppAmount" : 4,
+    "trigger" : "DRAW_PHASE",
+    "instantEffects" : [
+      {
+        "type" : "DISCOUNT_FOOD",
+        "category" : null,
+        "foodAmount" : 1,
+        "discountFoodType" : "DISCOUNT_FOR_BUILDING"
+      }
+    ],
+    "interactiveEffects" : []
+  },
+  {
+    "type" : "PAINTER",
+    "id" : 115,
+    "trigger" : "NONE",
+    "age" : 3,
+    "interactiveEffects" : [],
+    "instantEffects" : []
+  },
+  {
+    "type" : "GATHERER",
+    "trigger" : "DRAW_PHASE",
+    "id" : 116,
+    "age" : 3,
+    "interactiveEffects" : [],
+    "instantEffects" : [{
+      "type": "DISCOUNT_FOOD",
+      "category" : null,
+      "foodAmount" : 3,
+      "discountFoodType" : "DISCOUNT_FLAT"
+    }]
+  },
+  {
+    "type" : "HUNTER",
+    "id" : 117,
+    "age" : 3,
+    "trigger" : "DRAW_PHASE",
+    "flagSymbol" : true,
+    "interactiveEffects" : [],
+    "instantEffects" : [
+      {
+        "type" : "GAIN_FOOD",
+        "foodAmount" : 1,
+        "gainFoodType" : "FOOD_FLAT"
+      }
+    ]
+  }
+]

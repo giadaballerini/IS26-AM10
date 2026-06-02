@@ -1,0 +1,32 @@
+.toggle-rete{
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #d35400); 
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold; 
+    -fx-padding: 15px 40px;
+    -fx-background-radius: 40px;
+    -fx-border-radius: 40px;
+    -fx-border-color: #a04000;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5); 
+}
+
+/* Effetto quando passi sopra il mouse */
+.toggle-rete:selected:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #ba4a00);
+    -fx-scale-x: 1.05; 
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 8); 
+}
+.toggle-rete:selected {
+    -fx-background-color: linear-gradient(to bottom, #f39d12be, #d3540098); 
+    -fx-text-fill: white;
+    -fx-border-color: #a040005f;
+    -fx-border-width: 2;
+    -fx-border-radius: 40;
+    -fx-background-radius: 40px;
+}
+.toggle-rete:selected:hover {
+    -fx-background-color: #ffa533;
+    -fx-text-fill: white;
+}

@@ -19,7 +19,13 @@ public interface ServerMessageVisitor {
     void visit(StatsUpdateMessage statsUpdateMessage);
     void visit(PingMessage pingMessage);
     void visit(EventMessage eventMessage);
-    void visit(AvailableLobbiesMessage avaiableLobbiesMessage);
+    void visit(AvailableLobbiesMessage availableLobbiesMessage);
     void visit(GameCreatedMessage gameCreatedMessage);
     void visit(ErrorMessage errorMessage);
+    void visit(GameJoinedMessage gameJoinedMessage);
+    void visit(QuitAckMessage quitAckMessage);
+    void visit(LoginSuccessMessage loginSuccessMessage);
+    void visit(LoginFailedMessage loginFailedMessage);
+    void visit(ReconnectionMessage reconnectionMessage);
+    void visit(RankingResponseMessage rankingResponseMessage);
 }

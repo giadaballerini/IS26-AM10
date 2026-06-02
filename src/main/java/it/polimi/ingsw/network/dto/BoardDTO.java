@@ -14,7 +14,7 @@ public class BoardDTO implements Serializable {
     private final List<CardDTO> lowerList;
     private final List<PlayerDTO> players;
     private final List<PlayerStatsDTO> playerStats;
-
+    private final ActionsDTO toDoActions;
     private final List<TileDTO> boardTiles;
     private final List<TileDTO> queueTiles;
 
@@ -27,7 +27,7 @@ public class BoardDTO implements Serializable {
 
     public BoardDTO(List<CardDTO> upperList, List<CardDTO> lowerList, List<PlayerDTO> players,
                     List<TileDTO> boardTiles, List<TileDTO> queueTiles, List<PlayerStatsDTO> playerStats,
-                    String currentPlayerNickname, GamePhaseEnum currentPhase,
+                    String currentPlayerNickname,ActionsDTO toDoActions, GamePhaseEnum currentPhase,
                     int currTurn, int numPlayers) {
         this.upperList = upperList;
         this.lowerList = lowerList;
@@ -36,6 +36,7 @@ public class BoardDTO implements Serializable {
         this.queueTiles = queueTiles;
         this.playerStats = playerStats;
         this.currentPlayerNickname = currentPlayerNickname;
+        this.toDoActions = toDoActions;
         this.currentPhase = currentPhase;
         this.currTurn = currTurn;
         this.numPlayers = numPlayers;
@@ -45,7 +46,7 @@ public class BoardDTO implements Serializable {
     public List<CardDTO> getUpperList() {
         return new ArrayList<>(upperList);
     }
-    
+
     public List<CardDTO> getLowerList() {
         return new ArrayList<>(lowerList);
     }
@@ -53,7 +54,7 @@ public class BoardDTO implements Serializable {
     public List<TileDTO> getboardTiles() {
         return new ArrayList<>(boardTiles);
     }
-    
+
     public List<TileDTO> getqueueTiles() {
         return new ArrayList<>(queueTiles);
     }
@@ -74,4 +75,7 @@ public class BoardDTO implements Serializable {
 
     public int getNumPlayers(){return numPlayers;}
 
+    public ActionsDTO getTodoActions() {
+        return new ActionsDTO(toDoActions);
+    }
 }

@@ -1,6 +1,6 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
-import it.polimi.ingsw.enumerations.CardTypeEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = ProtectPP.class, name = "PROTECT_PP"),
         @JsonSubTypes.Type(value = LossIfBroke.class, name = "LOSS_IF_BROKE")
 })
-public abstract class  CardEffectInstant {
+public abstract class CardEffectInstant {
 
     public void apply(Player p){}
 
@@ -32,10 +32,13 @@ public abstract class  CardEffectInstant {
 
     public abstract void displayEffect();
 
+
     public int getPpAmount(){
         return 0;
     }
-
+    public int getFoodAmount(){return 0;}
+    @JsonIgnore
     public boolean isOneTime(){return false;}
+    @JsonIgnore
     public boolean isFoodEffect(){return false;}
 }

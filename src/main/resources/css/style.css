@@ -1,0 +1,236 @@
+
+.root{
+    -fx-font-family: "Vagabundo Medium";
+}
+@font-face {
+    font-family: 'ChristmasChalk';
+    src: url('../fonts/ChristmasChalk.ttf');
+}
+
+.table-view, .table-cell {
+    -fx-font-family: 'ChristmasChalk';
+    -fx-font-size: 16px;
+}
+
+.main_backgroud{
+    -fx-background-image: url("../images/table_texture.jpg");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+.leaderboard_backgroud{
+    -fx-background-image: url("../images/leaderboard_back.jpg");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: contain;
+    -fx-background-position: center;
+    -fx-background-color: #000000;
+}
+.bottone-mesos {
+    -fx-font-family: "Vagabundo Medium";
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #d35400); 
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-padding: 15px 15px;
+    -fx-background-radius: 40px;
+    -fx-border-radius: 40px;
+    -fx-border-color: #a04000;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5); 
+}
+
+.bottone-mesos:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #ba4a00);
+    -fx-scale-x: 1.05; 
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 8); 
+}
+.testo-personalizzato {
+    -fx-font-family: "Vagabundo Medium";
+    -fx-font-size: 20px;
+}
+
+.toggle-rete{
+    -fx-font-family: "Vagabundo Medium";
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #d35400);
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-padding: 15px 40px;
+    -fx-background-radius: 40px;
+    -fx-border-radius: 40px;
+    -fx-border-color: #a04000;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
+}
+
+.toggle-rete:selected:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #ba4a00);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 8);
+}
+.toggle-rete:selected {
+    -fx-background-color: linear-gradient(to bottom, #f39d12be, #d3540098);
+    -fx-text-fill: white;
+    -fx-border-color: #a040005f;
+    -fx-border-width: 2;
+    -fx-border-radius: 40px;
+    -fx-background-radius: 40px;
+}
+.toggle-rete:selected:hover {
+    -fx-background-color: #ffa533;
+    -fx-text-fill: white;
+}
+.toggle-giocatori{
+    -fx-font-family: "Vagabundo Medium";
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #d35400);
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-padding: 15px 40px;
+    -fx-background-radius: 40px;
+    -fx-border-radius: 40px;
+    -fx-border-color: #a04000;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
+}
+
+.toggle-giocatori:selected:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #ba4a00);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 8);
+}
+.toggle-giocatori:selected {
+    -fx-background-color: linear-gradient(to bottom, #f39d12be, #d3540098);
+    -fx-text-fill: white;
+    -fx-border-color: #a040005f;
+    -fx-border-width: 2;
+    -fx-border-radius: 40px;
+    -fx-background-radius: 40px;
+}
+.toggle-giocatori:selected:hover {
+    -fx-background-color: #ffa533;
+    -fx-text-fill: white;
+}
+.card-highlight{
+    -fx-stroke: gold;
+    -fx-stroke-width: 3px;
+    -fx-effect: dropshadow(gaussian, gold, 15, 0.7, 0, 0);
+}
+.card-not-drawable{
+    -fx-effect: none;
+    -fx-cursor: default;
+}
+.card{
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 4);
+}
+.campo-ip {
+    -fx-font-family: "ChristmasChalk";
+    -fx-font-size: 17px;
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 40px;
+    -fx-border-color: #f39c12;
+    -fx-border-width: 2px;
+    -fx-border-radius: 40px;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 4);
+    -fx-padding: 0px 20px;
+}
+
+.campo-ip .text-field,
+.campo-ip .text {
+    -fx-padding: 0;
+}
+
+.card-tooltip {
+    -fx-background-color: rgba(20, 20, 30, 0.92);
+    -fx-background-radius: 8;
+    -fx-border-color: #6a5acd;
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 14 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 12, 0, 0, 4);
+}
+
+.card-tooltip-title {
+    -fx-text-fill: #e8d5ff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.card-tooltip-desc {
+    -fx-text-fill: #c0b8d4;
+    -fx-font-size: 11px;
+}
+
+/* STILI PER POPUPS */
+.tooltip.card-tooltip {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-pref-width: -fx-to-contained;
+}
+.card-tooltip-content {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.22), 8, 0, 0, 3);
+}
+.card-tooltip-title {
+    -fx-fill: black;
+    -fx-font-family: 'Vagabundo Medium';
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.card-tooltip-description {
+    -fx-fill: #222222;
+    -fx-font-family: 'Vagabundo Medium';
+    -fx-font-size: 16px;
+}
+.bottone-join {
+    -fx-font-family: "Vagabundo Medium";
+    -fx-background-color: linear-gradient(to bottom, #f39c12, #d35400);
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-padding: 15px 20px;
+    -fx-background-radius: 40px;
+    -fx-border-radius: 40px;
+    -fx-border-color: #a04000;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
+}
+
+.bottone-join:hover {
+    -fx-background-color: linear-gradient(to bottom, #e67e22, #ba4a00);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 8);
+}
+.bottone-quit {
+    -fx-background-image: url('../images/esci_button.png');
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-pref-width:  100px;
+    -fx-pref-height: 40px;
+}
+
+.bottone-quit:hover {
+    -fx-opacity: 0.8;
+}
+
+.bottone-quit:pressed {
+    -fx-opacity: 0.6;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}

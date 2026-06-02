@@ -74,7 +74,7 @@ class CardTest {
         when(mockEffect.canApply(GamePhaseEnum.PLAY_EVENT, GamePhaseEnum.PLAY_EVENT)).thenReturn(true);
         lista.add(mockEffect);
 
-        Card card1 = new Builder(67, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), lista, 2,   CardTypeEnum.HUNTER);
+        Card card1 = new Builder(67, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), lista, 2,1,   CardTypeEnum.HUNTER);
 
         card1.execInstantEffect(player, GamePhaseEnum.PLAY_EVENT);
         verify(mockEffect).apply(player, card1);
@@ -89,7 +89,7 @@ class CardTest {
         lista.add(effect);
         lista.add(mockEffect1);
 
-        Card card1 = new Builder(67, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), lista, 2,   CardTypeEnum.HUNTER);
+        Card card1 = new Builder(67, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), lista, 2,1,   CardTypeEnum.HUNTER);
 
         when(mockEffect1.canApply(GamePhaseEnum.PLAY_EVENT, GamePhaseEnum.DRAW_PHASE)).thenReturn(false);
         card1.execInstantEffect(player, GamePhaseEnum.DRAW_PHASE);

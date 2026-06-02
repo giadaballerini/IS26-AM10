@@ -2,12 +2,13 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GainPPEnum;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class GainPP extends CardEffectInstant{
     private final int ppAmount;
     private final CardTypeEnum cat;
@@ -24,6 +25,7 @@ public class GainPP extends CardEffectInstant{
         gainPpType.apply(p, this, c);
     }
 
+    public void apply(){}
 
     @Override
     public void displayEffect(){
@@ -37,5 +39,5 @@ public class GainPP extends CardEffectInstant{
     public CardTypeEnum getCat() {return cat;}
 
     @Override
-    public boolean isOneTime(){return gainPpType.isOneTime();}
+    public boolean isOneTime(){return gainPpType != null && gainPpType.isOneTime();}
 }

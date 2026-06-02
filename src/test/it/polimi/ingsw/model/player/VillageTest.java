@@ -34,7 +34,7 @@ class VillageTest {
 
     @Test
     void testShouldAddBuilder() {
-        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,  CardTypeEnum.BUILDER);
+        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,1,  CardTypeEnum.BUILDER);
         assertNotNull(builder);
         v.add(builder);
         assertEquals(1, v.getNumType(CardTypeEnum.BUILDER));
@@ -77,7 +77,7 @@ class VillageTest {
     void testShouldGetNumCharacters() {
 
         Shaman shaman = new Shaman(21, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, CardTypeEnum.SHAMAN);
-        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,  CardTypeEnum.BUILDER);
+        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,1,  CardTypeEnum.BUILDER);
         assertNotNull(builder);
         Hunter hunter = new Hunter(4, GamePhaseEnum.DRAW_PHASE,new ArrayList<>(), new ArrayList<>(),2,true,CardTypeEnum.HUNTER);
         assertNotNull(hunter);
@@ -92,7 +92,7 @@ class VillageTest {
 
     @Test
     void testShouldGetNumType() {
-        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,  CardTypeEnum.BUILDER);
+        Builder builder = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,1,  CardTypeEnum.BUILDER);
         assertNotNull(builder);
         Hunter hunter = new Hunter(4, GamePhaseEnum.DRAW_PHASE,new ArrayList<>(), new ArrayList<>(),2,true,CardTypeEnum.HUNTER);
         assertNotNull(hunter);
@@ -108,7 +108,7 @@ class VillageTest {
         assertEquals(1, v.getNumType(CardTypeEnum.BUILDER));
         assertEquals(1, v.getNumType(CardTypeEnum.HUNTER));
         assertEquals(1, v.getNumType(CardTypeEnum.PAINTER));
-        Builder builder1 = new Builder(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,  CardTypeEnum.BUILDER);
+        Builder builder1 = new Builder(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,1,  CardTypeEnum.BUILDER);
         assertNotNull(builder1);
         v.add(builder1);
         assertEquals(2, v.getNumType(CardTypeEnum.BUILDER));
@@ -141,7 +141,7 @@ class VillageTest {
         for (int i = 0; i < 6; i++){
             List<CardEffectInstant> effectsInst = new ArrayList<>();
             effectsInst.add(effect);
-            Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), effectsInst, 1,  CardTypeEnum.BUILDER);
+            Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), effectsInst, 1,1,  CardTypeEnum.BUILDER);
             assertNotNull(builder);
             v2.add(builder);
         }

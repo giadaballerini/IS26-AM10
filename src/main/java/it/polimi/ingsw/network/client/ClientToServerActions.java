@@ -1,7 +1,6 @@
 package it.polimi.ingsw.network.client;
 
 
-import java.util.Map;
 
 public interface ClientToServerActions{
     boolean login(String nickname);
@@ -16,7 +15,7 @@ public interface ClientToServerActions{
 
     void draw(int card);
 
-    Map<String, Integer> requestRanking();
+    void requestRanking();
 
     void requestJoin();
 

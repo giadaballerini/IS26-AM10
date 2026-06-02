@@ -39,7 +39,7 @@ class BuilderTest {
     @Mock
     GainPPVisitor visitorPP;
 
-    Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, CardTypeEnum.BUILDER);
+    Builder builder = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,2, CardTypeEnum.BUILDER);
 
     @Test
     void testShouldDispatch() {

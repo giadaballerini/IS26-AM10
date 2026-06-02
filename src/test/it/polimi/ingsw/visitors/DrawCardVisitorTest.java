@@ -57,7 +57,7 @@ class DrawCardVisitorTest {
 
     @Test
     void testVisitCharacter() {
-        Character b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,  CardTypeEnum.BUILDER);
+        Character b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2,2,  CardTypeEnum.BUILDER);
         dcv.visit(b1);
         assertTrue(dcv.getCurrentPlayer().getNumType(CardTypeEnum.BUILDER) == 1);
     }

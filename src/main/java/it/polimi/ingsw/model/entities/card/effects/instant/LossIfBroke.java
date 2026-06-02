@@ -2,10 +2,11 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.LossIfBrokeEnum;
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class LossIfBroke extends CardEffectInstant{
     private final int ppCost;
     private final int foodCost;

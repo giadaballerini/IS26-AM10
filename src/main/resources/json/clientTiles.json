@@ -1,0 +1,55 @@
+[
+  {
+    "id": 0,
+    "caption": "Quando capiti su questa Tile ottieni 3 di cibo istantaneamente",
+    "cardSlot": { "topMargin": 30, "width": 52, "height": 27 }
+  },
+  {
+    "id": 1,
+    "caption": "Questa Tile ti garantisce 1 pescata dalla Fila Inferiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 36, "width": 52, "height": 27 },
+    "arrowArea": { "topMargin": 60, "leftMargin": 5, "width": 28, "height": 38 },
+    "maxDownDraws": 1,
+    "maxUpDraws": 0
+  },
+  {
+    "id": 2,
+    "caption": "Questa Tile ti garantisce 1 pescata dalla Fila Superiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 30, "width": 53, "height": 29 },
+    "arrowArea": { "topMargin": 60, "leftMargin": -8, "width": 28, "height": 38 },
+    "maxDownDraws": 0,
+    "maxUpDraws": 1
+  },
+  {
+    "id": 3,
+    "caption": "Questa Tile ti garantisce 2 pescate dalla Fila Inferiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 28, "width": 48, "height": 26 },
+    "arrowArea": { "topMargin": 60, "leftMargin": 1, "width": 57, "height": 38 },
+    "maxDownDraws": 2,
+    "maxUpDraws": 0
+  },
+  {
+    "id": 4,
+    "caption": "Questa Tile ti garantisce 1 pescata da Fila Inferiore E 1 pescata da Fila Superiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 35, "width": 52, "height": 27 },
+    "arrowArea": { "topMargin": 60, "leftMargin": -3, "width": 57, "height": 38 },
+    "maxDownDraws": 1,
+    "maxUpDraws": 1
+  },
+  {
+    "id": 5,
+    "caption": "Questa Tile ti garantisce 2 pescate dalla Fila Superiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 32, "width": 55, "height": 28 },
+    "arrowArea": { "topMargin": 60, "leftMargin": -8, "width": 57, "height": 38 },
+    "maxDownDraws": 0,
+    "maxUpDraws": 2
+  },
+  {
+    "id": 6,
+    "caption": "Questa Tile ti garantisce 2 pescate da Fila Superiore E 1 pescata da Fila Inferiore durante la fase di pesca",
+    "cardSlot":  { "topMargin": 30, "width": 45, "height": 30 },
+    "arrowArea": { "topMargin": 60, "leftMargin": -5, "width": 86, "height": 38 },
+    "maxDownDraws": 1,
+    "maxUpDraws": 2
+  }
+]

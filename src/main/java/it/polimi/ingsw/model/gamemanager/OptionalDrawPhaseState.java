@@ -5,16 +5,19 @@ import it.polimi.ingsw.enumerations.GamePhaseEnum;
 public class OptionalDrawPhaseState implements GamePhaseState{
     public GamePhaseState nextPhase(GameManager context){
         if(context.getToDoActions().isEmpty()) {
-            assert context.queue.getFirst() != null; //serve davvero?
-            context.setCurrPlayer(context.queue.getFirst().getPlayer());
+            context.setSkippableDraw(false);
+            context.nextPlayer();
             return new EndRoundPhaseState();
         }
-        else
-            return this;
+        return this;
     }
-    //qui rimango in attesa andando in EndRound dal momento che la lista di azioni si svuota
+
+    @Override
+    public void onEntry(GameManager context){
+        context.loadSkippableDraws();
+    }
     @Override
     public GamePhaseEnum getPhase(){
-        return GamePhaseEnum.DRAW_PHASE;
+        return GamePhaseEnum.OPTIONAL_DRAW_PHASE;
     }
 }

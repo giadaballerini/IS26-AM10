@@ -3,7 +3,6 @@ package it.polimi.ingsw.network.messages.server;
 import it.polimi.ingsw.network.dto.PlayerDTO;
 import it.polimi.ingsw.visitors.ServerMessageVisitor;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestLeaderboardUpdateMessage implements ServerMessage {
@@ -15,7 +14,7 @@ public class RequestLeaderboardUpdateMessage implements ServerMessage {
         return ranks;
     }
 
-    // TODO
+
     @Override
     public void accept(ServerMessageVisitor visitor) {
         visitor.visit(this);

@@ -2,11 +2,12 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.GainFoodEnum;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class GainFood extends CardEffectInstant{
     private final int foodAmount;
     private final GainFoodEnum gainFoodType;
@@ -20,6 +21,7 @@ public class GainFood extends CardEffectInstant{
     public void apply(Player p, Card c){
         gainFoodType.apply(p, this, c);
     }
+
     @Override
     public void apply(Player p){gainFoodType.apply(p, this);}
 
@@ -28,6 +30,8 @@ public class GainFood extends CardEffectInstant{
         System.out.println("\nAggiunto " + foodAmount + " di cibo");
     }
 
+
+    @Override
     public int getFoodAmount(){
         return foodAmount;
     }

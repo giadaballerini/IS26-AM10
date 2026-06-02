@@ -17,13 +17,17 @@ import java.util.List;
 
 public class Builder extends Character {
 
+    @JsonProperty
+    private final int ppAmount;
     @JsonCreator
     public Builder(@JsonProperty("id") int id, @JsonProperty("trigger") GamePhaseEnum trigger,
                    @JsonProperty("interactiveEffects") List<CardEffectInteractive> interactiveEffects,
                    @JsonProperty("instantEffects") List<CardEffectInstant> instantEffects,
                    @JsonProperty("age") int age,
+                   @JsonProperty("ppAmount" ) int ppAmount,
                    @JsonProperty("type") CardTypeEnum type) {
         super(id,trigger, interactiveEffects, instantEffects, age, type);
+        this.ppAmount = ppAmount;
     }
 
     @Override
@@ -39,4 +43,7 @@ public class Builder extends Character {
         visitor.visit(this, p, e);
     }
 
+    public int getPpAmount() {
+        return this.ppAmount;
+    }
 }

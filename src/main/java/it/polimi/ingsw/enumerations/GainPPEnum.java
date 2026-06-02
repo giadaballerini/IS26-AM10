@@ -1,10 +1,7 @@
 package it.polimi.ingsw.enumerations;
 
 import it.polimi.ingsw.model.entities.card.Card;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
-import it.polimi.ingsw.model.entities.card.types.character.Builder;
-import it.polimi.ingsw.model.entities.card.types.character.Crafter;
 import it.polimi.ingsw.model.interfaces.GainPPModifier;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
@@ -32,7 +29,7 @@ public enum GainPPEnum implements GainPPModifier, GainPPVisitor {
         p.addPP(e.getPpAmount());
     }){ public boolean isOneTime(){return true;}},
     DOUBLE_PP_SHAMAN((p, e, c) -> {
-        p.addDouble();
+        p.activateDoubleShaman();
     }),
     DOUBLE_BUILDER((p, e, c) -> {
         p.addPP(p.getBuilderPoints());

@@ -3,6 +3,7 @@ package it.polimi.ingsw.observer;
 import it.polimi.ingsw.network.dto.*;
 import it.polimi.ingsw.network.messages.client.ClientMessage;
 import it.polimi.ingsw.visitors.ClientMessageVisitor;
+import it.polimi.ingsw.visitors.GameMessageVisitor;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public interface ModelObserver {
 
     void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks);
 
-    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos);
+    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos);
 
     void onDrawUpdate(CardDTO c, String nickname);
 
@@ -45,5 +46,14 @@ public interface ModelObserver {
 
     void onChangeAge(ChangeAgeDTO dto);
 
-    void onEvent(String event);
+    void onEvent(EventDTO event);
+
+    void onQuitServer(String reason);
+
+    void onReconnection(int matchId);
+
+    default void injectGameVisitor(GameMessageVisitor visitor){}
+
+
+    default void resetGameVisitor(){}
 }

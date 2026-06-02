@@ -31,9 +31,7 @@ public class StonePainting extends Event{
     public void execEvent(List<Player> players, GamePhaseEnum phase){
         if(phase == GamePhaseEnum.END_ROUND){
             for(Player playerRef : players){
-                if(playerRef.hasPaintFlag()){
-                    playerRef.addFood(playerRef.getNumType(CardTypeEnum.PAINTER));
-                }
+                playerRef.applyPaintBonus();
                 int nPaintersActual = playerRef.getNumType(CardTypeEnum.PAINTER);
                 if(nPaintersActual <= this.nPainterSup){
                     playerRef.addPP(-this.ppLoss);

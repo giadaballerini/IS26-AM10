@@ -13,7 +13,7 @@ public interface VirtualViewRmi extends Remote {
     void onMoveUpdate(TileDTO tile, String nextPlayer) throws RemoteException;
     void onPhaseUpdate(PhaseDTO phaseDTO) throws RemoteException;
     void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks) throws RemoteException;
-    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos) throws RemoteException;
+    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos) throws RemoteException;
 
     void onDrawUpdate(CardDTO c, String nickname) throws RemoteException;
 
@@ -25,9 +25,11 @@ public interface VirtualViewRmi extends Remote {
     void notifyDrawable(ActionsDTO actions) throws RemoteException;
     void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) throws RemoteException;
     void showBoard(BoardDTO boardDTO) throws RemoteException;
-
-    void onEvent(String event) throws RemoteException;
+    void onQuitServer(String reason) throws RemoteException;
+    void onEvent(EventDTO event) throws RemoteException;
     void printError(String e) throws RemoteException;
 
     void ping() throws RemoteException;
+
+    void reconnect(int matchId) throws RemoteException;
 }

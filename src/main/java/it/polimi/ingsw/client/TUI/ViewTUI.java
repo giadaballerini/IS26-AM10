@@ -1,13 +1,10 @@
 package it.polimi.ingsw.client.TUI;
 
-import it.polimi.ingsw.client.Client;
-import it.polimi.ingsw.client.UserInterface;
-import it.polimi.ingsw.client.VirtualModel;
-import it.polimi.ingsw.client.CommandParser;
+import it.polimi.ingsw.client.*;
 import it.polimi.ingsw.client.commands.Command;
+import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.exceptions.InvalidCardException;
-import it.polimi.ingsw.exceptions.InvalidTimingException;
-import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.network.dto.*;
 import org.jline.reader.*;
 import org.jline.terminal.Terminal;
@@ -15,26 +12,56 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.jline.utils.InfoCmp;
-
 import java.io.IOException;
 import java.util.*;
+import org.jline.terminal.Terminal.Signal;
 
 import static it.polimi.ingsw.client.TUI.CardColorMapper.getCardJlineColor;
 import static it.polimi.ingsw.client.TUI.TUIColorMapper.getPlayerJlineColor;
 
 public class ViewTUI implements UserInterface {
 
+    private enum LayoutTier {
+        COMPACT  (0, 120),
+        STANDARD (120, 180),
+        LARGE    (180, 9999);
+
+        final int minCols, maxCols;
+        LayoutTier(int minCols, int maxCols) {
+            this.minCols = minCols;
+            this.maxCols = maxCols;
+        }
+
+        static LayoutTier from(int cols) {
+            for (LayoutTier t : values())
+                if (cols >= t.minCols && cols < t.maxCols) return t;
+            return STANDARD;
+        }
+    }
+
+    private LayoutTier currentTier = LayoutTier.STANDARD;
+
     VirtualModel model;
     private LineReader reader;
-    private final Client client;
+    private Client client;
     private Terminal terminal;
 
     private static final int MAX_LOGS = 8;
-    private final List<String> logs = new ArrayList<>();
+    private final List<LogEntry> logs = new ArrayList<>();
 
     private char[][] screenBuffer;
     private AttributedStyle[][] colorBuffer;
     private int screenW, screenH;
+
+    private int layoutStartRow;
+    private int layoutPanelHeight;
+    private int layoutLeftSize;
+    private int layoutCenterSize;
+    private int layoutRightSize;
+    private int layoutSepStart;
+    private int layoutLogStart;
+    private boolean layoutValid = false;
+
     private static final Set<String> GROUPABLE_CHARACTERS = Set.of(
             "PAINTER", "GATHERER", "SHAMAN"
     );
@@ -59,6 +86,7 @@ public class ViewTUI implements UserInterface {
             terminal.puts(InfoCmp.Capability.enter_ca_mode);
             terminal.puts(InfoCmp.Capability.cursor_invisible);
             terminal.flush();
+            terminal.handle(Signal.WINCH, signal -> redrawScreen());
             TuiCompleter completer = new TuiCompleter(this);
             this.reader = LineReaderBuilder.builder()
                     .terminal(terminal)
@@ -71,126 +99,197 @@ public class ViewTUI implements UserInterface {
     }
 
     public void start() {
+        boolean loggedIn = false;
+        while (!loggedIn) {
+            String nickname = reader.readLine("Inserire il nickname: ").trim();
+            if (!nickname.isEmpty())
+                loggedIn = client.login(nickname);
+        }
         redrawScreen();
-
         while (true) {
             try {
                 String input = reader.readLine("Comando> ").trim();
-
-                if (input.isEmpty()){
+                if (input.isEmpty()) {
                     redrawScreen();
                     continue;
                 }
-                
                 Command command = CommandParser.parse(input, client);
                 if (command != null) {
-                    if(command.shouldClearLogs())
+                    if (command.shouldClearLogs())
                         clearLogs();
                     command.execute(client);
                 } else {
-                    log("Comando non riconosciuto. Usa: move <n>, create <n>, join, choose <id>, draw <id>, info<id>, skip, help, exit");
+                    log("Comando non riconosciuto. Digitare 'help' per ottenere la lista completa dei comandi utilizzabili. Premere TAB per usare l'auto completer.");
                 }
             } catch (UserInterruptException | EndOfFileException e) {
                 System.exit(0);
             } catch (Exception e) {
                 log("Errore: " + e.getMessage());
             }
-
         }
     }
 
-    private synchronized void clearLogs() {
-        logs.clear();
-    }
 
-    private synchronized void log(String message) {
-        logs.add(message);
-        if (logs.size() > MAX_LOGS) logs.removeFirst();
-        redrawScreen();
-    }
-
-    private synchronized void redrawScreen() {
-        terminal.writer().print("\033[3J");
-        if (terminal == null || reader == null)
-            return;
-
+    private boolean computeLayout() {
         screenW = terminal.getWidth();
         screenH = terminal.getHeight() - 1;
+        currentTier = LayoutTier.from(screenW);
 
-        int reservedBottom = MAX_LOGS + 2;
-        int logStart = screenH - MAX_LOGS;
-        int sepStart = logStart - 1;
+        if (screenW < 20 || screenH < 10) {
+            layoutValid = false;
+            return false;
+        }
 
-        int startRow = 3;
-        int panelHeight = sepStart - startRow;
+        layoutLogStart  = screenH - MAX_LOGS;
+        layoutSepStart  = layoutLogStart - 1;
+        layoutStartRow  = 3;
+        layoutPanelHeight = layoutSepStart - layoutStartRow;
 
-        if (screenW < 20 || screenH < 10) return;
+        switch (currentTier) {
+            case LARGE -> {
+                layoutLeftSize   = screenW / 5;
+                layoutCenterSize = screenW * 4 / 10;
+            }
+            case COMPACT -> {
+                layoutLeftSize   = screenW / 4;
+                layoutCenterSize = screenW / 2;
+            }
+            default -> {
+                layoutLeftSize   = screenW / 6;
+                layoutCenterSize = screenW / 2;
+            }
+        }
+        layoutRightSize = screenW - layoutLeftSize - layoutCenterSize;
+        layoutValid = true;
+        return true;
+    }
 
+
+    private synchronized void redrawScreen() {
+        if (terminal == null || reader == null) return;
+
+        terminal.pause();
+        terminal.writer().print("\033[3J");
+
+        if (!computeLayout()) {
+            terminal.resume();
+            return;
+        }
 
         screenBuffer = new char[screenH][screenW];
-        for (int i = 0; i < screenH; i++) {
-            Arrays.fill(screenBuffer[i], ' ');
-        }
+        for (int i = 0; i < screenH; i++) Arrays.fill(screenBuffer[i], ' ');
         colorBuffer = new AttributedStyle[screenH][screenW];
-            for (int r = 0; r < screenH; r++) {
-                for (int c = 0; c < screenW; c++) {
-                    colorBuffer[r][c] = AttributedStyle.DEFAULT;
-                }
-        }
-
+        for (int r = 0; r < screenH; r++)
+            for (int c = 0; c < screenW; c++)
+                colorBuffer[r][c] = AttributedStyle.DEFAULT;
 
         String banner = "*** MESOS ***";
-        int bannerCol = Math.max(0, (screenW - banner.length()) / 2);
-        printAt(1, bannerCol, banner, screenW);
-        if (model != null && model.getQueue() != null && !model.getQueue().isEmpty()) {
-            int leftSize   = screenW / 6;
-            int centerSize = screenW / 2;
-            int rightSize  = screenW - leftSize - centerSize;
-            try {
-                drawBox(startRow, 0, leftSize - 1, panelHeight);
-                drawBox(startRow, leftSize, centerSize - 1, panelHeight);
-                drawBox(startRow, leftSize + centerSize, rightSize - 1, panelHeight);
+        printAt(1, Math.max(0, (screenW - banner.length()) / 2), banner, screenW);
 
-                drawQueuePanel  (startRow + 1, 1, leftSize - 3);
-                drawCenterBoard (startRow + 1, leftSize + 1, centerSize - 3);
-                drawPlayersPanel(startRow + 1, leftSize + centerSize + 1, rightSize - 3);
+        if (model != null && model.getQueue() != null && !model.getQueue().isEmpty()) {
+            try {
+                drawBox(layoutStartRow, 0,                               layoutLeftSize - 1,   layoutPanelHeight);
+                drawBox(layoutStartRow, layoutLeftSize,                  layoutCenterSize - 1, layoutPanelHeight);
+                drawBox(layoutStartRow, layoutLeftSize + layoutCenterSize, layoutRightSize - 1,  layoutPanelHeight);
+
+                drawQueuePanel  (layoutStartRow + 1, 1,                                          layoutLeftSize - 3);
+                drawCenterBoard (layoutStartRow + 1, layoutLeftSize + 1,                          layoutCenterSize - 3);
+                drawPlayersPanel(layoutStartRow + 1, layoutLeftSize + layoutCenterSize + 1,       layoutRightSize - 3);
             } catch (Exception ignored) {}
         } else {
             String waitMsg = "In attesa dell'inizio della partita...";
             printAt(screenH / 2, (screenW - waitMsg.length()) / 2, waitMsg, screenW);
         }
 
-
-        printAt(sepStart, 0, "─".repeat(screenW), screenW);
+        printAt(layoutSepStart, 0, "─".repeat(screenW), screenW);
         for (int i = 0; i < logs.size(); i++) {
-            if(logStart + i < screenH)
-                printAt(logStart + i, 0, logs.get(i), screenW);
+            if (layoutLogStart + i < screenH) {
+                LogEntry entry = logs.get(i);
+                printAt(layoutLogStart + i, 0, entry.message, screenW, entry.style);
+            }
+        }
+
+        flushBuffers();
+        redisplayPrompt();
+        terminal.resume();
+    }
+
+
+    private void clearRegion(int startRow, int startCol, int rows, int cols) {
+        for (int r = startRow; r < startRow + rows && r < screenH; r++) {
+            for (int c = startCol; c < startCol + cols && c < screenW; c++) {
+                screenBuffer[r][c] = ' ';
+                colorBuffer[r][c]  = AttributedStyle.DEFAULT;
+            }
+        }
+    }
+
+
+    private synchronized void redrawQueuePanel() {
+        if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
+        clearRegion(layoutStartRow + 1, 1, layoutPanelHeight - 2, layoutLeftSize - 3);
+        drawQueuePanel(layoutStartRow + 1, 1, layoutLeftSize - 3);
+        flushBuffers();
+        redisplayPrompt();
+    }
+
+    private synchronized void redrawCenterBoard() {
+        if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
+        clearRegion(layoutStartRow + 1, layoutLeftSize + 1, layoutPanelHeight - 2, layoutCenterSize - 3);
+        drawCenterBoard(layoutStartRow + 1, layoutLeftSize + 1, layoutCenterSize - 3);
+        flushBuffers();
+        redisplayPrompt();
+    }
+
+    private synchronized void redrawPlayersPanel() {
+        if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
+        clearRegion(layoutStartRow + 1, layoutLeftSize + layoutCenterSize + 1, layoutPanelHeight - 2, layoutRightSize - 3);
+        drawPlayersPanel(layoutStartRow + 1, layoutLeftSize + layoutCenterSize + 1, layoutRightSize - 3);
+        flushBuffers();
+        redisplayPrompt();
+    }
+
+    private synchronized void redrawLogs() {
+        if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
+        for (int c = 0; c < screenW; c++) {
+            screenBuffer[layoutSepStart][c] = '─';
+            colorBuffer[layoutSepStart][c]  = AttributedStyle.DEFAULT;
+        }
+        for (int i = 0; i < MAX_LOGS && layoutLogStart + i < screenH; i++) {
+            Arrays.fill(screenBuffer[layoutLogStart + i], ' ');
+            Arrays.fill(colorBuffer[layoutLogStart + i],  AttributedStyle.DEFAULT);
+            if (i < logs.size()) {
+                LogEntry entry = logs.get(i);
+                printAt(layoutLogStart + i, 0, entry.message, screenW, entry.style);
+            }
         }
         flushBuffers();
-
-        terminal.puts(InfoCmp.Capability.cursor_address, terminal.getHeight() - 1, 0);
-        terminal.puts(InfoCmp.Capability.clr_eol);
-        terminal.flush();
-
-        try {
-            if(reader != null) {
-                reader.callWidget(LineReader.REDRAW_LINE);
-                reader.callWidget(LineReader.REDISPLAY);
-            }
-        } catch (IllegalStateException ignored) {}
-
-        terminal.writer().flush();
+        redisplayPrompt();
     }
-    private void flushBuffers(){
+
+
+    private void flushBuffers() {
         terminal.puts(InfoCmp.Capability.cursor_home);
         AttributedStringBuilder asb = new AttributedStringBuilder();
-        for(int i = 0; i < screenH; i++){
-            for(int j = 0; j < screenW - 1; j++){
+        for (int i = 0; i < screenH; i++) {
+            int j = 0;
+            while (j < screenW - 1) {
+                char hi = screenBuffer[i][j];
+                if (Character.isHighSurrogate(hi) && j + 1 < screenW - 1) {
+                    char lo = screenBuffer[i][j + 1];
+                    if (Character.isLowSurrogate(lo)) {
+                        asb.style(colorBuffer[i][j]);
+                        asb.append(hi);
+                        asb.append(lo);
+                        j += 2;
+                        continue;
+                    }
+                }
                 asb.style(colorBuffer[i][j]);
-                asb.append(screenBuffer[i][j]);
+                asb.append(hi);
+                j++;
             }
-            if(i < screenH - 1)
-                asb.append("\n");
+            if (i < screenH - 1) asb.append("\n");
         }
         asb.style(AttributedStyle.DEFAULT);
         terminal.writer().print(asb.toAnsi());
@@ -198,76 +297,150 @@ public class ViewTUI implements UserInterface {
         terminal.writer().flush();
     }
 
-    private void printAt(int row, int col, String text, int maxWidth, AttributedStyle style) {
-        if (maxWidth <= 0 || text == null || text.isEmpty()) return;
-        if (row < 0 || row >= screenH || col < 0 || col >= screenW) return;
 
-        int allowed = maxWidth - 1;
-        String out;
-        if (allowed <= 3) {
-            out = text.substring(0, Math.min(text.length(), allowed));
-        } else if (text.length() > allowed) {
-            out = text.substring(0, allowed - 3) + "...";
-        } else {
-            out = text;
-        }
-
-        for (int i = 0; i < out.length(); i++) {
-            if (col + i < screenW) {
-                screenBuffer[row][col + i] = out.charAt(i);
-                colorBuffer[row][col + i] = style;
+    private void redisplayPrompt() {
+        terminal.puts(InfoCmp.Capability.cursor_address, terminal.getHeight() - 1, 0);
+        terminal.puts(InfoCmp.Capability.clr_eol);
+        terminal.flush();
+        try {
+            if (reader != null) {
+                reader.callWidget(LineReader.REDRAW_LINE);
+                reader.callWidget(LineReader.REDISPLAY);
             }
-        }
+        } catch (IllegalStateException ignored) {}
+        terminal.writer().flush();
     }
-    private void printAt(int row, int col, String text, int maxWidth) {
-        printAt(row, col, text, maxWidth, AttributedStyle.DEFAULT);
+
+
+    private synchronized void clearLogs() {
+        logs.clear();
     }
+
+    private synchronized void log(String message) {
+        logs.add(new LogEntry(message, AttributedStyle.DEFAULT));
+        if (logs.size() > MAX_LOGS) logs.removeFirst();
+        redrawLogs();
+    }
+
+    private synchronized void logColored(String message, AttributedStyle color) {
+        logs.add(new LogEntry(message, color));
+        if (logs.size() > MAX_LOGS) logs.removeFirst();
+        redrawLogs();
+    }
+
 
     private void drawQueuePanel(int startRow, int startCol, int maxWidth) {
         int row = startRow;
+
+        String nickLabel = "Nickname: ";
+        printAt(row, startCol, nickLabel, maxWidth);
+        printAt(row++, startCol + nickLabel.length(), model.getNickname(),
+                maxWidth - nickLabel.length(), getNicknameStyle(model.getNickname()));
+
         printAt(row++, startCol, "ORDINE TURNO", maxWidth);
         printAt(row++, startCol, "---------", maxWidth);
         List<TileDTO> queue = model.getQueue();
         for (int j = 0; j < queue.size(); j++) {
             TileDTO tile = queue.get(j);
-            String label = (j + 1) + ". " + (tile.isOccupied() ? tile.getPlayer() : "-");
-            printAt(row++, startCol, label, maxWidth);
+            if (tile.isOccupied()) {
+                String prefix = (j + 1) + ". ";
+                printAt(row, startCol, prefix, maxWidth);
+                printAt(row, startCol + prefix.length(), tile.getPlayer(),
+                        maxWidth - prefix.length(), getNicknameStyle(tile.getPlayer()));
+            } else {
+                printAt(row, startCol, (j + 1) + ". -", maxWidth);
+            }
+            row++;
         }
-        printAt(row++, startCol, "---------", maxWidth);
-        row++;
-        printAt(row++, startCol, "Turno corrente: " + model.getCurrTurn(), maxWidth);
+
+        printAt(row++, startCol, "Fase di gioco:", maxWidth);
+        printAt(row++, startCol, phaseToLabel(model.getCurrentPhase()), maxWidth);
+        printAt(row++, startCol, "Turno corrente:" + model.getCurrTurn(), maxWidth);
+        printAt(row++, startCol, "Era corrente: " + model.getCurrAge(), maxWidth);
         printAt(row++, startCol, "Giocatore corrente:", maxWidth);
-        printAt(row++, startCol, model.getCurrPlayer(), maxWidth);
+        printAt(row, startCol, model.getCurrPlayer(), maxWidth, getNicknameStyle(model.getCurrPlayer()));
+    }
+
+    private String phaseToLabel(GamePhaseEnum currentPhase) {
+        if (currentPhase == null) return "-";
+        return switch (currentPhase) {
+            case SETUP_PHASE        -> "Setup";
+            case DRAW_PHASE         -> "Pesca";
+            case OPTIONAL_DRAW_PHASE -> "Pesca aggiuntiva";
+            case END_TURN           -> "Fine turno";
+            case END_ROUND          -> "Fine round";
+            case PLAY_EVENT         -> "Evento in corso";
+            case END_GAME           -> "Fine partita";
+            case NONE               -> "";
+        };
     }
 
     private void drawCenterBoard(int startRow, int startCol, int maxWidth) {
         int row = startRow;
+        int half = maxWidth / 2;
 
         printAt(row++, startCol, "*** LISTA SUPERIORE ***", maxWidth);
-        int half = maxWidth / 2;
         for (int i = 0; i < model.getUpperList().size(); i += 2) {
-            printAt(row, startCol, "[ID: " + model.getUpperList().get(i).getId() + "] " + model.getUpperList().get(i).getType(), half, getCardJlineColor(model.getUpperList().get(i).getType().toString()));
-            if(i + 1 < model.getUpperList().size()){
-                printAt(row, startCol + half, "[ID: " + model.getUpperList().get(i+1).getId() + "] " + model.getUpperList().get(i+1).getType(), half, getCardJlineColor(model.getUpperList().get(i+1).getType().toString()));
+            CardDTO left = model.getUpperList().get(i);
+            printAt(row, startCol, buildCardLabel(left), half, getCardJlineColor(left.getType().toString()));
+            if (i + 1 < model.getUpperList().size()) {
+                CardDTO right = model.getUpperList().get(i + 1);
+                printAt(row, startCol + half, buildCardLabel(right), half, getCardJlineColor(right.getType().toString()));
             }
             row++;
         }
         row++;
 
-        printAt(row++, startCol, "*** TRACCIATO DELLE OFFERTE ***", maxWidth);
-        List<TileDTO> board = model.getBoard();
-        for (int i = 0; i < board.size(); i++) {
-            TileDTO t = board.get(i);
-            String label = (char)('1'+ i) + ": " + (t.isOccupied() ? t.getPlayer() : "Vuota");
-            printAt(row++, startCol, label, maxWidth);
+        int col = startCol;
+        for (int i = 0; i < model.getBoard().size(); i++) {
+            TileDTO t = model.getBoard().get(i);
+
+            String left = "[" + (i+1) + ":";
+            printAt(row, col, left, maxWidth - (col-startCol));
+            col += displayWidth(left);
+
+            String playerInitials;
+            AttributedStyle style;
+            if (t.isOccupied()) {
+                String nick = t.getPlayer();
+                playerInitials = nick.length() <= 3 ? nick : nick.substring(0, 3);
+                style = getNicknameStyle(nick);
+            } else {
+                playerInitials = "──";
+                style = AttributedStyle.DEFAULT;
+            }
+            printAt(row, col, playerInitials, maxWidth - (col-startCol), style);
+            col += displayWidth(playerInitials);
+
+            StringBuilder indicators = new StringBuilder();
+            if (t.getUpDraws() > 0)   indicators.append("↑".repeat(t.getUpDraws()));
+            if (t.getDownDraws() > 0) indicators.append("↓".repeat(t.getDownDraws()));
+            if (t.getFoodAmount() > 0) indicators.append(" C: ").append(t.getFoodAmount());
+            if (t.isOccupied() && t.getPlayer().equals(model.getCurrPlayer())
+                    && model.getCurrentPhase() == GamePhaseEnum.DRAW_PHASE) {
+                ActionsDTO actions = model.getToDoActions();
+                if (actions != null && (actions.getUpDraws() + actions.getDownDraws()) > 0) {
+                    indicators = new StringBuilder();
+                    if (actions.getUpDraws() > 0)   indicators.append("↑".repeat(actions.getUpDraws()));
+                    if (actions.getDownDraws() > 0) indicators.append("↓".repeat(actions.getDownDraws()));
+                    if (t.getFoodAmount() > 0) indicators.append(" C: ").append(t.getFoodAmount());
+                }
+            }
+            String extraStr = !indicators.isEmpty() ? " " + indicators.toString().trim() : "";
+
+            String right = extraStr + "] ";
+            printAt(row, col, right, maxWidth - (col-startCol));
+            col += displayWidth(right);
         }
         row++;
 
         printAt(row++, startCol, "*** LISTA INFERIORE ***", maxWidth);
         for (int i = 0; i < model.getLowerList().size(); i += 2) {
-            printAt(row, startCol, "[ID: " + model.getLowerList().get(i).getId() + "] " + model.getLowerList().get(i).getType(), half, getCardJlineColor(model.getLowerList().get(i).getType().toString()));
-            if(i + 1 < model.getLowerList().size()){
-                printAt(row, startCol + half, "[ID: " + model.getLowerList().get(i+1).getId() + "] " + model.getLowerList().get(i+1).getType(), half, getCardJlineColor(model.getLowerList().get(i+1).getType().toString()));
+            CardDTO left = model.getLowerList().get(i);
+            printAt(row, startCol, buildCardLabel(left), half, getCardJlineColor(left.getType().toString()));
+            if (i + 1 < model.getLowerList().size()) {
+                CardDTO right = model.getLowerList().get(i + 1);
+                printAt(row, startCol + half, buildCardLabel(right), half, getCardJlineColor(right.getType().toString()));
             }
             row++;
         }
@@ -278,97 +451,92 @@ public class ViewTUI implements UserInterface {
         int endRow = startRow + height - 1;
         int endCol = startCol + width - 1;
         printCharAt(startRow, startCol, '\u250C');
-        printCharAt(startRow, endCol, '\u2510');
-        printCharAt(endRow, startCol, '\u2514');
-        printCharAt(endRow, endCol, '\u2518');
-        for(int i = startCol + 1; i < endCol; i++){
+        printCharAt(startRow, endCol,   '\u2510');
+        printCharAt(endRow,   startCol, '\u2514');
+        printCharAt(endRow,   endCol,   '\u2518');
+        for (int i = startCol + 1; i < endCol; i++) {
             printCharAt(startRow, i, '\u2500');
-            printCharAt(endRow, i, '\u2500');
+            printCharAt(endRow,   i, '\u2500');
         }
-        for(int i = startRow + 1; i < endRow; i++){
+        for (int i = startRow + 1; i < endRow; i++) {
             printCharAt(i, startCol, '\u2502');
-            printCharAt(i, endCol, '\u2502');
+            printCharAt(i, endCol,   '\u2502');
         }
     }
 
     private void printCharAt(int row, int col, char c, AttributedStyle style) {
-        if(row < 0 || row >= screenH || col < 0 || col >= screenW) return;
+        if (row < 0 || row >= screenH || col < 0 || col >= screenW) return;
         screenBuffer[row][col] = c;
-        colorBuffer[row][col] = style;
+        colorBuffer[row][col]  = style;
     }
 
     private void printCharAt(int row, int col, char c) {
         printCharAt(row, col, c, AttributedStyle.DEFAULT);
     }
+
     private void drawPlayersPanel(int startRow, int startCol, int maxWidth) {
         class Etichetta {
-            String testo;
-            String tipo;
-
-            Etichetta(String testo, String tipo) {
-                this.testo = testo;
-                this.tipo = tipo;
-            }
+            final String testo, tipo;
+            Etichetta(String testo, String tipo) { this.testo = testo; this.tipo = tipo; }
         }
+
         int row = startRow;
         printAt(row++, startCol, "*** STATO DEI GIOCATORI ***", maxWidth);
 
-        List<PlayerStatsDTO> stats = model.getPlayerStats();
-        List<PlayerDTO> players = model.getPlayers();
+        List<PlayerStatsDTO> stats   = model.getPlayerStats();
+        List<PlayerDTO>      players = model.getPlayers();
 
         for (int i = 0; i < stats.size(); i++) {
             Map<String, Integer> grouped = new LinkedHashMap<>();
-            List<CardDTO> singles = new ArrayList<>();
-            PlayerStatsDTO s = stats.get(i);
+            List<CardDTO>        singles = new ArrayList<>();
+            PlayerStatsDTO s     = stats.get(i);
             AttributedStyle style = getPlayerJlineColor(players.get(i).getColor());
-            String statsLine = String.format("%s: Punti: %d | Cibo: %d | Stelle: %d", s.getNickname(), s.getPPs(), s.getnFood(), s.getnStars());
-            printAt(row++, startCol, statsLine, maxWidth, style);
+
+            String statsNick   = s.getNickname();
+            String statsSuffix = String.format(": PP:%d | Cibo:%d | Stelle:%d",
+                    s.getPPs(), s.getnFood(), s.getnStars());
+            printAt(row,   startCol,                           statsNick,   maxWidth,                         style);
+            printAt(row++, startCol + displayWidth(statsNick), statsSuffix, maxWidth - displayWidth(statsNick));
+
+            printAt(row++, startCol,
+                    String.format("   Sconti -> Edifici:%d | Cibo:%d",
+                            s.getTotBuildDisc(), s.getFoodDiscount()),
+                    maxWidth);
+
             if (i < players.size()) {
-                PlayerDTO p = players.get(i);
-                for (int j = 0; j < model.getPlayers().get(i).getMyCharacters().size(); j++) {
-                    String tipo = model.getPlayers().get(i).getMyCharacters().get(j).getType().toString();
-                    if (isGroupable(tipo)) {
-                        grouped.put(tipo, grouped.getOrDefault(tipo, 0) + 1);
-                    } else {
-                        singles.add(model.getPlayers().get(i).getMyCharacters().get(j));
-                    }
+                for (CardDTO c : players.get(i).getMyCharacters()) {
+                    String tipo = c.getType().toString();
+                    if (isGroupable(tipo)) grouped.merge(tipo, 1, Integer::sum);
+                    else                   singles.add(c);
                 }
-                singles.addAll(model.getPlayers().get(i).getMyBuildings());
+                singles.addAll(players.get(i).getMyBuildings());
             }
 
             List<Etichetta> labels = new ArrayList<>();
-            List<String> groupKeys = new ArrayList<>(grouped.keySet());
-            for (int j = 0; j < groupKeys.size(); j++) {
-                String tipo = groupKeys.get(j);
-                int amount = grouped.get(tipo);
-                labels.add(new Etichetta(amount + "x " + tipo, tipo));
-            }
-            for (int j = 0; j < singles.size(); j++) {
-                CardDTO card = singles.get(j);
-                String tipo = card.getType().toString();
-                labels.add(new Etichetta("[" + card.getId() + "] " + tipo, tipo));
-            }
+            grouped.forEach((tipo, amount) -> labels.add(new Etichetta(amount + "x " + tipo, tipo)));
+            for (CardDTO card : singles)
+                labels.add(new Etichetta(buildCardLabel(card), card.getType().toString()));
+
             if (labels.isEmpty()) {
                 printAt(row++, startCol, "Carte: Nessuna", maxWidth);
             } else {
                 printAt(row, startCol, "Carte: ", maxWidth);
                 int currentCol = startCol + 7;
                 for (int j = 0; j < labels.size(); j++) {
-                    Etichetta e = labels.get(j);
-                    boolean isLast = j == labels.size() - 1;
-                    String separatore = isLast ? "" : ", ";
-                    int space = e.testo.length() + separatore.length();
+                    Etichetta e     = labels.get(j);
+                    String sep      = (j == labels.size() - 1) ? "" : ", ";
+                    int space       = displayWidth(e.testo) + displayWidth(sep);
                     if ((currentCol - startCol) + space > maxWidth - 2) {
                         row++;
                         currentCol = startCol + 7;
                     }
-                    AttributedStyle colour = CardColorMapper.getCardJlineColor((e.tipo));
-                    printAt(row, currentCol, e.testo, maxWidth, colour);
-                    currentCol += e.testo.length();
-                    if (!separatore.isEmpty()) {
-                        printAt(row, currentCol, separatore, maxWidth);
-                        currentCol += separatore.length();
-
+                    int remTesto = maxWidth - (currentCol - startCol);
+                    printAt(row, currentCol, e.testo, remTesto, getCardJlineColor(e.tipo));
+                    currentCol += displayWidth(e.testo);
+                    if (!sep.isEmpty()) {
+                        int remSep = maxWidth - (currentCol - startCol);
+                        printAt(row, currentCol, sep, remSep);
+                        currentCol += displayWidth(sep);
                     }
                 }
                 row++;
@@ -377,35 +545,182 @@ public class ViewTUI implements UserInterface {
         }
     }
 
+
+
+
+    private void printAt(int row, int col, String text, int maxWidth, AttributedStyle style) {
+        if (maxWidth <= 0 || text == null || text.isEmpty()) return;
+        if (row < 0 || row >= screenH || col < 0 || col >= screenW) return;
+
+        int allowed = maxWidth - 1;
+
+        String out;
+        if (displayWidth(text) <= allowed) {
+            out = text;
+        } else if (allowed <= 3) {
+            StringBuilder sb = new StringBuilder();
+            int used = 0;
+            for (int i = 0; i < text.length(); ) {
+                int cp = text.codePointAt(i);
+                int w  = cpWidth(cp);
+                if (used + w > allowed) break;
+                sb.appendCodePoint(cp);
+                used += w;
+                i += Character.charCount(cp);
+            }
+            out = sb.toString();
+        } else {
+            StringBuilder sb = new StringBuilder();
+            int used = 0;
+            int limit = allowed - 3;
+            for (int i = 0; i < text.length(); ) {
+                int cp = text.codePointAt(i);
+                int w  = cpWidth(cp);
+                if (used + w > limit) break;
+                sb.appendCodePoint(cp);
+                used += w;
+                i += Character.charCount(cp);
+            }
+            out = sb + "...";
+        }
+
+        int curCol = col;
+        int maxCol = Math.min(col + maxWidth - 1, screenW);
+        for (int i = 0; i < out.length(); ) {
+            int cp = out.codePointAt(i);
+            int w  = cpWidth(cp);
+            if (curCol + w > maxCol) break;
+
+            if (Character.charCount(cp) == 2) {
+                screenBuffer[row][curCol] = out.charAt(i);
+                colorBuffer[row][curCol]  = style;
+                if (curCol + 1 < maxCol) {
+                    screenBuffer[row][curCol + 1] = out.charAt(i + 1);
+                    colorBuffer[row][curCol + 1]  = style;
+                }
+            } else {
+                screenBuffer[row][curCol] = (char) cp;
+                colorBuffer[row][curCol]  = style;
+                if (w == 2 && curCol + 1 < maxCol) {
+                    screenBuffer[row][curCol + 1] = ' ';
+                    colorBuffer[row][curCol + 1]  = style;
+                }
+            }
+            curCol += w;
+            i += Character.charCount(cp);
+        }
+    }
+
+
+
+
+    private void printAt(int row, int col, String text, int maxWidth) {
+        printAt(row, col, text, maxWidth, AttributedStyle.DEFAULT);
+    }
+
+
     @Override
-    public void showBoard() { redrawScreen(); }
+    public void showBoard() {
+        redrawScreen();
+    }
 
     @Override
     public void onMoveUpdate(TileDTO tile, String currPlayer) {
+        redrawCenterBoard();
         if (model.getNickname().equals(currPlayer))
-            log("Ti sei mossə alla tile: " + (char)('A' + tile.getId()));
+            log("Ti sei mossə alla tile: " + (char) ('A' + tile.getId()));
         else
-            log(currPlayer + " si e' mossə alla tile: " + (char)('A' + tile.getId()));
+            log(currPlayer + " si e' mossə alla tile: " + (char) ('A' + tile.getId()));
     }
 
     @Override
     public void onCurrPlayerUpdate(String nickname) {
-        if (model.getNickname().equals(nickname)) log(">>TOCCA A TE!<<");
+        clearLogs();
+        redrawQueuePanel();
+        if (model.getNickname().equals(nickname)) {
+            log(">>TOCCA A TE!<<");
+            log("Digitare 'help' per ottenere la lista completa dei comandi utilizzabili.");
+        }
     }
 
     @Override
-    public void onPhaseUpdate(PhaseDTO phaseDTO) { log("La fase corrente e': " + phaseDTO.getPhase()); }
+    public void onPhaseUpdate(PhaseDTO phaseDTO) {
+        redrawQueuePanel();
+    }
 
     @Override
     public void onDrawUpdate(CardDTO c, String nickname) {
-        if (model.getNickname().equals(nickname)) log("Hai pescato la carta: " + c.getId());
-        else log(nickname + " ha pescato la carta: " + c.getId());
+        redrawCenterBoard();
+        if (!model.getNickname().equals(nickname))
+            log(nickname + " ha pescato la carta: " + c.getId());
     }
 
     @Override
-    public void onEvent(String event){
-        log("E' stato eseguito un evento di " + event);
+    public void onEvent(EventDTO events, List<PlayerStatsDTO> statsBefore) {
+        try {
+            if(!events.isEmpty()) {
+                EventScreen screen = new EventScreen(terminal, events, statsBefore, model.getPlayers());
+                screen.display();
+            }
+        } catch (IOException | InterruptedException e) {
+            log("Errore nella visualizzazione degli eventi: " + e.getMessage());
+        } finally {
+            redrawScreen();
+        }
     }
+
+    @Override
+    public void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) {
+        redrawQueuePanel();
+        redrawCenterBoard();
+        redrawPlayersPanel();
+        showCompletedDraw();
+    }
+
+    @Override
+    public void onChangeAge(int age) {
+        redrawQueuePanel();
+        redrawCenterBoard();
+        log("E' cambiata l'era! Adesso siamo nell'era: " + age);
+    }
+
+    @Override
+    public void onStatsUpdate(PlayerStatsDTO stats) {
+        model.onStatsUpdate(stats);
+        redrawPlayersPanel();
+    }
+
+    @Override
+    public void onStatusUpdate(PlayerStatusDTO status) {
+        model.onStatusUpdate(status);
+    }
+
+    @Override
+    public void showDrawable() {
+        redrawCenterBoard();
+        ActionsDTO a = model.getToDoActions();
+        if (a.getUpDraws() > 0)
+            log(a.getUpDraws() + " pescate rimanenti dalla fila superiore.");
+        if (a.getDownDraws() > 0)
+            log(a.getDownDraws() + " pescate rimanenti dalla fila inferiore.");
+        if ((a.getDownDraws() + a.getUpDraws()) != 0) {
+            if (a.isOptionalFlag())
+                log("Hai la possibilita' di saltare la fase di pesca.");
+            else
+                log("Non hai la possibilita' di saltare la fase di pesca.");
+        }
+    }
+
+    public void showCompletedDraw(){
+        log("Hai completato il turno di pesca!");
+    }
+
+    @Override
+    public void notifySkip(String nickname) {
+        if (model.getNickname().equals(nickname)) log("Hai saltato il turno.");
+        else log(nickname + " ha saltato il turno.");
+    }
+
 
     @Override
     public VirtualModel quit() {
@@ -414,83 +729,79 @@ public class ViewTUI implements UserInterface {
             terminal.puts(InfoCmp.Capability.cursor_home);
             terminal.flush();
         }
-
-        synchronized (logs) {
-            logs.clear();
-        }
-
-        if (model != null) {
-            model = new VirtualModel(); // il metodo mi ricrea il modello e lo passa alla classe che chiama la quit così non dovrei avere più problemi.
-        }   // IN ALTERNATIVA ANDREBBE RESETTATO TUTTO A LISTA VUOTA NEL VM
-
+        synchronized (logs) { logs.clear(); }
+        if (model != null) model = new VirtualModel(model.getNickname());
+        layoutValid = false;
         redrawScreen();
-
         return model;
+    }
+
+    @Override
+    public void onQuit(String reason) {
+        redrawScreen();
+        log(reason);
+        log("Digitare create <numeroPersone> per creare una nuova partita o join per visualizzare le partite disponibili.");
+    }
+
+    @Override
+    public void onServerCrash() {
+        log("Il server è crashato. Riavviare e riconnettersi ad esso per riprendere la partita.");
     }
 
     @Override
     public void exit() {
         log("Disconnessione in corso...");
+        try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        if (terminal != null) {
+            terminal.puts(InfoCmp.Capability.exit_ca_mode);
+            terminal.puts(InfoCmp.Capability.cursor_visible);
+            terminal.flush();
+            try { terminal.close(); } catch (IOException ignored) {}
+        }
+        System.exit(0);
+    }
+
+    public void showStatusScreen() {
         try {
-            if(terminal != null) {
-                terminal.puts(InfoCmp.Capability.exit_ca_mode);
-                terminal.puts(InfoCmp.Capability.cursor_visible);
-                terminal.flush();
-            }
-            Thread.sleep(500);
-        } catch (Exception e) {
-            System.err.println("Errore durante la disconnessione: " + e.getMessage());
-        } finally {
-            System.exit(0);
+            StatusScreen statusScreen = new StatusScreen(terminal, model.getPlayerStatuses(), model.getPlayers());
+            statusScreen.display();
+            redrawScreen();
+        } catch (IOException e) {
+            log("Errore nell'apertura della schermata status: " + e.getMessage());
         }
     }
 
     @Override
-    public void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) {
-        log(playerStatsDTO.getNickname() + " e' tornatə in posizione " + tileDTO.getId());
-        showBoard();
+    public void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalPos) {
+        model.updateAllStats(stats);
+        redrawScreen();
+        try {
+            EndGameScreen endGameScreen = new EndGameScreen(terminal, stats, rankingPos, globalPos);
+            endGameScreen.display();
+            redrawScreen();
+        } catch (IOException e) {
+            clearLogs();
+            log("==============================");
+            log("      PARTITA TERMINATA!      ");
+            log("==============================");
+            log("Ti sei classificato al posto numero: " + rankingPos);
+            log("Classifica finale:");
+            stats.stream()
+                    .sorted(Comparator.comparing(PlayerStatsDTO::getPPs, Comparator.reverseOrder())
+                            .thenComparing(PlayerStatsDTO::getnFood, Comparator.reverseOrder()))
+                    .forEach(s -> log("- " + s.getNickname() + ": " + s.getPPs() + " Punti, " + s.getnFood() + " Cibo"));
+        }
     }
 
     @Override
-    public void onChangeAge(int age) { log("E' cambiata l'era! Adesso siamo nell'era: " + age); }
-
-    @Override
-    public void onStatsUpdate(PlayerStatsDTO stats) {
-        log("Nickname: " + stats.getNickname() + "  Food: " + stats.getnFood() + "  PP: " + stats.getPPs() + "  Stelle: " + stats.getnStars());
-    }
-
-    @Override
-    public void onStatusUpdate(PlayerStatusDTO status) {
-        log("Stato del giocatore: huntFlag=" + status.isHuntFlag() + " discountPainter=" + status.isDiscountPainter()
-                + " discountCrafter=" + status.isDiscountCrafter() + " discountGatherer=" + status.isDiscountGatherer()
-                + " paintFlag=" + status.isPaintFlag() + " extraFlag=" + status.isExtraFlag()
-                + " hasProtection=" + status.hasProtection() + " doubleShamanIncome=" + status.hasDoubleShamanIncome());
-    }
-
-    public void notifySkip(String nickname) {
-        if (model.getNickname().equals(nickname)) log("Hai saltato il turno.");
-        else log(nickname + " ha saltato il turno.");
-    }
-
-    @Override
-    public void showDrawable() {
-        ActionsDTO a = model.getToDoActions();
-        if (a.getUpDraws() > 0) log(a.getUpDraws() + " pescate rimanenti dalla fila superiore.");
-        if (a.getDownDraws() > 0) log(a.getDownDraws() + " pescate rimanenti dalla fila inferiore.");
-        if (a.isOptionalFlag()) log("Hai la possibilita' di saltare la fase di pesca.");
-        else log("Non hai la possibilita' di saltare la fase di pesca.");
-    }
-
-    @Override
-    public void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos) {
-        log("==============================");
-        log("      PARTITA TERMINATA!      ");
-        log("==============================");
-        log("Ti sei classificato al posto numero: " + rankingPos);
-        log("Classifica finale:");
-        stats.stream()
-                .sorted(Comparator.comparingInt(PlayerStatsDTO::getPPs).reversed().thenComparingInt(PlayerStatsDTO::getnFood).reversed())
-                .forEach(s -> log("- " + s.getNickname() + ": " + s.getPPs() + " Punti, " + s.getnFood() + " Cibo"));
+    public void showRanking(Map<String, Integer> ranks) {
+        try {
+            RankingScreen lbScreen = new RankingScreen(terminal, ranks, model.getNumPlayers());
+            lbScreen.display();
+            redrawScreen();
+        } catch (IOException e) {
+            log("Errore nell'apertura della classifica: " + e.getMessage());
+        }
     }
 
     @Override
@@ -510,40 +821,47 @@ public class ViewTUI implements UserInterface {
     }
 
     @Override
-    public void showLeaderboard(Map<PlayerDTO, Integer> ranks) { log("Classifica da DB"); } // TODO non è stato implementato a fondo
+    public void showLeaderboard(Map<PlayerDTO, Integer> ranks) {}
 
     @Override
     public void printError(Exception e) { log("ERRORE: " + e.getMessage()); }
 
     @Override
     public void onLogin(String nickname) {
+        clearLogs();
         log("Login effettuato come " + nickname);
         log("Digitare create <numeroPersone> per creare una nuova partita o join per visualizzare le partite disponibili.");
     }
 
-    //possibilità di fare stampe a colori per le info
     @Override
-    public void info(int cardId){
-        try{
+    public void info(int cardId) {
+        try {
             CardDTO card = model.findCardById(cardId);
             List<String> details = CardInfoHelper.getFormattedDetails(card);
-            for(String s : details){
-                log(s);
-            }
-        }catch (InvalidCardException e) {
+            AttributedStyle cardColor = getCardJlineColor(card.getType().toString());
+            for (String s : details) logColored(s, cardColor);
+        } catch (InvalidCardException e) {
             printError(e);
         }
     }
+
     @Override
-    public void onCreate(int id){
+    public void onCreate(int id) {
+        clearLogs();
         log("Partita creata con ID: " + id);
     }
 
     @Override
-    public void onJoin(int id){
+    public void onJoin(int id) {
+        clearLogs();
         log("Ti sei unito alla partita con ID: " + id);
     }
 
+    @Override
+    public void reconnect(int matchId) {
+        clearLogs();
+        log("Ti sei riunito alla partita con ID: " + matchId + "\nIn attesa degli altri giocatori.");
+    }
 
     private void printLogo() {
         String logo =
@@ -575,16 +893,15 @@ public class ViewTUI implements UserInterface {
                          @@@@                        @@@        @@@@@.#%%%-            @@@@@@@@@@                     %@@@@@@@@@@@:                   @@@@@@@@@@               \s
                                                                     +@@@@@@@@@@@@@                                                                                             \s
                         """;
-
         terminal.writer().print("\033[3J");
         terminal.puts(InfoCmp.Capability.clear_screen);
         terminal.writer().println(logo);
         terminal.writer().flush();
     }
 
-    public void displayHelpMessage(){
+    public void displayHelpMessage() {
         try {
-            HelpScreen helpScreen = new HelpScreen(terminal, reader);
+            HelpScreen helpScreen = new HelpScreen(terminal);
             helpScreen.display();
             redrawScreen();
         } catch (IOException e) {
@@ -592,8 +909,90 @@ public class ViewTUI implements UserInterface {
         }
     }
 
+    private AttributedStyle getNicknameStyle(String nickname) {
+        for (PlayerDTO p : model.getPlayers())
+            if (p.getNickname().equals(nickname))
+                return getPlayerJlineColor(p.getColor());
+        return AttributedStyle.DEFAULT;
+    }
 
-    public VirtualModel getModel() {
-        return model;
+    private static int cpWidth(int cp) {
+        if (cp < 0x1100) return 1;
+        // CJK and East-Asian wide ranges (below U+1F000)
+        if ((cp <= 0x115F)   // Hangul Jamo
+                || (cp >= 0x2E80 && cp <= 0x303E)   // CJK Radicals / Kangxi
+                || (cp >= 0x3040 && cp <= 0x33FF)   // Hiragana, Katakana, CJK compat
+                || (cp >= 0x3400 && cp <= 0x4DBF)   // CJK Ext-A
+                || (cp >= 0x4E00 && cp <= 0x9FFF)   // CJK Unified
+                || (cp >= 0xA000 && cp <= 0xA4CF)   // Yi
+                || (cp >= 0xAC00 && cp <= 0xD7AF)   // Hangul Syllables
+                || (cp >= 0xF900 && cp <= 0xFAFF)   // CJK Compatibility Ideographs
+                || (cp >= 0xFE10 && cp <= 0xFE1F)   // Vertical forms
+                || (cp >= 0xFE30 && cp <= 0xFE4F)   // CJK Compatibility Forms
+                || (cp >= 0xFF00 && cp <= 0xFF60)   // Fullwidth Latin
+                || (cp >= 0xFFE0 && cp <= 0xFFE6))  // Fullwidth Signs
+            return 2;
+        // Everything in the SMP (U+1F000+) including all emoji
+        if (cp >= 0x1F000) return 2;
+        return 1;
+    }
+
+
+    private static int displayWidth(String s) {
+        if (s == null) return 0;
+        int w = 0;
+        for (int i = 0; i < s.length(); ) {
+            int cp = s.codePointAt(i);
+            w += cpWidth(cp);
+            i += Character.charCount(cp);
+        }
+        return w;
+    }
+
+
+    public VirtualModel getModel() { return model; }
+
+    public void setClient(Client client) { this.client = client; }
+
+    private String buildCardLabel(CardDTO card) {
+        String tipo = card.getType().toString();
+        StringBuilder label = new StringBuilder("[ID: ").append(card.getId()).append("] ").append(tipo);
+        CardData data = CardRegistry.getCard(card.getId());
+        if (data != null) {
+            switch (tipo.toUpperCase()) {
+                case "BUILDING" -> {
+                    int cost = data.getCost();
+                    if (cost > 0) label.append(" (Cost: ").append(cost).append(")");
+                }
+                case "CRAFTER" -> {
+                    CrafterSymbolEnum sym = data.getSymbol();
+                    if (sym != null) label.append(" ").append(CrafterSymbolMapper.getSymbol(sym));
+                }
+                case "HUNTER" -> {
+                    if (data.isMark()) label.append(" ⚑ ");
+                }
+                case "BUILDER" -> {
+                    int foodDiscount = data.getFoodDiscount();
+                    int pp = data.getPp();
+                    if (pp > 0 || foodDiscount > 0) {
+                        label.append(" (");
+                        if (foodDiscount > 0) label.append("C: ").append(foodDiscount);
+                        if (foodDiscount > 0 && pp > 0) label.append(" | ");
+                        if (pp > 0) label.append("PP: ").append(pp);
+                        label.append(")");
+                    }
+                }
+            }
+        }
+        return label.toString();
+    }
+
+    private static class LogEntry {
+        final String message;
+        final AttributedStyle style;
+        LogEntry(String message, AttributedStyle style) {
+            this.message = message;
+            this.style   = style;
+        }
     }
 }

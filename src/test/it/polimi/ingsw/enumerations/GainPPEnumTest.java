@@ -13,39 +13,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
 @ExtendWith(MockitoExtension.class)
 class GainPPEnumTest {
 
-    @Mock
-    GainPP effect;
-    @Mock
-    private Player player;
-    @Mock
-    private Card card;
-
+    @Mock GainPP effect;
+    @Mock private Player player;
+    @Mock private Card card;
 
     @ParameterizedTest
     @EnumSource(value = CardTypeEnum.class, names = {
             "BUILDER", "GATHERER", "CRAFTER", "HUNTER", "SHAMAN", "PAINTER"
     })
-    void TestShouldApply_PPForCat(CardTypeEnum cardType) {
-
+    void testShouldApply_PPForCat(CardTypeEnum cardType) {
         when(effect.getCat()).thenReturn(cardType);
         when(player.getNumType(cardType)).thenReturn(6);
         when(effect.getPpAmount()).thenReturn(7);
 
-        GainPPEnum.PP_FOR_CAT.apply(player,effect,card);
-        
+        GainPPEnum.PP_FOR_CAT.apply(player, effect, card);
+
         verify(player).addPP(42);
     }
 
-
     @Test
-    void TestShouldApply_PPForSet_Increment() {
+    void testShouldApply_PPForSet_Increment() {
         for (CardTypeEnum type : CardTypeEnum.values()) {
-            if(type.isCharacter())
-                when(player.getNumType(type)).thenReturn(1);
+            if (type.isCharacter()) when(player.getNumType(type)).thenReturn(1);
         }
         when(card.getType()).thenReturn(CardTypeEnum.BUILDER);
         when(effect.getPpAmount()).thenReturn(5);
@@ -57,15 +49,11 @@ class GainPPEnumTest {
     }
 
     @Test
-    void TestShouldApply_PPForSet_NotIncrement() {
+    void testShouldApply_PPForSet_NotIncrement() {
         when(card.getType()).thenReturn(CardTypeEnum.BUILDER);
         for (CardTypeEnum type : CardTypeEnum.values()) {
-            if(type.isCharacter()) {
-                if (card.getType().equals(type))
-                    when(player.getNumType(type)).thenReturn(1);
-                else
-                    when(player.getNumType(type)).thenReturn(0);
-            }
+            if (type.isCharacter())
+                when(player.getNumType(type)).thenReturn(card.getType().equals(type) ? 1 : 0);
         }
 
         GainPPEnum.PP_FOR_SET.apply(player, effect, card);
@@ -74,30 +62,32 @@ class GainPPEnumTest {
     }
 
     @Test
-    void TestShouldApply_PPFlat(){
-        
+    void testShouldApply_PPFlat() {
         when(effect.getPpAmount()).thenReturn(67);
-        
+
         GainPPEnum.PP_FLAT.apply(player, effect, card);
-        
+
         verify(player).addPP(67);
         assertTrue(GainPPEnum.PP_FLAT.isOneTime());
     }
-    
-    @Test 
-    void TestShouldAddDoublePPShaman(){
+
+    // --- DOUBLE_PP_SHAMAN: ora attiva doubleShaman tramite activateDoubleShaman() ---
+
+    @Test
+    void testShouldActivateDoubleShaman() {
         Player real = new Player("Player1", ColorPawnEnum.ORANGE);
 
         GainPPEnum.DOUBLE_PP_SHAMAN.apply(real, effect, card);
 
-        assertTrue(real.getHasDoubleShamanIncome());
+        // verifica tramite comportamento: applyRitualGain deve raddoppiare
+        real.applyRitualGain(4);
+        assertEquals(8, real.getPP());
     }
 
     @Test
-    void TestShouldAddDoubleBuilder(){
-        
+    void testShouldAddDoubleBuilder() {
         when(player.getBuilderPoints()).thenReturn(67);
-        
+
         GainPPEnum.DOUBLE_BUILDER.apply(player, effect, card);
 
         verify(player).addPP(67);
@@ -113,6 +103,5 @@ class GainPPEnumTest {
         verify(player).addPP(100);
         assertTrue(GainPPEnum.PP_FLAT.isOneTime());
         assertFalse(GainPPEnum.DOUBLE_BUILDER.isOneTime());
-
     }
 }

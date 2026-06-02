@@ -30,10 +30,12 @@ public class CommandParser {
                 }
                 case "draw" -> new DrawCardCommand(Integer.parseInt(parts[1]));
                 case "skip" -> new SkipDrawCommand();
+                case "status" -> new StatusCommand();
                 case "quit" -> new QuitCommand();
                 case "exit" -> new ExitCommand();
                 case "help" -> new HelpCommand();
                 case "info" -> new InfoCommand(Integer.parseInt(parts[1]));
+                case "ranking" -> new RankingRequestCommand();
                 default -> null;
             };
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {

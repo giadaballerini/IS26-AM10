@@ -21,6 +21,5 @@ class DrawPhaseState implements GamePhaseState{
         context.nextPlayer();
         context.checkBoardTileEffects();
         context.checkCanDraw();
-        nextPhase(context);
     }
 }

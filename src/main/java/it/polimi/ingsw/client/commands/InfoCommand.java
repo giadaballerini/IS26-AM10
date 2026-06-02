@@ -4,7 +4,7 @@ import it.polimi.ingsw.client.Client;
 
 public class InfoCommand implements Command{
 
-    private int cardId;
+    private final int cardId;
     public InfoCommand(int cardId) {
         this.cardId = cardId;
     }

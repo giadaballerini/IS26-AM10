@@ -43,11 +43,11 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
     }
     },
     FOOD_FOR_HUNTER_HUNT((p, e, c ) -> {
-        p.setHuntFlag(true);
+        p.activateHuntBonus();
     }){public boolean isOneTime(){return true;}},
 
     FOOD_FOR_ARTIST_PAINT((p, e, c) -> {
-       p.setPaintFlag(true);
+       p.activatePaintBonus();
     }){ public boolean isOneTime(){return true;}},
 
     FOOD_FLAT((p, e, c) -> {
@@ -58,8 +58,7 @@ public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
     }},
 
     FOOD_EXTRA((p, e, c) -> {
-        p.setExtraFlag(true);
-        //creare flag in player per abilitare il +1 quando torna in queue. In remove from board bisogna controllare, se il player ha la flag a true, allora controllare se la tile su cui si posiziona ha un effetto di tipo GAIN_FOOD E FARE +1 al cibo del player
+        p.activateExtraFoodOnQueue();
     }){ public boolean isOneTime(){return true;}};
 
     private final GainFoodModifier modifier;

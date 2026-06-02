@@ -12,7 +12,12 @@ public abstract class Client implements ClientToServerActions {
 
     public abstract boolean isInGame();
 
+    public abstract void showStatus();
     public abstract void help();
 
     public abstract void info(int cardId);
+
+    public abstract void setUi(UserInterface ui);
+
+    public abstract VirtualModel getModel();
 }

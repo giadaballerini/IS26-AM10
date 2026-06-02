@@ -3,12 +3,21 @@ package it.polimi.ingsw.network.server;
 import it.polimi.ingsw.network.server.rmi.ServerRmi;
 import it.polimi.ingsw.network.server.socket.ServerSocket;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class ServerMain {
-    static void main(String[] args) {
+    public static void main(String[] args) {
+        System.setProperty("sun.rmi.transport.tcp.readTimeout", "5000");
+        System.setProperty("sun.rmi.transport.tcp.responseTimeout", "5000");
+        System.setProperty("sun.rmi.transport.tcp.connectionTimeout", "3000");
+
+        String serverIp = detectLocalIp();
+        System.setProperty("java.rmi.server.hostname", serverIp);
+        System.out.println("Binding RMI su: " + serverIp);
         try{
             Registry registry = LocateRegistry.createRegistry(1099);
             MatchManager matchManager = new MatchManager();
@@ -29,4 +38,16 @@ public class ServerMain {
             e.printStackTrace();
         }
     }
+
+
+    private static String detectLocalIp() {
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 80);
+            return socket.getLocalAddress().getHostAddress();
+        } catch (Exception e) {
+            System.err.println("Rilevazione IP fallita, uso localhost: " + e.getMessage());
+            return "localhost";
+        }
+    }
 }
+

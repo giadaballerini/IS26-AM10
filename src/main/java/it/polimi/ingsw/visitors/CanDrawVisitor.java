@@ -20,7 +20,10 @@ public class CanDrawVisitor implements CardVisitor {
         this.mustDraw = true;
     }
     public void visit(Building building){
-        if(this.currPlayer.getNFood() >= building.getFoodCost()){
+        int actualCost = building.getFoodCost() - currPlayer.getTotBuildDisc();
+        if(actualCost < 0)
+            actualCost = 0;
+        if(this.currPlayer.getNFood() >= actualCost){
             this.mayDraw = true;
         }
     }

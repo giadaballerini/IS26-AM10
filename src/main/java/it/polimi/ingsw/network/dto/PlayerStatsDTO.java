@@ -8,12 +8,15 @@ public class PlayerStatsDTO implements Serializable {
     int nFood;
     int pps;
     int nStars;
-    public PlayerStatsDTO(String nickname, int nFood, int pps, int nStars){
+    int totBuildDisc;
+    int foodDiscount;
+    public PlayerStatsDTO(String nickname, int nFood, int pps, int nStars, int totBuildDisc, int foodDiscount){
         this.nickname = nickname;
         this.nFood = nFood;
         this.pps = pps;
         this.nStars = nStars;
-
+        this.totBuildDisc = totBuildDisc;
+        this.foodDiscount = foodDiscount;
     }
     public int getnFood() {
         return nFood;
@@ -26,5 +29,11 @@ public class PlayerStatsDTO implements Serializable {
     }
     public String getNickname() {
         return nickname;
+    }
+    public int getTotBuildDisc() {
+        return totBuildDisc;
+    }
+    public int getFoodDiscount() {
+        return foodDiscount;
     }
 }

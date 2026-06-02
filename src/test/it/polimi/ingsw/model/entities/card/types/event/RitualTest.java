@@ -14,54 +14,62 @@ import static org.junit.jupiter.api.Assertions.*;
 class RitualTest {
 
     @Test
-    void execEvent() {
+    void execEvent_CorrectPhases() {
         Player p1 = new Player("p1", ColorPawnEnum.BLUE);
         Player p2 = new Player("p2", ColorPawnEnum.ORANGE);
         Player p3 = new Player("p3", ColorPawnEnum.WHITE);
         Player p4 = new Player("p4", ColorPawnEnum.PURPLE);
         Player p5 = new Player("p5", ColorPawnEnum.YELLOW);
         Player p6 = new Player("p6", ColorPawnEnum.ORANGE);
-       List<Player> players = new ArrayList<>();
-       players.add(p1);
-       players.add(p2);
-       players.add(p3);
-       players.add(p4);
-       players.add(p5);
-       players.add(p6);
-       p6.addStars(2);
-       p1.addStars(1);
-       p3.addStars(1);
-       p5.addStars(1);
-       p5.addProtection();
-       p3.addDouble();
-       p2.addStars(3);
-       p4.addStars(3);
-       p4.addDouble();
-       Ritual ritual = new Ritual(1, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), new ArrayList<>(), 1, 3, 4, CardTypeEnum.RITUAL);
-       ritual.execEvent(players, GamePhaseEnum.PLAY_EVENT);
-       assertEquals(-3, p1.getPP());
-       assertEquals(4, p2.getPP());
-       assertEquals(-6, p3.getPP());
-       assertEquals(8, p4.getPP());
-       assertEquals(0, p5.getPP());
-       assertEquals(0, p6.getPP());
 
-       ritual.execEvent(players, GamePhaseEnum.END_ROUND);
-       assertEquals(-6, p1.getPP());
-       assertEquals(8, p2.getPP());
-       assertEquals(-12, p3.getPP());
-       assertEquals(16, p4.getPP());
-       assertEquals(0, p5.getPP());
-       assertEquals(0, p6.getPP());
+        List<Player> players = new ArrayList<>();
+        players.add(p1); players.add(p2); players.add(p3);
+        players.add(p4); players.add(p5); players.add(p6);
 
-       ritual.execEvent(players, GamePhaseEnum.SETUP_PHASE);
-        assertEquals(-6, p1.getPP());
-        assertEquals(8, p2.getPP());
-        assertEquals(-12, p3.getPP());
-        assertEquals(16, p4.getPP());
-        assertEquals(0, p5.getPP());
-        assertEquals(0, p6.getPP());
+        // stelle: p1=1, p2=3, p3=1, p4=3, p5=1, p6=2
+        p6.addStars(2);
+        p1.addStars(1);
+        p3.addStars(1);
+        p5.addStars(1);
+        p2.addStars(3);
+        p4.addStars(3);
 
+        // p5: protetto dalla perdita PP
+        p5.activatePpProtection();
+        // p3, p4: doubleShaman
+        p3.activateDoubleShaman();
+        p4.activateDoubleShaman();
 
+        Ritual ritual = new Ritual(1, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), new ArrayList<>(), 1, 3, 4, CardTypeEnum.RITUAL);
+
+        ritual.execEvent(players, GamePhaseEnum.PLAY_EVENT);
+        assertEquals(-3, p1.getPP());   // minimo, senza protezione
+        assertEquals(4,  p2.getPP());   // massimo, senza double
+        assertEquals(-3, p3.getPP());   // minimo, con double non cambia la perdita (double è solo sul gain)
+        assertEquals(8,  p4.getPP());   // massimo, con double → 4*2=8
+        assertEquals(0,  p5.getPP());   // minimo, protetto → 0
+        assertEquals(0,  p6.getPP());   // né min né max → 0
+
+        ritual.execEvent(players, GamePhaseEnum.END_ROUND);
+        assertEquals(-6,  p1.getPP());
+        assertEquals(8,   p2.getPP());
+        assertEquals(-6,  p3.getPP());
+        assertEquals(16,  p4.getPP());
+        assertEquals(0,   p5.getPP());
+        assertEquals(0,   p6.getPP());
+    }
+
+    @Test
+    void execEvent_WrongPhase_DoesNothing() {
+        Player p1 = new Player("p1", ColorPawnEnum.BLUE);
+        Player p2 = new Player("p2", ColorPawnEnum.ORANGE);
+        p1.addStars(1);
+        p2.addStars(3);
+
+        Ritual ritual = new Ritual(1, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), new ArrayList<>(), 1, 3, 4, CardTypeEnum.RITUAL);
+        ritual.execEvent(List.of(p1, p2), GamePhaseEnum.SETUP_PHASE);
+
+        assertEquals(0, p1.getPP());
+        assertEquals(0, p2.getPP());
     }
 }

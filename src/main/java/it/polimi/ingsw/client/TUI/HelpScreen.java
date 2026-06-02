@@ -1,17 +1,15 @@
 package it.polimi.ingsw.client.TUI;
 
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.jline.utils.InfoCmp;
-
+import org.jline.terminal.Attributes;
 import java.io.IOException;
 import java.util.List;
 
 public class HelpScreen {
     private final Terminal terminal;
-    private final LineReader reader;
     private int screenW;
     private int screenH;
 
@@ -19,44 +17,49 @@ public class HelpScreen {
     private AttributedStyle[][] colorBuffer;
 
     private static final List<Explanation> EXPLANATIONS = List.of(
-            new Explanation("move <n>", "Sposta il tuo personaggio alla casella numero n"),
-            new Explanation("draw <id>", "Pesca la carta con l'ID specificato"),
-            new Explanation("skip", "Salta il turno corrente"),
+            new Explanation("move <n>", "Sposta il tuo personaggio alla casella numero n (utilizzabile durante la fase di Setup)"),
+            new Explanation("draw <id>", "Pesca la carta con l'ID specificato (utilizzabile durante la fase di Pesca)"),
+            new Explanation("skip", "Salta il turno corrente, se possibile (utilizzabile durante la fase di Pesca)"),
             new Explanation("create <n>", "Crea una nuova partita con n giocatori"),
             new Explanation("join", "Visualizza le partite disponibili"),
             new Explanation("choose <id>", "Accedi alla partita con ID specificato"),
+            new Explanation("status", "Visualizza lo status di tutti i giocatori"),
             new Explanation("help", "Mostra questa schermata di aiuto"),
             new Explanation("exit", "Disconnettiti ed esci dal gioco"),
-            new Explanation("info <id>", "Visualizza le informazioni della carta con l'ID specificato")
+            new Explanation("info <id>", "Visualizza le informazioni della carta con l'ID specificato"),
+            new Explanation("ranking", "Mostra a schermo la classifica globale delle partite con il numero di giocatori della partita a cui hai partecipato")
     );
 
-    public HelpScreen(Terminal terminal, LineReader reader) {
+    public HelpScreen(Terminal terminal) {
         this.terminal = terminal;
-        this.reader = reader;
         this.screenW = terminal.getWidth();
         this.screenH = terminal.getHeight();
     }
 
     public void display() throws IOException {
+        Attributes attributes = terminal.getAttributes();
         saveTerminalState();
-        renderHelpScreen();
-        waitForBackspace();
-        restoreTerminalState();
+
+        try{
+            renderHelpScreen();
+            waitForBackspace();
+        }finally{
+            restoreTerminalState();
+            terminal.setAttributes(attributes);
+        }
+
+
     }
 
     private void saveTerminalState() {
-        terminal.puts(InfoCmp.Capability.enter_ca_mode);
         terminal.puts(InfoCmp.Capability.cursor_invisible);
         terminal.flush();
     }
 
     private void restoreTerminalState() {
-        terminal.puts(InfoCmp.Capability.exit_ca_mode);
+
         terminal.puts(InfoCmp.Capability.cursor_visible);
-        terminal.flush();
         terminal.writer().print("\033[0m");
-        terminal.writer().print("\033[2J");
-        terminal.writer().print("\033[H");
         terminal.writer().flush();
     }
 
@@ -144,15 +147,16 @@ public class HelpScreen {
         terminal.writer().flush();
     }
 
-    private void waitForBackspace() throws IOException {
-        while (true) {
-            try {
+    private void waitForBackspace() {
+        try {
+            while (true) {
                 int c = terminal.reader().read();
-                if (c == '\b')
-                    break;
-            } catch (Exception e) {
-                break;
+                if (c == 8) {
+                    return;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

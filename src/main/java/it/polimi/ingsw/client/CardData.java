@@ -11,36 +11,56 @@ public class CardData {
     private CardTypeEnum type;
     @JsonProperty("caption")
     private String caption;
-    @JsonProperty("cost")
-    private int cost = 0;
-    @JsonProperty("PP")
-    private int PP = 0;
     @JsonProperty("age")
     private int age;
+    @JsonProperty("cost")
+    private Integer cost = null;
+    @JsonProperty("PP")
+    private Integer PP = null;
+
     @JsonProperty("ppGain")
-    private int ppGain = 0;
+    private Integer ppGain = null;
+
     @JsonProperty("ppLoss")
-    private int ppLoss = 0;
+    private Integer ppLoss = null;
+
     @JsonProperty("food")
-    private int food = 0;
+    private Integer food = null;
+
     @JsonProperty("thresh")
-    private int thresh = 0;
+    private Integer thresh = null;
+
     @JsonProperty("mark")
-    private boolean mark = false;
+    private Boolean mark = null;
+
     @JsonProperty("symbol")
     private CrafterSymbolEnum symbol = null;
 
-    public int getId() { return id; }
-    public CardTypeEnum getName() { return type; }
-    public String getDescription() { return caption; }
-    public int getCost() { return cost; }
-    public int getPp() { return PP; }
-    public int getAge() { return age; }
-    public int getPpGain() { return ppGain; }
-    public int getPpLoss() { return ppLoss; }
-    public int getFood() { return food; }
-    public int getThresh() { return thresh; }
-    public boolean isMark() { return mark; }
-    public CrafterSymbolEnum getSymbol() { return symbol; }
+    @JsonProperty("foodDiscount")
+    private Integer foodDiscount = null;
+
+    public int getId()                  { return id; }
+    public CardTypeEnum getType()       { return type; }
+    public String getDescription()      { return caption; }
+    public int getAge()                 { return age; }
+
+    public int getCost()                { return cost != null ? cost : 0; }
+    public int getPp()                  { return PP != null ? PP : 0; }
+    public int getPpGain()              { return ppGain != null ? ppGain : 0; }
+    public int getPpLoss()              { return ppLoss != null ? ppLoss : 0; }
+    public int getFood()                { return food != null ? food : 0; }
+    public int getThresh()              { return thresh != null ? thresh : 0; }
+    public boolean isMark()             { return mark != null && mark; }
+    public CrafterSymbolEnum getSymbol(){ return symbol; }
+    public int getFoodDiscount()        { return foodDiscount != null ? foodDiscount : 0; }
+
+    public String getBackImagePath(){
+        if(age == 3 && (type.equals(CardTypeEnum.FEAST) || type.equals(CardTypeEnum.RITUAL))){
+            return "Back_card_final";
+        } else if(type.equals(CardTypeEnum.BUILDING)){
+            return "Back_build_" + age;
+        } else
+            return "Back_card_" + age;
+    }
 
 }

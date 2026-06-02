@@ -23,15 +23,17 @@ public interface UserInterface {
 
     void showLeaderboard(Map<PlayerDTO, Integer> ranks);
 
-    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos);
+    void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos);
 
     void showDrawable();
+
+    void showCompletedDraw();
 
     void start();
 
     void notifySkip(String nickname);
 
-    void onEvent(String event);
+    void onEvent(EventDTO events, List<PlayerStatsDTO> stats);
 
     VirtualModel quit();
 
@@ -40,4 +42,13 @@ public interface UserInterface {
     void displayHelpMessage();
 
     void info(int cardId);
+
+    void onQuit(String reason);
+    void onServerCrash();
+    void setClient(Client client);
+    void reconnect(int matchId);
+
+    void showRanking(Map<String, Integer> stringIntegerMap);
+
+    void showStatusScreen();
 }

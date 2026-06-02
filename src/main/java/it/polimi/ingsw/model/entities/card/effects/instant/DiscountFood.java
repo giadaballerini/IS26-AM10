@@ -2,11 +2,12 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.DiscountFoodEnum;
-import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class DiscountFood extends CardEffectInstant{
     private final CardTypeEnum cat;
     private final int foodAmount;
@@ -35,6 +36,7 @@ public class DiscountFood extends CardEffectInstant{
         return cat;
     }
 
+    @Override
     public int getFoodAmount() {
         return foodAmount;
     }

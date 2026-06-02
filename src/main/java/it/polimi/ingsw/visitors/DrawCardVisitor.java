@@ -15,8 +15,12 @@ public class DrawCardVisitor implements CardVisitor {
         errorMessage = "";
     }
     public void visit(Building building) {
-        if(currPlayer.getNFood() >= building.getFoodCost()){
-            currPlayer.addFood(-building.getFoodCost());
+        int actualCost = building.getFoodCost() - currPlayer.getTotBuildDisc();
+        if(actualCost < 0)
+            actualCost = 0;
+
+        if(currPlayer.getNFood() >= actualCost){
+            currPlayer.addFood(-actualCost);
             currPlayer.addBuilding(building);
         }
         else

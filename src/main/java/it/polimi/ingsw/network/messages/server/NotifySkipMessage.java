@@ -11,7 +11,6 @@ public class NotifySkipMessage implements ServerMessage {
     public String getNickname() {
         return nickname;
     }
-    // TODO
     @Override
     public void accept(ServerMessageVisitor visitor) {
         visitor.visit(this);

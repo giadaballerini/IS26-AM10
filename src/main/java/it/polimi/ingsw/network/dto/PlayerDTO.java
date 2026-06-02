@@ -1,12 +1,13 @@
 package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.ColorPawnEnum;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerDTO implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     private final String nickname;
     private final ColorPawnEnum color;
@@ -27,13 +28,6 @@ public class PlayerDTO implements Serializable {
         this.myBuildings = myBuildings;
         this.myCharacters = p.getMyCharacters();
     }
-
-    /*public PlayerDTO(PlayerDTO p, List<CardDTO> myCharacters) {
-        this.nickname = p.getNickname();
-        this.color = p.getColor();
-        this.myBuildings = p.getMyBuildings();
-        this.myCharacters = myCharacters;
-    }*/
 
     public String getNickname() {
         return nickname;

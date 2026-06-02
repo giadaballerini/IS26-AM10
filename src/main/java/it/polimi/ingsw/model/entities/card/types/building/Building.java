@@ -16,8 +16,6 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
-import javafx.scene.control.ListView;
-
 import java.util.ArrayList;
 import java.util.List;
 

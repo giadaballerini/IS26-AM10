@@ -30,26 +30,20 @@ public class Ritual extends Event {
         if(phase == GamePhaseEnum.END_ROUND || phase == GamePhaseEnum.PLAY_EVENT) {
             int maxStars;
             int minStars;
-            maxStars = players.stream().map(Player::getNStars).max(Integer::compareTo).get();
-            minStars = players.stream().map(Player::getNStars).min(Integer::compareTo).get();
-            for (Player player : players) {
+            maxStars = players.stream().mapToInt(Player::getNStars).max().getAsInt();
+            minStars = players.stream().mapToInt(Player::getNStars).min().getAsInt();
+
+            for(Player player : players){
                 if (player.getNStars() == maxStars) {
-                    if(player.getHasDoubleShamanIncome())
-                        player.addPP(ppGain * 2);
-                    else
-                        player.addPP(ppGain);
+                    player.applyRitualGain(ppGain);
                 }
-                if (player.getNStars() == minStars) {
-                    if(!player.getHasProtection()) {
-                        if (player.getHasDoubleShamanIncome())
-                            player.addPP(-ppLoss * 2);
-                        else
-                            player.addPP(-ppLoss);
+            }
+            for (Player player : players) {
+                if (player.getNStars() == minStars){
+                        player.applyRitualLoss(ppLoss);
                     }
                 }
-
             }
         }
 
-    }
 }

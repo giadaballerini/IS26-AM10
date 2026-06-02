@@ -1,11 +1,13 @@
 package it.polimi.ingsw.model.gamemanager;
 
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
-//vengono giocati gli eventi che ci sono sulle file ig
+
 class EndRoundPhaseState implements GamePhaseState{
     @Override
     public GamePhaseState nextPhase(GameManager context){
-
+        if(context.hasAnySkippableDraws()) {
+            return new OptionalDrawPhaseState();
+        }
         if(context.getCurrTurn() == 10) {
             return new PlayEventPhaseState();
         }
