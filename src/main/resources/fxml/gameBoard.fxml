@@ -16,6 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.text.TextFlow?>
 <StackPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <BorderPane prefHeight="200.0" prefWidth="200.0">
@@ -59,7 +60,10 @@
                                     <children>
                                         <Text fx:id="txtAge" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="in " />
                                         <Text fx:id="txtRound" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="attesa " />
-                                        <Text fx:id="txtCurrPlayer" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="di " />
+                                        <TextFlow fx:id="txtCurrPlayer" lineSpacing="0" style="-fx-padding: 9 10 0 10;" visible = "false">
+                                            <Text text="turno di: " fill="white" styleClass="testo-personalizzato" />
+                                            <Text fx:id="txtCurrPlayerNick" />
+                                        </TextFlow>
                                         <Text fx:id="txtPhase" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="giocatori!" />
                                     </children>
                                 </HBox>
@@ -185,6 +189,11 @@
                 </VBox>
             </top>
         </BorderPane>
+        <VBox fx:id="notificationBox"
+              mouseTransparent="true"
+              spacing="6.0"
+              style="-fx-padding: 8 12 8 12;"
+              StackPane.alignment="TOP_LEFT" />
         <StackPane fx:id="globalOverlay" managed="false" maxHeight="Infinity" maxWidth="Infinity" style="-fx-background-color: rgba(0,0,0,0.75);" visible="false">
             <children>
                 <HBox fx:id="overlayContent" alignment="CENTER" maxHeight="Infinity" maxWidth="Infinity" StackPane.alignment="CENTER" />

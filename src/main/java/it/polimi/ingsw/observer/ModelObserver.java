@@ -34,7 +34,6 @@ public interface ModelObserver {
 
     void onStatsUpdate(PlayerStatsDTO stats, int cardId);
 
-    void refresh(List<PlayerDTO> listPlayers, BoardDTO board);
 
     void notifySkip(String nickname);
 
@@ -53,7 +52,5 @@ public interface ModelObserver {
     void onReconnection(int matchId);
 
     default void injectGameVisitor(GameMessageVisitor visitor){}
-
-
     default void resetGameVisitor(){}
 }

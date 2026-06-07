@@ -1,8 +1,7 @@
 package it.polimi.ingsw.client;
 
-import it.polimi.ingsw.client.GUI.LauncherApp;
-import it.polimi.ingsw.client.TUI.ViewTUI;
-
+import it.polimi.ingsw.client.ui.GUI.LauncherApp;
+import it.polimi.ingsw.client.ui.TUI.ViewTUI;
 import it.polimi.ingsw.network.client.rmi.ClientRmi;
 import it.polimi.ingsw.network.client.socket.ClientSocket;
 import javafx.application.Application;
@@ -51,7 +50,6 @@ public class ClientMain {
 
         } catch (Exception e) {
             System.err.println("Errore connessione: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }

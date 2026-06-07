@@ -1,15 +1,15 @@
 package it.polimi.ingsw.network.server.rmi;
 
+import it.polimi.ingsw.client.rmi.VirtualViewRmi;
 import it.polimi.ingsw.network.dto.*;
 import it.polimi.ingsw.network.messages.client.ClientMessage;
 import it.polimi.ingsw.network.server.ClientHandler;
-import it.polimi.ingsw.client.rmi.VirtualViewRmi;
 import it.polimi.ingsw.visitors.ClientMessageVisitor;
 
-import java.util.concurrent.*;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 public class ClientHandlerRmi extends ClientHandler {
 
@@ -216,14 +216,6 @@ public class ClientHandlerRmi extends ClientHandler {
         });
     }
 
-    @Override
-    public void refresh(List<PlayerDTO> listPlayers, BoardDTO board) {
-        if (!isAvailable()) return;
-        messageSender.submit(() -> {
-            try { clientStub.refresh(listPlayers, board); }
-            catch (RemoteException e) { handleRemoteException(e); }
-        });
-    }
 
     @Override
     public void onPhaseUpdate(PhaseDTO phaseDTO) {

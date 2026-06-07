@@ -7,7 +7,6 @@ import it.polimi.ingsw.model.entities.card.types.character.Crafter;
 import it.polimi.ingsw.model.interfaces.GainFoodModifier;
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.player.Player;
-import java.lang.Math;
 
 public enum GainFoodEnum implements GainFoodModifier, GainFoodVisitor {
     FOOD_FOR_SET((p, e, c) -> {

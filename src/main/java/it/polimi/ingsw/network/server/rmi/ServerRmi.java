@@ -1,10 +1,10 @@
 package it.polimi.ingsw.network.server.rmi;
 
+import it.polimi.ingsw.client.rmi.VirtualViewRmi;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.network.dto.LobbyDTO;
 import it.polimi.ingsw.network.server.MatchManager;
 import it.polimi.ingsw.network.server.VirtualServerRmi;
-import it.polimi.ingsw.client.rmi.VirtualViewRmi;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

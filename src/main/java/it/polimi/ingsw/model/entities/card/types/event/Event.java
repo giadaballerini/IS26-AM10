@@ -48,9 +48,9 @@ public abstract class Event extends Card {
     public void accept(PlayEventVisitor visitor){
         visitor.visit(this);
     }
+    @Override
     public void accept(DrawCardVisitor visitor){
         visitor.visit(this);
     }
     public void accept(CanDrawVisitor visitor){visitor.visit(this);}
-
 }

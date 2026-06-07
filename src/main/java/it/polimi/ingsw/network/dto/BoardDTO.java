@@ -23,12 +23,12 @@ public class BoardDTO implements Serializable {
     private final GamePhaseEnum currentPhase;
     private final int currTurn;
     private final int numPlayers;
-
+    private final int deckSize;
 
     public BoardDTO(List<CardDTO> upperList, List<CardDTO> lowerList, List<PlayerDTO> players,
                     List<TileDTO> boardTiles, List<TileDTO> queueTiles, List<PlayerStatsDTO> playerStats,
                     String currentPlayerNickname,ActionsDTO toDoActions, GamePhaseEnum currentPhase,
-                    int currTurn, int numPlayers) {
+                    int currTurn, int numPlayers, int deckSize) {
         this.upperList = upperList;
         this.lowerList = lowerList;
         this.players = players;
@@ -40,9 +40,9 @@ public class BoardDTO implements Serializable {
         this.currentPhase = currentPhase;
         this.currTurn = currTurn;
         this.numPlayers = numPlayers;
+        this.deckSize = deckSize;
     }
 
-    // Getter...
     public List<CardDTO> getUpperList() {
         return new ArrayList<>(upperList);
     }
@@ -74,6 +74,10 @@ public class BoardDTO implements Serializable {
     public int getCurrTurn() {return currTurn;}
 
     public int getNumPlayers(){return numPlayers;}
+
+    public int getDeckSize() {
+        return deckSize;
+    }
 
     public ActionsDTO getTodoActions() {
         return new ActionsDTO(toDoActions);

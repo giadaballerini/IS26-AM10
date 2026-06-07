@@ -14,13 +14,10 @@ public interface VirtualViewRmi extends Remote {
     void onPhaseUpdate(PhaseDTO phaseDTO) throws RemoteException;
     void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks) throws RemoteException;
     void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos) throws RemoteException;
-
     void onDrawUpdate(CardDTO c, String nickname) throws RemoteException;
-
     void onStatusUpdate(PlayerStatusDTO status) throws RemoteException;
     void onStatsUpdate(PlayerStatsDTO stats, int cardId) throws RemoteException;
     void onChangeAge(ChangeAgeDTO dto) throws RemoteException;
-    void refresh(List<PlayerDTO> listPlayers, BoardDTO board) throws RemoteException;
     void notifySkip(String nickname) throws RemoteException;
     void notifyDrawable(ActionsDTO actions) throws RemoteException;
     void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) throws RemoteException;

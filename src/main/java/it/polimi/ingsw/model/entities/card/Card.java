@@ -1,7 +1,8 @@
 package it.polimi.ingsw.model.entities.card;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
@@ -9,16 +10,20 @@ import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
+import it.polimi.ingsw.model.entities.card.types.building.Building;
+import it.polimi.ingsw.model.entities.card.types.character.*;
+import it.polimi.ingsw.model.entities.card.types.event.Feast;
+import it.polimi.ingsw.model.entities.card.types.event.Hunt;
+import it.polimi.ingsw.model.entities.card.types.event.Ritual;
+import it.polimi.ingsw.model.entities.card.types.event.StonePainting;
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.model.entities.card.types.event.*;
-import it.polimi.ingsw.model.entities.card.types.character.*;
-import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.network.dto.CardDTO;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

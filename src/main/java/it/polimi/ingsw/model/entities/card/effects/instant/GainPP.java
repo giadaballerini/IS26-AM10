@@ -1,8 +1,8 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GainPPEnum;
 import it.polimi.ingsw.model.entities.card.Card;

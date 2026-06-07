@@ -13,12 +13,13 @@ public class ChangeAgeDTO implements Serializable {
     private int age;
     private final List<CardDTO> upperList;
     private final List<CardDTO> lowerList;
+    private final int deckSize;
 
-
-    public ChangeAgeDTO(List<CardDTO> upperList, List<CardDTO> lowerList, int currAge) {
+    public ChangeAgeDTO(List<CardDTO> upperList, List<CardDTO> lowerList, int currAge, int deckSize) {
         this.upperList = upperList;
         this.lowerList = lowerList;
         this.age = currAge;
+        this.deckSize = deckSize;
     }
 
     public List<CardDTO> getUpperList() {
@@ -27,6 +28,10 @@ public class ChangeAgeDTO implements Serializable {
 
     public List<CardDTO> getLowerList() {
         return new ArrayList<>(lowerList);
+    }
+
+    public int getDeckSize() {
+        return deckSize;
     }
 
     public int getAge() {return age;}

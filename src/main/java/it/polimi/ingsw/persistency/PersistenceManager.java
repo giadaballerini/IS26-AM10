@@ -1,9 +1,13 @@
 package it.polimi.ingsw.persistency;
 
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.gamemanager.GameManager;
 
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,8 +34,14 @@ public class PersistenceManager {
     }
 
     public void saveNow(int matchId, GameManager gameManager) {
+        GameSnapshot snapshot = buildSnapshot(matchId, gameManager);
+
+        if(snapshot.getCurrentPhase() == GamePhaseEnum.END_GAME){
+            GameStateDAO.delete(matchId);
+            return;
+        }
+
         try {
-            GameSnapshot snapshot = buildSnapshot(matchId, gameManager);
             boolean ok = GameStateDAO.save(snapshot);
             if (!ok) {
                 LOG.warning("Salvataggio fallito per match " + matchId);

@@ -1,8 +1,8 @@
 package it.polimi.ingsw.model.player;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.ColorPawnEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
@@ -11,7 +11,9 @@ import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Character;
-import it.polimi.ingsw.network.dto.*;
+import it.polimi.ingsw.network.dto.PlayerDTO;
+import it.polimi.ingsw.network.dto.PlayerStatsDTO;
+import it.polimi.ingsw.network.dto.PlayerStatusDTO;
 
 import java.util.*;
 

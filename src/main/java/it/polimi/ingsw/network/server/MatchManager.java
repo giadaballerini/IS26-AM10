@@ -2,9 +2,9 @@ package it.polimi.ingsw.network.server;
 
 import it.polimi.ingsw.controller.Controller;
 import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.model.database.RankingDAO;
 import it.polimi.ingsw.model.gamemanager.GameManager;
 import it.polimi.ingsw.model.gamemanager.RestoredGameManager;
-import it.polimi.ingsw.model.persistence.RankingDAO;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.dto.LobbyDTO;
 import it.polimi.ingsw.network.messages.client.DrawMessage;
@@ -14,6 +14,7 @@ import it.polimi.ingsw.observer.ModelObserver;
 import it.polimi.ingsw.persistency.GameSnapshot;
 import it.polimi.ingsw.persistency.GameStateDAO;
 import it.polimi.ingsw.persistency.PersistenceManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,8 +1,8 @@
 package it.polimi.ingsw.network.server.socket;
 
+import it.polimi.ingsw.client.socket.VirtualView;
 import it.polimi.ingsw.network.dto.*;
 import it.polimi.ingsw.network.messages.client.ClientMessage;
-import it.polimi.ingsw.client.socket.VirtualView;
 import it.polimi.ingsw.network.messages.server.*;
 import it.polimi.ingsw.network.messages.service.PingMessage;
 import it.polimi.ingsw.network.server.ClientHandler;
@@ -148,7 +148,6 @@ public class ClientHandlerSocket extends ClientHandler implements VirtualView, R
     public void onDrawUpdate(CardDTO c, String nickname) { sendMessage(new DrawUpdateMessage(c, nickname)); }
     public void onStatusUpdate(PlayerStatusDTO status) { sendMessage(new StatusUpdateMessage(status)); }
     public void onStatsUpdate(PlayerStatsDTO stats, int cardId) { sendMessage(new StatsUpdateMessage(stats, cardId)); }
-    public void refresh(List<PlayerDTO> listPlayers, BoardDTO board) { }
     public void onLogin(String nickname) {
         this.nickname = nickname;
         this.lastMessageReceivedTime = System.currentTimeMillis();

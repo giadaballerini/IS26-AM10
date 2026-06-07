@@ -1,6 +1,7 @@
 package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.ColorPawnEnum;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;

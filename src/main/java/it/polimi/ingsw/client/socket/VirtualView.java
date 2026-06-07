@@ -1,6 +1,6 @@
 package it.polimi.ingsw.client.socket;
 
-import it.polimi.ingsw.network.dto.*;
+import it.polimi.ingsw.network.dto.LobbyDTO;
 import it.polimi.ingsw.network.messages.client.ClientMessage;
 import it.polimi.ingsw.observer.ModelObserver;
 import it.polimi.ingsw.visitors.ClientMessageVisitor;

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.CardTypeEnum;
+
 import java.io.Serializable;
 
 public class GameEventDTO implements Serializable {

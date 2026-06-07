@@ -52,5 +52,13 @@ module it.polimi.ingsw {
     opens it.polimi.ingsw.client.socket to com.fasterxml.jackson.databind, java.rmi;
     opens it.polimi.ingsw.model.action;
     //Apre i pacchetti a javaFX
-    opens it.polimi.ingsw.client.GUI to javafx.graphics, javafx.fxml;
+    opens it.polimi.ingsw.client.ui.GUI to javafx.graphics, javafx.fxml;
+    exports it.polimi.ingsw.client.ui to java.rmi;
+    opens it.polimi.ingsw.client.ui to com.fasterxml.jackson.databind, java.rmi;
+    exports it.polimi.ingsw.client.data to java.rmi;
+    opens it.polimi.ingsw.client.data to com.fasterxml.jackson.databind, java.rmi;
+    exports it.polimi.ingsw.client.ui.TUI to java.rmi;
+    opens it.polimi.ingsw.client.ui.TUI to com.fasterxml.jackson.databind, java.rmi;
+    exports it.polimi.ingsw.client.ui.TUI.utility to java.rmi;
+    opens it.polimi.ingsw.client.ui.TUI.utility to com.fasterxml.jackson.databind, java.rmi;
 }

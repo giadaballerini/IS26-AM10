@@ -477,7 +477,7 @@ public class GameState {
 
     public ChangeAgeDTO genChangeAgeDTO(){
         return new ChangeAgeDTO(upperList.stream().map(Card::toDTO).toList(),
-                lowerList.stream().map(Card::toDTO).toList(), currAge);
+                lowerList.stream().map(Card::toDTO).toList(), currAge, deck.size());
     }
     public BoardDTO toDTO(GamePhaseState currPhaseState){
         return new BoardDTO(
@@ -491,7 +491,8 @@ public class GameState {
                 toActionsDTO(),
                 currPhaseState.getPhase(),
                 currTurn,
-                numPlayers
+                numPlayers,
+                deck.size()
         );
     }
 

@@ -14,7 +14,7 @@
            stylesheets="@../css/style.css"
            xmlns="http://javafx.com/javafx/19"
            xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.polimi.ingsw.client.GUI.SplashController">
+           fx:controller="it.polimi.ingsw.client.ui.GUI.SplashController">
 
     <styleClass>
         <String fx:value="testo-personalizzato" />

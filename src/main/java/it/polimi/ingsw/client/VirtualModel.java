@@ -1,9 +1,11 @@
 package it.polimi.ingsw.client;
 
+import it.polimi.ingsw.client.data.CardRegistry;
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.exceptions.InvalidCardException;
 import it.polimi.ingsw.network.dto.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class VirtualModel {
     private String nickname;
     private List<PlayerStatusDTO> playerStatuses;
     private List<PlayerStatsDTO> playerStats;
+    private int deckSize;
 
     public VirtualModel(String nickname){
         this.queue = new ArrayList<>();
@@ -104,6 +107,7 @@ public class VirtualModel {
         this.board = new ArrayList<>(b.getboardTiles());
         this.upperList = new ArrayList<>(b.getUpperList());
         this.lowerList = new ArrayList<>(b.getLowerList());
+        this.deckSize = b.getDeckSize();
         this.players = new ArrayList<>(b.getPlayers());
         this.playerStats = new ArrayList<>(b.getPlayerStats());
         this.currPhaseState = b.getCurrentPhase();
@@ -234,6 +238,7 @@ public class VirtualModel {
         this.currAge = c.getAge();
         this.upperList = new ArrayList<>(c.getUpperList());
         this.lowerList = new ArrayList<>(c.getLowerList());
+        this.deckSize = c.getDeckSize();
     }
 
     public synchronized void onEvent(EventDTO e){
@@ -245,6 +250,9 @@ public class VirtualModel {
         return this.nickname;
     }
 
+    public int getDeckSize(){
+        return this.deckSize;
+    }
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
@@ -282,5 +290,21 @@ public class VirtualModel {
             }
         }
         throw new InvalidCardException("La carta con ID " + cardId + " non è presente nel gioco.");
+    }
+
+    public synchronized void reset() {
+        this.queue = new ArrayList<>();
+        this.board = new ArrayList<>();
+        this.upperList = new ArrayList<>();
+        this.lowerList = new ArrayList<>();
+        this.numPlayers = 0;
+        this.currPhaseState = null;
+        this.currAge = 1;
+        this.players = new ArrayList<>();
+        this.currPlayer = "";
+        this.currTurn = 0;
+        this.playerStatuses = new ArrayList<>();
+        this.playerStats = new ArrayList<>();
+        this.toDoActions = new ActionsDTO(0, 0, false);
     }
 }

@@ -1,11 +1,11 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,

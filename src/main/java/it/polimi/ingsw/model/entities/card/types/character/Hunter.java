@@ -11,7 +11,7 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInterac
 import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
 import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.model.player.Village;
+import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.List;
 
@@ -28,15 +28,12 @@ public class Hunter extends Character {
         this.flagSymbol = flagSymbol;
     }
 
-    @Override
-    public void dispatch(Village v) {
-        v.add(this);
-    }
     public void accept(GainFoodVisitor visitor, Player p, GainFood e){
         visitor.visit(this, p, e);
     }
-
     public void accept (GainPPVisitor visitor, Player p, GainPP e){
         visitor.visit(this, p, e);
     }
+    @Override
+    public void accept(VillageVisitor visitor){visitor.visit(this);}
 }
