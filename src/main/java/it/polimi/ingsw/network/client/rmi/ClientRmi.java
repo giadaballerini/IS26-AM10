@@ -30,10 +30,16 @@ import java.util.concurrent.Executors;
  */
 public class ClientRmi extends Client implements VirtualViewRmi {
 
+    /** The remote server stub used to invoke game actions on the server. */
     private final VirtualServerRmi serverStub;
+
+    /** Whether the connection to the server is currently active. */
     private volatile boolean connected = true;
 
+    /** Port on which the RMI registry is expected to be running. */
     private static final int PORT = 1099;
+
+    /** Interval in milliseconds between consecutive ping attempts. */
     private static final int PING_INTERVAL = 2000;
 
     /**
@@ -55,8 +61,7 @@ public class ClientRmi extends Client implements VirtualViewRmi {
      * @throws NotBoundException    if the server stub is not registered
      * @throws UnknownHostException if the host cannot be resolved
      */
-    public ClientRmi(String ip, VirtualModel model)
-            throws RemoteException, NotBoundException, UnknownHostException {
+    public ClientRmi(String ip, VirtualModel model) throws RemoteException, NotBoundException, UnknownHostException {
         super(model);
         try {
             try (java.net.DatagramSocket socket = new java.net.DatagramSocket()) {
@@ -71,6 +76,13 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         UnicastRemoteObject.exportObject(this, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends the login request to the server via RMI, updates the virtual
+     * model with the chosen nickname, notifies the UI, and starts the
+     * health check thread.
+     */
     @Override
     protected boolean doLogin(String nickname) {
         try {
@@ -85,6 +97,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Forwards the create-game request to the server and notifies the UI
+     * with the assigned match ID upon success.
+     */
     @Override
     protected void doCreateGame(String nickname, int numPlayers) {
         try {
@@ -95,6 +113,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Forwards the join-game request to the server and stores the match ID
+     * locally upon success.
+     */
     @Override
     protected void doJoinGame(String nickname, int id) {
         try {
@@ -106,6 +130,11 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Forwards the tile-placement move to the server via RMI.
+     */
     @Override
     protected void doMove(int tileId) {
         try {
@@ -116,6 +145,13 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Forwards the draw request to the server. If the draw is invalid and
+     * further draws are still available, the UI is prompted to show the
+     * drawable options again.
+     */
     @Override
     protected void doDraw(int card) {
         try {
@@ -130,6 +166,11 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Forwards the skip-turn request to the server via RMI.
+     */
     @Override
     protected void doSkip() {
         try {
@@ -139,6 +180,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Fetches the end-of-game ranking from the server on a dedicated thread
+     * to avoid blocking the caller.
+     */
     @Override
     protected void doRequestRanking() {
         new Thread(() -> {
@@ -151,6 +198,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }, "End Game UI").start();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Retrieves the list of available lobbies from the server and forwards
+     * it to the UI. Sets {@code lobbiesAvailable} accordingly.
+     */
     @Override
     public void requestJoin() {
         Map<Integer, List<LobbyDTO>> lobbies = askLobbies();
@@ -158,6 +211,11 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         ui.displayLobbies(lobbies);
     }
 
+    /**
+     * Queries the server for the current list of open lobbies.
+     *
+     * @return a map from match ID to the list of lobbies, or an empty map on error
+     */
     private Map<Integer, List<LobbyDTO>> askLobbies() {
         try {
             return serverStub.getLobbies(vm.getNickname());
@@ -167,6 +225,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Notifies the server that the player is voluntarily leaving the match,
+     * resets the local match state, and triggers the quit UI callback.
+     */
     @Override
     public void quit() {
         if (!isInGame()) return;
@@ -179,6 +243,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         ui.onQuit("Hai abbandonato la partita.");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Notifies the server of the disconnection, resets the local state, and
+     * exits the application.
+     */
     @Override
     public void exit() {
         try {
@@ -190,24 +260,53 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         ui.exit();
     }
 
+    /**
+     * Called by the server when a tile has been placed on the board.
+     *
+     * @param tile       the DTO representing the placed tile
+     * @param currPlayer the nickname of the player who made the move
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onMoveUpdate(TileDTO tile, String currPlayer) throws RemoteException {
         vm.onMoveUpdate(tile);
         ui.onMoveUpdate(tile, currPlayer);
     }
 
+    /**
+     * Called by the server when the active player changes.
+     *
+     * @param nickname the nickname of the new current player
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onCurrPlayerUpdate(String nickname) throws RemoteException {
         vm.onCurrPlayerUpdate(nickname);
         ui.onCurrPlayerUpdate(nickname);
     }
 
+    /**
+     * Called by the server when the game phase changes.
+     *
+     * @param phaseDTO the DTO representing the new phase
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onPhaseUpdate(PhaseDTO phaseDTO) throws RemoteException {
         vm.onPhaseUpdate(phaseDTO);
         ui.onPhaseUpdate(phaseDTO);
     }
 
+    /**
+     * Called by the server when the game ends.
+     * Enqueues the UI callback on the {@link #uiEventExecutor} to guarantee it
+     * runs after any pending {@code onEvent} callbacks.
+     *
+     * @param stats             the final statistics for all players
+     * @param rankingPos        the local player's position in the match ranking
+     * @param globalRankingPos  the local player's position in the global leaderboard
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalRankingPos)
             throws RemoteException {
@@ -215,48 +314,104 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         uiEventExecutor.execute(() -> ui.onGameEnding(stats, rankingPos, globalRankingPos));
     }
 
+    /**
+     * Called by the server when a card has been drawn.
+     *
+     * @param c        the DTO of the drawn card
+     * @param nickname the nickname of the player who drew
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onDrawUpdate(CardDTO c, String nickname) throws RemoteException {
         vm.onDrawUpdate(c, nickname);
         ui.onDrawUpdate(c, nickname);
     }
 
+    /**
+     * Called by the server when a player's status changes.
+     *
+     * @param status the updated player status DTO
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onStatusUpdate(PlayerStatusDTO status) throws RemoteException {
         vm.onStatusUpdate(status);
         ui.onStatusUpdate(status);
     }
 
+    /**
+     * Called by the server when a player's statistics are updated.
+     *
+     * @param stats  the updated player statistics DTO
+     * @param cardId the ID of the card that triggered the update
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onStatsUpdate(PlayerStatsDTO stats, int cardId) throws RemoteException {
         vm.onStatsUpdate(stats);
         ui.onStatsUpdate(stats);
     }
 
+    /**
+     * Called by the server to notify all clients that a player has skipped
+     * their turn.
+     *
+     * @param nickname the nickname of the player who skipped
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void notifySkip(String nickname) throws RemoteException {
         vm.skip();
         ui.notifySkip(nickname);
     }
 
+    /**
+     * Called by the server when the player is allowed to draw a card.
+     *
+     * @param actions the DTO describing how many draws are available
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void notifyDrawable(ActionsDTO actions) throws RemoteException {
         vm.updateToDoActions(actions);
         ui.showDrawable();
     }
 
+    /**
+     * Called by the server when the player is returned to the queue.
+     *
+     * @param tileDTO        the tile returned to the pool
+     * @param playerStatsDTO the player's updated statistics
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) throws RemoteException {
         vm.onReturnToQueue(tileDTO, playerStatsDTO);
         ui.onReturnToQueue(tileDTO, playerStatsDTO);
     }
 
+    /**
+     * Called by the server when the game age advances.
+     *
+     * @param dto the DTO containing the new age value
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onChangeAge(ChangeAgeDTO dto) throws RemoteException {
         vm.onChangeAge(dto);
         ui.onChangeAge(dto.getAge());
     }
 
+    /**
+     * Called by the server when one or more game events occur.
+     * Snapshots the current player stats before applying the update
+     * so the UI can animate the delta, then enqueues the UI callback on the
+     * {@link #uiEventExecutor} to preserve ordering with respect to
+     * {@link #onGameEnding}.
+     *
+     * @param events the DTO carrying the event list and updated stats
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onEvent(EventDTO events) throws RemoteException {
         List<PlayerStatsDTO> statsBefore = new ArrayList<>(vm.getPlayerStats());
@@ -270,17 +425,37 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         });
     }
 
+    /**
+     * Called by the server to send the full board state to the client,
+     * typically at the start of the game or after a reconnection.
+     *
+     * @param board the DTO representing the entire board state
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void showBoard(BoardDTO board) throws RemoteException {
         vm.update(board);
         ui.showBoard();
     }
 
+    /**
+     * Called by the server with the global leaderboard after the game ends.
+     *
+     * @param ranks a map from player DTOs to their global ranking positions
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks) throws RemoteException {
         ui.showLeaderboard(ranks);
     }
 
+    /**
+     * Called by the server to forcefully disconnect the client from the
+     * current match.
+     *
+     * @param reason a human-readable explanation for the disconnection
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void onQuitServer(String reason) throws RemoteException {
         if (!isInGame()) return;
@@ -288,11 +463,23 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         ui.onQuit(reason);
     }
 
+    /**
+     * Called by the server to relay an error message to the local UI.
+     *
+     * @param e the error message string
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void printError(String e) throws RemoteException {
         ui.printError(new Exception(e));
     }
 
+    /**
+     * No-op ping method used by the server to verify that this client is still
+     * reachable.
+     *
+     * @throws RemoteException if the remote call fails
+     */
     @Override
     public void ping() throws RemoteException { }
 
@@ -306,6 +493,12 @@ public class ClientRmi extends Client implements VirtualViewRmi {
         ui.reconnect(matchId);
     }
 
+    /**
+     * Starts a daemon thread that periodically pings the server to detect
+     * connection loss. If a {@link RemoteException} is thrown, the connection
+     * is marked as lost, the match state is reset, and the UI is notified via
+     * {@link UserInterface#onServerCrash()}.
+     */
     private void startHealthCheck() {
         Thread t = new Thread(() -> {
             while (connected) {
