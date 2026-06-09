@@ -18,39 +18,107 @@ import it.polimi.ingsw.visitors.PlayEventVisitor;
 
 import java.util.List;
 
+/**
+ * Abstract base class for event cards.
+ *
+ * <p>Event cards are not drawn into a player's hand; instead they are resolved
+ * collectively at the end of a round or age, affecting all players at once.
+ * The four concrete event types are {@link Feast}, {@link Hunt},
+ * {@link Ritual}, and {@link StonePainting}, each implementing
+ * {@link #execEvent(List, GamePhaseEnum)} with their own resolution logic.</p>
+ */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type" // Il campo "type" che si trova dentro l'oggetto effect nel JSON
+        property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Feast.class, name = "FEAST"),
-        @JsonSubTypes.Type(value = Hunt.class, name = "HUNT"),
-        @JsonSubTypes.Type(value = Ritual.class, name = "RITUAL"),
+        @JsonSubTypes.Type(value = Feast.class,         name = "FEAST"),
+        @JsonSubTypes.Type(value = Hunt.class,          name = "HUNT"),
+        @JsonSubTypes.Type(value = Ritual.class,        name = "RITUAL"),
         @JsonSubTypes.Type(value = StonePainting.class, name = "STONE_PAINTING")
-
 })
-
-
 public abstract class Event extends Card {
-    public Event(int id, GamePhaseEnum trigger, List<CardEffectInteractive> interactiveEffects, List<CardEffectInstant> instantEffects, int age, CardTypeEnum type) {
-        super(id, trigger, interactiveEffects, instantEffects, age,  type);
+
+    /**
+     * Constructs an {@code Event} card with the given properties.
+     *
+     * @param id                 unique card identifier
+     * @param trigger            the game phase during which this event is resolved
+     * @param interactiveEffects interactive effects carried by this card
+     * @param instantEffects     instant effects carried by this card
+     * @param age                the age this card belongs to (1–3)
+     * @param type               the event type
+     */
+    public Event(int id, GamePhaseEnum trigger,
+                 List<CardEffectInteractive> interactiveEffects,
+                 List<CardEffectInstant> instantEffects,
+                 int age, CardTypeEnum type) {
+        super(id, trigger, interactiveEffects, instantEffects, age, type);
     }
 
+    /**
+     * Resolves this event for all players in the match.
+     *
+     * @param players the list of all players; must not be {@code null}
+     * @param phase   the current game phase at the time of resolution
+     */
     public abstract void execEvent(List<Player> players, GamePhaseEnum phase);
-    public void accept(GainFoodVisitor visitor, Player p, GainFood e){
+
+    /**
+     * Accepts a {@link GainFoodVisitor}, dispatching to
+     * {@link GainFoodVisitor#visit(Event, Player, GainFood)}.
+     *
+     * @param visitor the visitor to dispatch to
+     * @param p       the player receiving the food gain
+     * @param e       the food gain effect being applied
+     */
+    @Override
+    public void accept(GainFoodVisitor visitor, Player p, GainFood e) {
         visitor.visit(this, p, e);
     }
 
-    public void accept (GainPPVisitor visitor, Player p, GainPP e){
+    /**
+     * Accepts a {@link GainPPVisitor}, dispatching to
+     * {@link GainPPVisitor#visit(Event, Player, GainPP)}.
+     *
+     * @param visitor the visitor to dispatch to
+     * @param p       the player receiving the PP gain
+     * @param e       the PP gain effect being applied
+     */
+    @Override
+    public void accept(GainPPVisitor visitor, Player p, GainPP e) {
         visitor.visit(this, p, e);
     }
-    public void accept(PlayEventVisitor visitor){
-        visitor.visit(this);
-    }
+
+    /**
+     * Accepts a {@link PlayEventVisitor}, dispatching to
+     * {@link PlayEventVisitor#visit(Event)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
     @Override
-    public void accept(DrawCardVisitor visitor){
+    public void accept(PlayEventVisitor visitor) {
         visitor.visit(this);
     }
-    public void accept(CanDrawVisitor visitor){visitor.visit(this);}
+
+    /**
+     * Accepts a {@link DrawCardVisitor}, dispatching to
+     * {@link DrawCardVisitor#visit(Event)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
+    @Override
+    public void accept(DrawCardVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    /**
+     * Accepts a {@link CanDrawVisitor}, dispatching to
+     * {@link CanDrawVisitor#visit(Event)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
+    @Override
+    public void accept(CanDrawVisitor visitor) { visitor.visit(this); }
 }

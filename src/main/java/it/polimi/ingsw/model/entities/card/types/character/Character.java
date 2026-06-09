@@ -20,6 +20,16 @@ import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.List;
 
+/**
+ * Abstract base class for all character cards.
+ *
+ * <p>Character cards are placed into a player's {@link Village} when drawn.
+ * Each concrete subclass ({@link Builder}, {@link Crafter}, {@link Gatherer},
+ * {@link Hunter}, {@link Painter}, {@link Shaman}) represents a distinct
+ * villager role with its own effect and visitor dispatch logic.
+ * Characters do not participate in event resolution; their
+ * {@link #accept(PlayEventVisitor)} implementation is a no-op.</p>
+ */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -35,6 +45,16 @@ import java.util.List;
 })
 public abstract class Character extends Card {
 
+    /**
+     * Constructs a {@code Character} card with the given properties.
+     *
+     * @param id                 unique card identifier
+     * @param trigger            the game phase that gates this card's instant effects
+     * @param interactiveEffects interactive effects carried by this card
+     * @param instantEffects     instant effects carried by this card
+     * @param age                the age this card belongs to (1–3)
+     * @param type               the character type
+     */
     public Character(int id, GamePhaseEnum trigger,
                      List<CardEffectInteractive> interactiveEffects,
                      List<CardEffectInstant> instantEffects,
@@ -42,13 +62,66 @@ public abstract class Character extends Card {
         super(id, trigger, interactiveEffects, instantEffects, age, type);
     }
 
+    /**
+     * Places this character into the given village by calling
+     * {@link Village#add(Character)}.
+     *
+     * @param v the village to add this character to; must not be {@code null}
+     */
     public void dispatch(Village v) { v.add(this); }
 
-    @Override public void accept(DrawCardVisitor visitor)  { visitor.visit(this); }
-    @Override public void accept(CanDrawVisitor visitor)   { visitor.visit(this); }
-    @Override public void accept(PlayEventVisitor visitor) {}
+    /**
+     * Accepts a {@link DrawCardVisitor}, dispatching to
+     * {@link DrawCardVisitor#visit(Character)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
+    @Override
+    public void accept(DrawCardVisitor visitor) { visitor.visit(this); }
 
+    /**
+     * Accepts a {@link CanDrawVisitor}, dispatching to
+     * {@link CanDrawVisitor#visit(Character)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
+    @Override
+    public void accept(CanDrawVisitor visitor) { visitor.visit(this); }
+
+    /**
+     * Characters do not participate in event resolution; this method is a
+     * no-op.
+     *
+     * @param visitor the event visitor (unused)
+     */
+    @Override
+    public void accept(PlayEventVisitor visitor) {}
+
+    /**
+     * Accepts a {@link GainFoodVisitor}, dispatching to the overload that
+     * matches this character's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     * @param p       the player receiving the food gain
+     * @param e       the food gain effect being applied
+     */
     public abstract void accept(GainFoodVisitor visitor, Player p, GainFood e);
+
+    /**
+     * Accepts a {@link GainPPVisitor}, dispatching to the overload that
+     * matches this character's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     * @param p       the player receiving the PP gain
+     * @param e       the PP gain effect being applied
+     */
     public abstract void accept(GainPPVisitor visitor, Player p, GainPP e);
+
+    /**
+     * Accepts a {@link VillageVisitor}, dispatching to the overload that
+     * matches this character's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     */
     public abstract void accept(VillageVisitor visitor);
 }

@@ -28,7 +28,26 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
+/**
+ * Abstract base class for all cards in the game.
+ *
+ * <p>A card carries a set of {@link CardEffectInstant instant effects} applied
+ * when the card is drawn or a phase trigger fires, and optionally a set of
+ * {@link CardEffectInteractive interactive effects} that generate pending
+ * {@link Action} instances to be resolved by the owner. Each card belongs to
+ * an age (1–3), has a {@link CardTypeEnum type}, and is associated with a
+ * {@link GamePhaseEnum trigger} that gates when its instant effects may fire.</p>
+ *
+ * <p>Concrete subclasses cover three categories: characters ({@link Builder},
+ * {@link Crafter}, {@link Gatherer}, {@link Hunter}, {@link Painter},
+ * {@link Shaman}), events ({@link Feast}, {@link Hunt}, {@link Ritual},
+ * {@link StonePainting}), and buildings ({@link Building}). Jackson uses the
+ * {@code type} property to deserialize the correct subclass.</p>
+ *
+ * <p>The Visitor pattern is used for type-specific dispatch: each concrete
+ * subclass implements the {@code accept} overloads to call the matching
+ * {@code visit} method on the visitor.</p>
+ */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -36,34 +55,54 @@ import java.util.List;
         visible = true
 )
 @JsonSubTypes({
-        // Sottoclasse diretta concreta
-        @JsonSubTypes.Type(value = Building.class, name = "BUILDING"),
-
-        // Sottoclassi di Event
-        @JsonSubTypes.Type(value = Feast.class, name = "FEAST"),
-        @JsonSubTypes.Type(value = Hunt.class, name = "HUNT"),
-        @JsonSubTypes.Type(value = Ritual.class, name = "RITUAL"),
+        @JsonSubTypes.Type(value = Building.class,      name = "BUILDING"),
+        @JsonSubTypes.Type(value = Feast.class,         name = "FEAST"),
+        @JsonSubTypes.Type(value = Hunt.class,          name = "HUNT"),
+        @JsonSubTypes.Type(value = Ritual.class,        name = "RITUAL"),
         @JsonSubTypes.Type(value = StonePainting.class, name = "STONE_PAINTING"),
-
-        // Sottoclassi di Character
-        @JsonSubTypes.Type(value = Builder.class, name = "BUILDER"),
-        @JsonSubTypes.Type(value = Crafter.class, name = "CRAFTER"),
-        @JsonSubTypes.Type(value = Gatherer.class, name = "GATHERER"),
-        @JsonSubTypes.Type(value = Hunter.class, name = "HUNTER"),
-        @JsonSubTypes.Type(value = Painter.class, name = "PAINTER"),
-        @JsonSubTypes.Type(value = Shaman.class, name = "SHAMAN")
+        @JsonSubTypes.Type(value = Builder.class,       name = "BUILDER"),
+        @JsonSubTypes.Type(value = Crafter.class,       name = "CRAFTER"),
+        @JsonSubTypes.Type(value = Gatherer.class,      name = "GATHERER"),
+        @JsonSubTypes.Type(value = Hunter.class,        name = "HUNTER"),
+        @JsonSubTypes.Type(value = Painter.class,       name = "PAINTER"),
+        @JsonSubTypes.Type(value = Shaman.class,        name = "SHAMAN")
 })
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public abstract class Card {
+
+    /** Unique identifier of this card. */
     private int id;
+
+    /**
+     * The game phase that must be active for this card's instant effects to
+     * fire, or that determines when the card's special behaviour is relevant.
+     */
     protected GamePhaseEnum trigger;
-    protected List <CardEffectInteractive> interactiveEffects;
+
+    /** Interactive effects that generate pending actions for the card's owner. */
+    protected List<CardEffectInteractive> interactiveEffects;
+
+    /** Instant effects applied when this card is drawn or its trigger phase fires. */
     protected List<CardEffectInstant> instantEffects;
+
+    /** The age (1–3) this card belongs to. */
     private int age;
+
+    /** The category of this card (character type, building, or event variant). */
     private CardTypeEnum type;
 
-    public Card(int id, GamePhaseEnum trigger, List <CardEffectInteractive> interactiveEffects,List <CardEffectInstant> instantEffects, int age, CardTypeEnum type) {
+    /**
+     * Constructs a {@code Card} with the given properties.
+     *
+     * @param id                 unique card identifier
+     * @param trigger            the game phase that gates this card's instant effects
+     * @param interactiveEffects interactive effects carried by this card
+     * @param instantEffects     instant effects carried by this card
+     * @param age                the age this card belongs to (1–3)
+     * @param type               the category of this card
+     */
+    public Card(int id, GamePhaseEnum trigger, List<CardEffectInteractive> interactiveEffects,
+                List<CardEffectInstant> instantEffects, int age, CardTypeEnum type) {
         this.id = id;
         this.trigger = trigger;
         this.interactiveEffects = interactiveEffects;
@@ -72,54 +111,146 @@ public abstract class Card {
         this.type = type;
     }
 
-
-    public int getAge(){
+    /**
+     * Returns the age this card belongs to.
+     *
+     * @return age (1–3)
+     */
+    public int getAge() {
         return this.age;
     }
 
-    public List<CardEffectInteractive> getInteractiveEffects(){
+    /**
+     * Returns the interactive effects carried by this card.
+     *
+     * @return the interactive effect list; never {@code null}
+     */
+    public List<CardEffectInteractive> getInteractiveEffects() {
         return this.interactiveEffects;
     }
 
-    public List<CardEffectInstant> getInstantEffects(){
+    /**
+     * Returns the instant effects carried by this card.
+     *
+     * @return the instant effect list; never {@code null}
+     */
+    public List<CardEffectInstant> getInstantEffects() {
         return this.instantEffects;
     }
 
+    /**
+     * Applies all eligible instant effects of this card to the given player
+     * for the current game phase, removing one-time effects after they fire.
+     *
+     * <p>An effect fires only if {@link CardEffectInstant#canApply(GamePhaseEnum, GamePhaseEnum)}
+     * returns {@code true} for this card's trigger and the current phase.</p>
+     *
+     * @param p         the player to apply the effects to
+     * @param currPhase the current game phase
+     */
     public void execInstantEffect(Player p, GamePhaseEnum currPhase) {
         Iterator<CardEffectInstant> it = instantEffects.iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             CardEffectInstant e = it.next();
-            if(e.canApply(trigger, currPhase)){
-                e.apply(p,this);
-                if(e.isOneTime())
+            if (e.canApply(trigger, currPhase)) {
+                e.apply(p, this);
+                if (e.isOneTime())
                     it.remove();
             }
         }
     }
 
+    /**
+     * Returns the game phase that gates this card's instant effects.
+     *
+     * @return the trigger phase; never {@code null}
+     */
     public GamePhaseEnum getTrigger() {
         return trigger;
     }
 
-    public int getId(){
+    /**
+     * Returns the unique identifier of this card.
+     *
+     * @return card ID
+     */
+    public int getId() {
         return this.id;
     }
 
-    public List<Action> execInteractiveEffect(Player p){
+    /**
+     * Applies the interactive effects of this card to the given player,
+     * returning any resulting pending actions.
+     *
+     * <p>The default implementation returns an empty list; subclasses that
+     * carry interactive effects should override this method.</p>
+     *
+     * @param p the player to apply the effects to
+     * @return list of pending actions generated; never {@code null}
+     */
+    public List<Action> execInteractiveEffect(Player p) {
         return Collections.emptyList();
     }
 
-    public CardTypeEnum getType(){
+    /**
+     * Returns the category of this card.
+     *
+     * @return the {@link CardTypeEnum} value; never {@code null}
+     */
+    public CardTypeEnum getType() {
         return this.type;
     }
 
+    /**
+     * Accepts a {@link GainFoodVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     *
+     * @param visitor  the visitor to dispatch to
+     * @param p        the player receiving the food gain
+     * @param effect   the food gain effect being applied
+     */
     public abstract void accept(GainFoodVisitor visitor, Player p, GainFood effect);
+
+    /**
+     * Accepts a {@link GainPPVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     * @param p       the player receiving the PP gain
+     * @param effect  the PP gain effect being applied
+     */
     public abstract void accept(GainPPVisitor visitor, Player p, GainPP effect);
+
+    /**
+     * Accepts a {@link PlayEventVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     */
     public abstract void accept(PlayEventVisitor visitor);
+
+    /**
+     * Accepts a {@link DrawCardVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     */
     public abstract void accept(DrawCardVisitor visitor);
+
+    /**
+     * Accepts a {@link CanDrawVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     *
+     * @param visitor the visitor to dispatch to
+     */
     public abstract void accept(CanDrawVisitor visitor);
 
-    public CardDTO toDTO(){
+    /**
+     * Converts this card to a {@link CardDTO} for network transfer.
+     *
+     * @return a DTO carrying the card's ID, age, and type; never {@code null}
+     */
+    public CardDTO toDTO() {
         return new CardDTO(id, age, type);
     }
 }

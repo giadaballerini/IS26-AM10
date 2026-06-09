@@ -9,10 +9,27 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * Data Access Object for player credentials and match ranking data.
+ *
+ * <p>Provides methods to authenticate players, retrieve and update rankings,
+ * and record match results in the database. All methods open and close their
+ * own {@link Connection} via {@link DBManager#connect()}.</p>
+ */
 public class RankingDAO {
 
     private static final Logger LOG = Logger.getLogger(RankingDAO.class.getName());
 
+    /**
+     * Computes the SHA-256 hash of the given string and returns it as a
+     * lowercase hexadecimal string.
+     *
+     * <p>Used to hash passwords before storing or comparing them in the database.</p>
+     *
+     * @param base the string to hash; must not be {@code null}
+     * @return the SHA-256 hex digest of {@code base}
+     * @throws RuntimeException if the SHA-256 algorithm is not available
+     */
     public static String hashFunction(String base) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -29,6 +46,19 @@ public class RankingDAO {
         }
     }
 
+    /**
+     * Validates a player's login credentials, registering the player if they
+     * do not yet exist in the database.
+     *
+     * <p>If the nickname is already present, the provided password is checked
+     * against the stored hash. If the nickname is new, a new record is inserted
+     * with the hashed password.</p>
+     *
+     * @param nickname the player's nickname; must not be {@code null}
+     * @param password the player's plaintext password; must not be {@code null}
+     * @throws WrongPasswordException if the nickname exists but the password does not match
+     * @throws SQLException           if a database access error occurs
+     */
     public static void isLoginOk(String nickname, String password) throws SQLException, WrongPasswordException {
         String query = "SELECT psw FROM credentials WHERE nickname = ?";
 
@@ -43,12 +73,12 @@ public class RankingDAO {
                         throw new WrongPasswordException("Password sbagliata, l'utente è già esistente!");
                     }
                 } else {
-                    String query2 = "INSERT INTO credentials (nickname, psw) VALUES (?, ?)";
-                    try (PreparedStatement statement2 = conn.prepareStatement(query2)) {
-                        statement2.setString(1, nickname);
-                        statement2.setString(2, hashFunction(password));
-                        int written = statement2.executeUpdate();
-                        if (written > 0)
+                    String insertQuery = "INSERT INTO credentials (nickname, psw) VALUES (?, ?)";
+                    try (PreparedStatement insertStmnt = conn.prepareStatement(insertQuery)) {
+                        insertStmnt.setString(1, nickname);
+                        insertStmnt.setString(2, hashFunction(password));
+                        int rowsWritten = insertStmnt.executeUpdate();
+                        if (rowsWritten > 0)
                             LOG.info("User Inserted");
                     }
                 }
@@ -59,6 +89,13 @@ public class RankingDAO {
         }
     }
 
+    /**
+     * Retrieves the ID of the last recorded game from the database.
+     *
+     * <p>Returns {@code 0} if the database is unreachable or the table is empty.</p>
+     *
+     * @return the last game ID, or {@code 0} if it cannot be retrieved
+     */
     public static int requestLastId() {
         String query = "SELECT gameId FROM last_id";
         try (Connection conn = DBManager.connect();
@@ -72,6 +109,18 @@ public class RankingDAO {
         return 0;
     }
 
+    /**
+     * Returns the global ranking position of a player for matches with the
+     * given number of players.
+     *
+     * <p>The position is 1-based: a return value of {@code 1} means the player
+     * has the highest cumulative score among all players in that category.
+     * Returns {@code -1} if the database is unreachable.</p>
+     *
+     * @param nickname    the player's nickname
+     * @param playerCount the number of players in the match category to consider
+     * @return the player's ranking position (1-based), or {@code -1} on error
+     */
     public static int reportPlayerPlace(String nickname, int playerCount) {
         String query = "SELECT count(*) + 1 as ris " +
                 "FROM totals " +
@@ -92,6 +141,19 @@ public class RankingDAO {
         return -1;
     }
 
+    /**
+     * Retrieves the global ranking for matches with the given number of players,
+     * ordered by total score descending.
+     *
+     * <p>Each entry maps a player's nickname to their cumulative score across
+     * all recorded matches in that category. Returns an empty map if the
+     * database is unreachable.</p>
+     *
+     * @param nickname    the nickname of the requesting player (reserved for
+     *                    future filtering; currently unused in the query)
+     * @param playerCount the number of players in the match category to rank
+     * @return an ordered map of nickname → total score, never {@code null}
+     */
     public static Map<String, Integer> requestRanking(String nickname, int playerCount) {
         String query = "SELECT nickname, SUM(score) as tot " +
                 "FROM matches " +
@@ -114,18 +176,27 @@ public class RankingDAO {
         return new LinkedHashMap<>();
     }
 
-    public static void insertMatch(int id, String nickname, int punti, int nGiocatori, Date date) {
+    /**
+     * Inserts a match result for a single player into the database.
+     *
+     * @param gameId      unique identifier of the game
+     * @param nickname    the player's nickname
+     * @param score       the score achieved by the player in this match
+     * @param playerCount the total number of players in the match
+     * @param date        the date on which the match was played
+     */
+    public static void insertMatch(int gameId, String nickname, int score, int playerCount, Date date) {
         String query = "INSERT INTO matches (gameId, nickname, score, nPlayers, matchDate) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBManager.connect();
              PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setInt(1, id);
+            statement.setInt(1, gameId);
             statement.setString(2, nickname);
-            statement.setInt(3, punti);
-            statement.setInt(4, nGiocatori);
+            statement.setInt(3, score);
+            statement.setInt(4, playerCount);
             statement.setDate(5, date);
-            int written = statement.executeUpdate();
-            if (written > 0)
+            int rowsWritten = statement.executeUpdate();
+            if (rowsWritten > 0)
                 LOG.info("Match Inserted");
         } catch (SQLException e) {
             LOG.warning("Errore durante l'inserimento del match: " + e.getMessage());

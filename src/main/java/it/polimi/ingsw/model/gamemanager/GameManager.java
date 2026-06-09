@@ -353,7 +353,7 @@ public class GameManager implements ApplicableActions, Snapshotable {
 
     /**
      * Notifies all observers that the game has ended, including per-player stats,
-     * local ranking positions, and global (cross-match) positions.
+     * local ranking positions, and global ranking positions.
      *
      * @param globalPositions a map from player nickname to their global ranking position
      */

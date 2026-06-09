@@ -13,14 +13,36 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * Responsible for initializing all game components at the start of a match.
+ *
+ * <p>Each method loads data from a JSON resource file and returns the
+ * corresponding collection ready for use by the game engine. The size and
+ * composition of each collection depend on the number of players.</p>
+ */
 public class GameInitializer {
 
+    /**
+     * Shared Jackson mapper configured to accept single values as arrays
+     * and to ignore unknown properties during deserialization.
+     */
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private static final Logger LOG = Logger.getLogger(GameInitializer.class.getName());
 
+    /**
+     * Initializes and returns the main card deck for the given number of players.
+     *
+     * <p>Cards are loaded from {@code /json/tribes.json} and trimmed to the
+     * appropriate deck size. They are then split by age, shuffled within each
+     * age, and reassembled in order (age 1 → age 2 → age 3 → final events).</p>
+     *
+     * @param numPlayers number of players in the match (2–5)
+     * @return the shuffled deck ordered by age; an empty list if
+     *         {@code numPlayers} is invalid or the resource cannot be loaded
+     */
     public List<Card> initDeck(int numPlayers) {
         int deckSize = switch (numPlayers) {
             case 2 -> 63;
@@ -68,6 +90,17 @@ public class GameInitializer {
         }
     }
 
+    /**
+     * Initializes and returns the building card deck for the given number of players.
+     *
+     * <p>Cards are loaded from {@code /json/buildings.json}, shuffled within
+     * each age, and trimmed to the number of buildings appropriate for the
+     * player count.</p>
+     *
+     * @param numPlayers number of players in the match (2–5)
+     * @return the selected building cards ordered by age; an empty list if
+     *         {@code numPlayers} is invalid or the resource cannot be loaded
+     */
     public List<Card> initBuildingDeck(int numPlayers) {
         if (numPlayers < 2 || numPlayers > 5) {
             LOG.warning("Numero di giocatori non valido: " + numPlayers);
@@ -110,6 +143,17 @@ public class GameInitializer {
         }
     }
 
+    /**
+     * Initializes and returns the tile queue for the given number of players.
+     *
+     * <p>Tiles are loaded from {@code /json/qtiles.json} and filtered by ID
+     * range according to the player count. The result is returned as a
+     * {@link LinkedList} to support efficient removal from the front.</p>
+     *
+     * @param numPlayers number of players in the match (2–5)
+     * @return the tile queue as a {@link LinkedList}; an empty list if
+     *         {@code numPlayers} is invalid or the resource cannot be loaded
+     */
     public List<Tile> initQueue(int numPlayers) {
         int minId = switch (numPlayers) {
             case 2 -> 0;
@@ -148,6 +192,16 @@ public class GameInitializer {
         }
     }
 
+    /**
+     * Initializes and returns the game board tiles for the given number of players.
+     *
+     * <p>Tiles are loaded from {@code /json/tiles.json}, filtered to include only
+     * those whose minimum player requirement is met, and sorted by ID.</p>
+     *
+     * @param numPlayers number of players in the match (2-5)
+     * @return the board tiles sorted by ID; an empty list if
+     *         {@code numPlayers} is invalid or the resource cannot be loaded
+     */
     public ArrayList<Tile> initBoard(int numPlayers) {
         if (numPlayers < 2) {
             LOG.warning("Numero di giocatori non valido: " + numPlayers);
@@ -171,6 +225,20 @@ public class GameInitializer {
         }
     }
 
+    /**
+     * Populates the upper card list by drawing from the deck and the building deck.
+     *
+     * <p>Cards are drawn from {@code deck} until the upper list reaches
+     * {@code numPlayers + 4} entries, then a fixed number of building cards
+     * (depending on {@code numPlayers}) are appended.</p>
+     *
+     * @param deck       the main card deck to draw from; modified in place
+     * @param buildings  the building card deck to draw from; modified in place
+     * @param upperList  the list to populate; modified in place
+     * @param numPlayers number of players in the match (2–5)
+     * @return the populated {@code upperList}; an empty list if
+     *         {@code numPlayers} is invalid
+     */
     public List<Card> initUpperList(List<Card> deck, List<Card> buildings, List<Card> upperList, int numPlayers) {
         int buildingsToAdd = switch (numPlayers) {
             case 2 -> 1;
@@ -194,6 +262,19 @@ public class GameInitializer {
         return upperList;
     }
 
+    /**
+     * Populates and returns the lower card list by drawing from the deck.
+     *
+     * <p>Cards are drawn one at a time until the lower list reaches
+     * {@code numPlayers + 1} entries. Event cards encountered during drawing
+     * are redirected to {@code upperList} rather than added to the lower list.</p>
+     *
+     * @param deck       the main card deck to draw from; modified in place
+     * @param upperList  the upper list, which receives any event cards drawn;
+     *                   modified in place
+     * @param numPlayers number of players in the match
+     * @return the populated lower list; an empty list if the deck is empty
+     */
     public List<Card> initLowerList(List<Card> deck, List<Card> upperList, int numPlayers) {
         if (deck.isEmpty()) {
             LOG.severe("Numero di giocatori non valido o partita non inizializzata correttamente!");

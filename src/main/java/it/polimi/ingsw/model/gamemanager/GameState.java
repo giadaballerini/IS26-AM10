@@ -25,25 +25,69 @@ import java.util.stream.Stream;
 
 import static it.polimi.ingsw.enumerations.GamePhaseEnum.SETUP_PHASE;
 
+/**
+ * Holds and manages all mutable game data for a single match.
+ *
+ * <p>This class is the central data store accessed by {@link GameManager} and
+ * the phase state machine. It owns the card lists (deck, buildings, upper and
+ * lower display rows), the board and queue tiles, the player list, the current
+ * player, turn/age counters, and the pending action queue. It also exposes the
+ * operations that mutate this data in response to player actions and phase
+ * transitions.</p>
+ */
 public class GameState {
+
+    /** The main draw pile of tribe cards. */
     private List<Card> deck;
+
+    /** The building card supply not yet added to the display rows. */
     private List<Card> buildings;
-    private List <Tile> queue;
+
+    /** Tiles constituting the queue, where players wait before moving onto the board. */
+    private List<Tile> queue;
+
+    /** Tiles constituting the main game board. */
     private List<Tile> board;
+
+    /** The upper card display row, from which players may draw. */
     private List<Card> upperList;
+
+    /** The lower card display row, from which players may draw. */
     private List<Card> lowerList;
+
+    /** All players participating in this match. */
     private List<Player> players;
+
+    /** The player currently taking their turn. */
     private Player currPlayer;
+
+    /** The current age (era) of the match (1–3). */
     private int currAge;
+
+    /** The current turn number within the age (1–10). */
     private int currTurn;
+
+    /**
+     * Whether the pending draw actions in {@link #toDoActions} may be skipped
+     * by the active player.
+     */
     private boolean skippableDraw;
+
+    /** Draw actions that have been triggered but not yet resolved. */
     private List<Action> toDoActions;
+
+    /** The total number of players in this match. */
     private final int numPlayers;
 
-
-
-
-    public GameState(List<Player> players, int numPlayers){
+    /**
+     * Constructs a {@code GameState} with the given player list and player count,
+     * initializing all collections to empty and counters to their starting values.
+     * Call {@link #initialize()} to populate the game data before play begins.
+     *
+     * @param players    the list of players participating in the match
+     * @param numPlayers the total number of players
+     */
+    public GameState(List<Player> players, int numPlayers) {
         this.players = players;
         this.numPlayers = numPlayers;
         this.currAge = 1;
@@ -59,128 +103,280 @@ public class GameState {
         this.queue = new LinkedList<>();
     }
 
-
-    public Card getCardById(int id){
+    /**
+     * Returns the card with the given ID from the upper or lower display row.
+     *
+     * @param id the card ID to look up
+     * @return the matching card, or {@code null} if not found in either row
+     */
+    public Card getCardById(int id) {
         return Stream.of(upperList, lowerList).flatMap(List::stream)
-                .filter(c->c.getId()==id)
+                .filter(c -> c.getId() == id)
                 .findFirst()
                 .orElse(null);
     }
 
-    public Tile getTileById(int id){
+    /**
+     * Returns the board tile at the given position.
+     *
+     * @param id the index of the tile in the board list
+     * @return the tile at position {@code id}, or {@code null} if out of bounds
+     */
+    public Tile getTileById(int id) {
         if (id < 0 || id >= board.size()) {
             return null;
         }
         return board.get(id);
     }
 
-    public boolean getSkippableDraw(){ return this.skippableDraw; }
+    /**
+     * Returns whether the pending draw actions may be skipped by the active player.
+     *
+     * @return {@code true} if the current draws are skippable
+     */
+    public boolean getSkippableDraw() { return this.skippableDraw; }
 
-
-    public List<Action> getToDoActions(){
+    /**
+     * Returns a copy of the list of pending draw actions.
+     *
+     * @return pending actions; never {@code null}, may be empty
+     */
+    public List<Action> getToDoActions() {
         return new ArrayList<>(toDoActions);
     }
 
-    int getQueueSize(){
+    /**
+     * Returns the number of players currently occupying a queue tile.
+     *
+     * @return count of occupied queue tiles
+     */
+    int getQueueSize() {
         return Math.toIntExact(queue.stream().filter(Tile::isOccupied).count());
     }
 
-    int getNumPlayers(){
+    /**
+     * Returns the total number of players in this match.
+     *
+     * @return number of players
+     */
+    int getNumPlayers() {
         return this.numPlayers;
     }
 
-    void incrementTurn(){
+    /**
+     * Increments the turn counter by one.
+     */
+    void incrementTurn() {
         currTurn++;
     }
 
-    int getCurrTurn(){
+    /**
+     * Returns the current turn number within the age.
+     *
+     * @return current turn (1–10)
+     */
+    int getCurrTurn() {
         return currTurn;
     }
 
-    void setSkippableDraw(boolean canSkip){
+    /**
+     * Sets whether the pending draw actions may be skipped.
+     *
+     * @param canSkip {@code true} to mark the current draws as skippable
+     */
+    void setSkippableDraw(boolean canSkip) {
         this.skippableDraw = canSkip;
     }
 
+    /**
+     * Sets the currently active player.
+     *
+     * @param p the player to set as current; may be {@code null}
+     */
     public void setCurrPlayer(Player p) {
         currPlayer = p;
     }
 
+    /**
+     * Replaces the current deck with the given list.
+     *
+     * @param deck the new deck; must not be {@code null}
+     */
     public void setDeck(List<Card> deck) {
         this.deck = deck;
     }
 
+    /**
+     * Returns the tile queue.
+     *
+     * @return the queue; never {@code null}
+     */
     public List<Tile> getQueue() {
         return queue;
     }
 
+    /**
+     * Replaces the tile queue with the given list.
+     *
+     * @param queue the new queue; must not be {@code null}
+     */
     public void setQueue(List<Tile> queue) {
         this.queue = queue;
     }
 
+    /**
+     * Returns the main draw pile.
+     *
+     * @return the deck; never {@code null}
+     */
     public List<Card> getDeck() {
         return deck;
     }
 
+    /**
+     * Returns the building card supply.
+     *
+     * @return the buildings list; never {@code null}
+     */
     public List<Card> getBuildings() {
         return buildings;
     }
 
+    /**
+     * Returns the board tiles.
+     *
+     * @return the board; never {@code null}
+     */
     public List<Tile> getBoard() {
         return board;
     }
 
+    /**
+     * Replaces the board tiles with the given list.
+     *
+     * @param board the new board; must not be {@code null}
+     */
     public void setBoard(ArrayList<Tile> board) {
         this.board = board;
     }
 
+    /**
+     * Returns the upper card display row.
+     *
+     * @return the upper list; never {@code null}
+     */
     public List<Card> getUpperList() {
         return upperList;
     }
 
+    /**
+     * Replaces the upper card display row with the given list.
+     *
+     * @param upperList the new upper list; must not be {@code null}
+     */
     public void setUpperList(List<Card> upperList) {
         this.upperList = upperList;
     }
 
+    /**
+     * Returns the lower card display row.
+     *
+     * @return the lower list; never {@code null}
+     */
     public List<Card> getLowerList() {
         return lowerList;
     }
 
+    /**
+     * Replaces the lower card display row with the given list.
+     *
+     * @param lowerList the new lower list; must not be {@code null}
+     */
     public void setLowerList(List<Card> lowerList) {
         this.lowerList = lowerList;
     }
 
+    /**
+     * Returns the list of all players in the match.
+     *
+     * @return the player list; never {@code null}
+     */
     public List<Player> getPlayers() {
         return players;
     }
 
+    /**
+     * Replaces the player list with the given list.
+     *
+     * @param players the new player list; must not be {@code null}
+     */
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
 
+    /**
+     * Returns the player currently taking their turn.
+     *
+     * @return the current player; may be {@code null} before the match starts
+     */
     public Player getCurrPlayer() {
         return currPlayer;
     }
 
+    /**
+     * Returns the current age.
+     *
+     * @return current age (1–3)
+     */
     public int getCurrAge() {
         return currAge;
     }
 
+    /**
+     * Sets the current age.
+     *
+     * @param currAge the age to set (1–3)
+     */
     public void setCurrAge(int currAge) {
         this.currAge = currAge;
     }
 
+    /**
+     * Sets the current turn number.
+     *
+     * @param currTurn the turn to set (1–10)
+     */
     public void setCurrTurn(int currTurn) {
         this.currTurn = currTurn;
     }
 
+    /**
+     * Replaces the pending action list with the given list.
+     *
+     * @param toDoActions the new action list; must not be {@code null}
+     */
     public void setToDoActions(List<Action> toDoActions) {
         this.toDoActions = toDoActions;
     }
 
+    /**
+     * Replaces the building card supply with the given list.
+     *
+     * @param buildings the new buildings list; must not be {@code null}
+     */
     public void setBuildings(List<Card> buildings) {
         this.buildings = buildings;
     }
 
+    /**
+     * Initializes all game data for a new match.
+     *
+     * <p>Loads and shuffles the deck, building deck, board, queue, and display
+     * rows via {@link GameInitializer}. Players are shuffled and assigned to
+     * queue tiles in random order. The first player in the shuffled order
+     * becomes the starting current player. Initial food is distributed
+     * according to turn order.</p>
+     */
     public void initialize() {
         GameInitializer g = new GameInitializer();
 
@@ -209,9 +405,13 @@ public class GameState {
         currPlayer = players.isEmpty() ? null : players.getFirst();
 
         assignInitialFood();
-
     }
 
+    /**
+     * Assigns starting food to each player based on their position in the
+     * turn order. Earlier players receive less food to compensate for the
+     * first-mover advantage.
+     */
     private void assignInitialFood() {
         for (int i = 0; i < players.size(); i++) {
             int food = switch (i) {
@@ -224,6 +424,14 @@ public class GameState {
         }
     }
 
+    /**
+     * Advances the match to the next age.
+     *
+     * <p>Increments the age counter (up to 3), removes building cards from
+     * the lower row when entering age 3, moves any remaining building cards
+     * from the upper row to the lower row, and adds the new age's building
+     * cards to the upper row.</p>
+     */
     public void advanceAge() {
         if (currAge < 3)
             currAge++;
@@ -245,10 +453,22 @@ public class GameState {
                 .toList());
     }
 
-    public boolean hasAnySkippableDraws(){
+    /**
+     * Returns whether any player has pending skippable draw actions.
+     *
+     * @return {@code true} if at least one player has skippable draws queued
+     */
+    public boolean hasAnySkippableDraws() {
         return players.stream().anyMatch(Player::hasSkippableDraws);
     }
 
+    /**
+     * Loads the skippable draw actions of the first player who has any,
+     * setting them as the current player and populating the action queue.
+     *
+     * @return {@code true} if a player with skippable draws was found and
+     *         loaded; {@code false} if no such player exists
+     */
     public boolean loadSkippableDraws() {
         Player p = players.stream()
                 .filter(Player::hasSkippableDraws)
@@ -263,6 +483,14 @@ public class GameState {
         return true;
     }
 
+    /**
+     * Refills the display rows at the start of a new round by removing played
+     * character and event cards, shifting remaining cards, and drawing new
+     * cards from the deck.
+     *
+     * @return {@code true} if at least one card drawn belongs to a newer age,
+     *         indicating that an age change should be triggered
+     */
     public boolean refillBoard() {
         boolean ageChanged = false;
 
@@ -290,6 +518,12 @@ public class GameState {
         return ageChanged;
     }
 
+    /**
+     * Moves the current player from the front of the queue onto the given
+     * board tile. The vacated queue tile is moved to the back of the queue.
+     *
+     * @param t the board tile the current player is moving to
+     */
     public void applyMove(Tile t) {
         Tile removed = queue.removeFirst();
         removed.removePlayer();
@@ -297,6 +531,13 @@ public class GameState {
         t.setPlayer(currPlayer);
     }
 
+    /**
+     * Computes and applies end-of-game scores for all players, including
+     * builder points, crafter bonuses, painter pairs, and building PP values.
+     * Any interactive end-game building effects are also triggered.
+     *
+     * @param phase the game phase to pass to building effect checks
+     */
     public void applyFinalScores(GamePhaseEnum phase) {
         for (Player p : players) {
             p.addPP(calculateFinalPlayerScore(p));
@@ -309,6 +550,13 @@ public class GameState {
         }
     }
 
+    /**
+     * Calculates the end-of-game prestige point bonus for a single player,
+     * summing contributions from builders, crafters, painters, and buildings.
+     *
+     * @param p the player to calculate the score for
+     * @return the total end-of-game PP bonus for the player
+     */
     private int calculateFinalPlayerScore(Player p) {
         int score = 0;
         score += p.getBuilderPoints();
@@ -318,8 +566,18 @@ public class GameState {
         return score;
     }
 
+    /**
+     * Advances the current player to the next one in turn order.
+     *
+     * <p>During the setup phase, or when no player is on the board, the next
+     * player is taken from the front of the queue. In all other phases, the
+     * next player is the first one currently occupying a board tile.</p>
+     *
+     * @param currPhaseState the current game phase, used to determine the
+     *                       selection strategy
+     */
     public void applyNextPlayer(GamePhaseEnum currPhaseState) {
-        if(board.stream().anyMatch(Tile::isOccupied) && (currPhaseState != SETUP_PHASE))
+        if (board.stream().anyMatch(Tile::isOccupied) && (currPhaseState != SETUP_PHASE))
             currPlayer = board.stream()
                     .filter(Tile::isOccupied)
                     .map(Tile::getPlayer)
@@ -329,6 +587,17 @@ public class GameState {
             currPlayer = queue.getFirst().getPlayer();
     }
 
+    /**
+     * Applies all event cards in the display row appropriate for the given
+     * phase, collecting the results into an {@link EventDTO}.
+     *
+     * <p>During {@link GamePhaseEnum#END_ROUND}, event cards are read from the
+     * lower row; during {@link GamePhaseEnum#PLAY_EVENT}, from the upper row.
+     * After events are applied, updated player stats are added to the DTO.</p>
+     *
+     * @param phase the game phase determining which display row to process
+     * @return a DTO summarising all event effects and updated player stats
+     */
     public EventDTO applyEvents(GamePhaseEnum phase) {
         EventDTO events = new EventDTO();
 
@@ -345,6 +614,13 @@ public class GameState {
         return events;
     }
 
+    /**
+     * Applies instant and interactive tile effects for the current player
+     * across the given collection of tiles, adding any resulting actions to
+     * the pending queue.
+     *
+     * @param tiles the tiles to evaluate
+     */
     private void applyTileEffects(Collection<Tile> tiles) {
         for (Tile t : tiles) {
             if (t.isOccupied() && t.getPlayer().equals(currPlayer)) {
@@ -354,10 +630,17 @@ public class GameState {
         }
     }
 
-    void checkBoardTileEffects(){
+    /**
+     * Evaluates board tile effects for the current player.
+     */
+    void checkBoardTileEffects() {
         applyTileEffects(board);
     }
 
+    /**
+     * Evaluates queue tile effects for the current player, including the
+     * queue food bonus, instant effects, and interactive effects.
+     */
     public void applyQueueTileEffects() {
         for (Tile t : queue) {
             if (t.isOccupied() && t.getPlayer().equals(currPlayer)) {
@@ -368,6 +651,21 @@ public class GameState {
         }
     }
 
+    /**
+     * Resolves a draw action by the current player for the given card.
+     *
+     * <p>The draw type (upper or lower) is inferred from which display row the
+     * card belongs to. A matching pending action must exist, and the card must
+     * pass validation by {@link DrawCardVisitor}; otherwise an
+     * {@link InvalidDrawException} is thrown. On success, the action is
+     * removed from the queue, the card is removed from its row, and its
+     * instant and interactive effects are applied.</p>
+     *
+     * @param card  the card the player wants to draw
+     * @param phase the current game phase, passed to instant effect resolution
+     * @throws InvalidDrawException if no matching pending draw action exists or
+     *                              the card fails validation
+     */
     public void applyDraw(Card card, GamePhaseEnum phase) throws InvalidDrawException {
         boolean isInUpper = upperList.stream().anyMatch(c -> c.equals(card));
         DrawCardEnum requiredDraw = isInUpper ? DrawCardEnum.UP_DRAW : DrawCardEnum.DOWN_DRAW;
@@ -392,18 +690,41 @@ public class GameState {
         card.execInteractiveEffect(currPlayer);
     }
 
+    /**
+     * Removes the given action from the pending action queue, marking it as
+     * resolved.
+     *
+     * @param action the action to resolve
+     */
     private void resolveAction(Action action) {
         toDoActions.remove(action);
     }
 
-    public void applySkip(){
+    /**
+     * Clears all pending draw actions, effectively skipping them.
+     */
+    public void applySkip() {
         toDoActions.clear();
     }
 
-    boolean isQueueEmpty(){
+    /**
+     * Returns whether the queue is empty, meaning that no player is occupying the
+     * first queue tile.
+     *
+     * @return {@code true} if the first queue tile is unoccupied
+     */
+    boolean isQueueEmpty() {
         return !queue.getFirst().isOccupied();
     }
 
+    /**
+     * Moves the current player off the board and onto the first free queue
+     * tile, then evaluates queue tile effects.
+     *
+     * @return the queue tile the player was placed on
+     * @throws IllegalStateException if no free queue tile exists or the current
+     *                               player is not found on the board
+     */
     public Tile applyEndTurn() {
         removeFromBoard();
 
@@ -417,6 +738,12 @@ public class GameState {
         return t;
     }
 
+    /**
+     * Removes the current player's pawn from the board tile they occupy.
+     *
+     * @throws IllegalStateException if the current player is not found on any
+     *                               board tile
+     */
     private void removeFromBoard() {
         board.stream().filter(tile -> tile.isOccupied() && tile.getPlayer().equals(currPlayer))
                 .findFirst()
@@ -424,10 +751,24 @@ public class GameState {
                 .removePlayer();
     }
 
+    /**
+     * Returns whether the given nickname matches the current player's nickname.
+     *
+     * @param p the nickname to check
+     * @return {@code true} if {@code p} is the current player's nickname
+     */
     public boolean checkCorrectPlayer(String p) {
         return currPlayer.getNickname().equals(p);
     }
 
+    /**
+     * Builds a {@link CanDrawVisitor} pre-loaded with the draw actions available
+     * to the current player, checking upper and lower rows in order and stopping
+     * early if a mandatory draw is found.
+     *
+     * @return a {@link CanDrawVisitor} reflecting which cards the current player
+     *         may draw and whether any draw is mandatory
+     */
     public CanDrawVisitor buildCanDrawVisitor() {
         CanDrawVisitor cd = new CanDrawVisitor(currPlayer);
 
@@ -449,6 +790,19 @@ public class GameState {
         return cd;
     }
 
+    /**
+     * Serializes the current game state into a {@link GameSnapshot} for
+     * persistence.
+     *
+     * <p>All mutable collections are copied into new lists to avoid aliasing.
+     * Pending actions are converted to {@link it.polimi.ingsw.persistency.GameSnapshot.PendingAction}
+     * records; actions without an owner are recorded with the placeholder
+     * nickname {@code "SYSTEM"}.</p>
+     *
+     * @param matchId the unique identifier of the match being snapshotted
+     * @param phase   the current game phase at the time of the snapshot
+     * @return a {@link GameSnapshot} representing the full current state
+     */
     public GameSnapshot toSnapshot(int matchId, GamePhaseEnum phase) {
         List<GameSnapshot.PendingAction> pendingActions = toDoActions.stream()
                 .map(a -> new GameSnapshot.PendingAction(
@@ -475,11 +829,26 @@ public class GameState {
         );
     }
 
-    public ChangeAgeDTO genChangeAgeDTO(){
+    /**
+     * Builds a {@link ChangeAgeDTO} reflecting the current display rows and
+     * age counter, used to notify clients of an age transition.
+     *
+     * @return a DTO describing the new age state
+     */
+    public ChangeAgeDTO genChangeAgeDTO() {
         return new ChangeAgeDTO(upperList.stream().map(Card::toDTO).toList(),
                 lowerList.stream().map(Card::toDTO).toList(), currAge, deck.size());
     }
-    public BoardDTO toDTO(GamePhaseState currPhaseState){
+
+    /**
+     * Builds a {@link BoardDTO} representing the full current board state,
+     * suitable for broadcasting to all clients.
+     *
+     * @param currPhaseState the current phase state, used to include the phase
+     *                       enum in the DTO
+     * @return a DTO of the current board state
+     */
+    public BoardDTO toDTO(GamePhaseState currPhaseState) {
         return new BoardDTO(
                 upperList.stream().map(Card::toDTO).toList(),
                 lowerList.stream().map(Card::toDTO).toList(),
@@ -496,7 +865,14 @@ public class GameState {
         );
     }
 
-    public ActionsDTO toActionsDTO(){
+    /**
+     * Builds an {@link ActionsDTO} summarising the pending draw actions
+     * available to the current player.
+     *
+     * @return a DTO with the count of upper and lower draws available and
+     *         whether they are skippable
+     */
+    public ActionsDTO toActionsDTO() {
         int up = 0;
         int down = 0;
         for (Action a : toDoActions) {
