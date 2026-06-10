@@ -15,17 +15,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * TUI screen displayed at the end of each round to show the events that triggered
+ * and their effects on each player. For each player, stat changes in Prestige Points,
+ * food, and stars are shown as before/after comparisons, color-coded green for gains
+ * and red for losses. The screen is displayed for 8 seconds and then dismissed automatically.
+ */
 public class EventScreen {
 
     private final Terminal terminal;
+
+    /** The event data for the current round, including triggered event cards and updated player stats. */
     private final EventDTO events;
+
+    /**
+     * Snapshot of each player's stats before the events were applied,
+     * keyed by nickname for fast lookup.
+     */
     private final Map<String, PlayerStatsDTO> beforeMap;
+
+    /** The list of all players in the match, used to resolve pawn colors for name styling. */
     private final List<PlayerDTO> players;
 
-    private int screenW, screenH;
+    /** Width of the terminal in characters, read at display time. */
+    private int screenW;
+
+    /** Height of the terminal in lines, read at display time. */
+    private int screenH;
+
+    /**
+     * Character buffer holding the text content of each cell before it is flushed
+     * to the terminal.
+     */
     private char[][] screenBuffer;
+
+    /**
+     * Style buffer holding the ANSI style of each cell, applied when the buffers
+     * are flushed to the terminal.
+     */
     private AttributedStyle[][] colorBuffer;
 
+    /**
+     * Creates a new event screen for the current round.
+     *
+     * @param terminal    the JLine terminal to render on
+     * @param events      the event data for the round, including triggered cards and updated stats
+     * @param statsBefore the stats of all players before the events were applied
+     * @param players     the list of all players in the match, used to resolve pawn colors
+     */
     public EventScreen(Terminal terminal, EventDTO events, List<PlayerStatsDTO> statsBefore, List<PlayerDTO> players) {
         this.terminal  = terminal;
         this.events    = events;
@@ -34,6 +71,13 @@ public class EventScreen {
                 .collect(Collectors.toMap(PlayerStatsDTO::getNickname, s -> s));
     }
 
+    /**
+     * Renders the event screen and holds it for 8 seconds, updating the countdown
+     * footer every second, then clears the terminal and returns.
+     *
+     * @throws IOException          if a terminal I/O error occurs
+     * @throws InterruptedException if the countdown sleep is interrupted
+     */
     public void display() throws IOException, InterruptedException {
         screenW = terminal.getWidth();
         screenH = terminal.getHeight();
@@ -64,7 +108,6 @@ public class EventScreen {
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN));
         row++;
 
-
         int leftMargin = 6;
         for (PlayerStatsDTO after : events.getStats()) {
             PlayerStatsDTO before = beforeMap.get(after.getNickname());
@@ -78,15 +121,15 @@ public class EventScreen {
 
             printAt(row++, leftMargin, after.getNickname(), nameStyle);
             row++;
-            if(before.getPPs() != after.getPPs())
+            if (before.getPPs() != after.getPPs())
                 printAt(row++, leftMargin + 4,
                         String.format("PP:     %d → %d", before.getPPs(), after.getPPs()),
                         colorFor(after.getPPs() - before.getPPs()));
-            if(before.getnFood() != after.getnFood())
+            if (before.getnFood() != after.getnFood())
                 printAt(row++, leftMargin + 4,
                         String.format("Cibo:   %d → %d", before.getnFood(), after.getnFood()),
                         colorFor(after.getnFood() - before.getnFood()));
-            if(before.getnStars() != after.getnStars())
+            if (before.getnStars() != after.getnStars())
                 printAt(row++, leftMargin + 4,
                         String.format("Stelle: %d → %d", before.getnStars(), after.getnStars()),
                         colorFor(after.getnStars() - before.getnStars()));
@@ -105,12 +148,28 @@ public class EventScreen {
         terminal.writer().flush();
     }
 
+    /**
+     * Returns the ANSI style corresponding to the sign of the given stat delta.
+     * Positive deltas are styled green, negative red, and unchanged values white.
+     *
+     * @param delta the difference between a stat's value after and before the event
+     * @return the {@link AttributedStyle} to apply to the stat change line
+     */
     private AttributedStyle colorFor(int delta) {
         if (delta > 0) return AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN);
         if (delta < 0) return AttributedStyle.DEFAULT.foreground(AttributedStyle.RED);
         return AttributedStyle.DEFAULT.foreground(AttributedStyle.WHITE);
     }
 
+    /**
+     * Writes the given text into the screen and color buffers at the specified position,
+     * clipping any characters that fall outside the terminal width.
+     *
+     * @param row   the zero-based row index to write at
+     * @param col   the zero-based column index to start writing from
+     * @param text  the text to write; ignored if {@code null}
+     * @param style the ANSI style to apply to the written characters
+     */
     private void printAt(int row, int col, String text, AttributedStyle style) {
         if (row < 0 || row >= screenH || col < 0 || text == null) return;
         for (int i = 0; i < text.length(); i++) {
@@ -121,6 +180,10 @@ public class EventScreen {
         }
     }
 
+    /**
+     * Flushes the screen and color buffers to the terminal.
+     * Clears any remaining content below the rendered area.
+     */
     private void flushBuffers() {
         terminal.puts(InfoCmp.Capability.cursor_home);
         AttributedStringBuilder asb = new AttributedStringBuilder();

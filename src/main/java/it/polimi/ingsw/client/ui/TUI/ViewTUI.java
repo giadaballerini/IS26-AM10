@@ -31,65 +31,190 @@ import java.util.*;
 
 import static it.polimi.ingsw.client.ui.TUI.utility.CardColorMapper.getCardJlineColor;
 import static it.polimi.ingsw.client.ui.TUI.utility.TUIColorMapper.getPlayerJlineColor;
-
+/**
+ * Text-based user interface for the Mesos game, implementing
+ * {@link UserInterface}.
+ *
+ * <p>{@code ViewTUI} renders the entire game state into a raw terminal using
+ * <a href="https://github.com/jline/jline3">JLine 3</a>. The screen is divided
+ * into three side-by-side panels drawn inside Unicode box characters:</p>
+ * <ul>
+ *   <li><strong>Left panel</strong> — turn order queue, current phase, era,
+ *       round, and active player ({@link #drawQueuePanel}).</li>
+ *   <li><strong>Centre panel</strong> — board tiles with totem indicators,
+ *       upper and lower drawable-card rows ({@link #drawCenterBoard}).</li>
+ *   <li><strong>Right panel</strong> — per-player stats, discounts, and card
+ *       inventories ({@link #drawPlayersPanel}).</li>
+ * </ul>
+ *
+ * <p>Below the panels a separator line divides the game area from a scrolling
+ * log area that holds up to {@value #MAX_LOGS} entries. All rendering goes
+ * through a double-buffered approach ({@link #screenBuffer} /
+ * {@link #colorBuffer}) that is flushed atomically via
+ * {@link #flushBuffers()}.</p>
+ *
+ * <h2>Layout tiers</h2>
+ * <p>The layout adapts to the terminal width through the {@link LayoutTier}
+ * enum: {@code COMPACT} (< 120 cols), {@code STANDARD} (120–179 cols), and
+ * {@code LARGE} (≥ 180 cols). Column proportions are recalculated on every
+ * {@code WINCH} (window-resize) signal.</p>
+ *
+ * <h2>Input loop</h2>
+ * <p>{@link #start()} runs a blocking readline loop on the calling thread.
+ * Raw input is parsed by {@link CommandParser} into {@link Command} objects
+ * that are executed directly; unrecognised input is reported in the log
+ * area.</p>
+ *
+ * <h2>Thread safety</h2>
+ * <p>All methods that write to the terminal or the internal buffers are
+ * {@code synchronized} on {@code this}. Server-callback methods (e.g.
+ * {@link #onMoveUpdate}, {@link #onEvent}) may be called from network threads
+ * and are safe to invoke from any thread.</p>
+ */
 public class ViewTUI implements UserInterface {
-
+    /**
+     * Responsive breakpoints that control the column-width proportions of the
+     * three-panel layout.
+     *
+     * <p>The tier is selected by {@link #computeLayout()} based on the current
+     * terminal width and stored in {@link #currentTier}. A {@code WINCH} signal
+     * triggers a full redraw which re-evaluates the tier automatically.</p>
+     */
     private enum LayoutTier {
+        /** Terminals narrower than 120 columns. Uses wider proportional panels. */
         COMPACT  (0, 120),
+        /** Terminals between 120 and 179 columns (default). */
         STANDARD (120, 180),
+        /** Terminals 180 columns wide or wider. Allocates more space to the centre panel. */
         LARGE    (180, 9999);
-
-        final int minCols, maxCols;
+        /** Minimum terminal width (inclusive) for this tier. */
+        final int minCols;
+        /** Maximum terminal width (exclusive) for this tier. */
+        final int maxCols;
         LayoutTier(int minCols, int maxCols) {
             this.minCols = minCols;
             this.maxCols = maxCols;
         }
-
+        /**
+         * Returns the tier that matches the given terminal column count.
+         *
+         * @param cols current terminal width in columns
+         * @return the matching {@link LayoutTier}; falls back to
+         *         {@code STANDARD} if no range matches
+         */
         static LayoutTier from(int cols) {
             for (LayoutTier t : values())
                 if (cols >= t.minCols && cols < t.maxCols) return t;
             return STANDARD;
         }
     }
-
+    /** The layout tier currently in use; re-evaluated on every {@link #computeLayout()} call. */
     private LayoutTier currentTier = LayoutTier.STANDARD;
-
+    /** Read-only view of the game state shared with the network layer. */
     VirtualModel model;
+    /** JLine line reader that provides readline-style input with tab-completion. */
     private LineReader reader;
+    /** Network client used to dispatch player actions to the server. */
     private Client client;
+    /** JLine terminal handle; owns the raw-mode lifecycle and the output writer. */
     private Terminal terminal;
-
+    /** Maximum number of log entries kept in {@link #logs} and displayed at the bottom of the screen. */
     private static final int MAX_LOGS = 8;
+    /** Scrolling log buffer; newest entries are appended at the tail, oldest are evicted when full. */
     private final List<LogEntry> logs = new ArrayList<>();
-
+    /**
+     * Character buffer backing the current frame.
+     * Dimensions are {@code [screenH][screenW]}, re-allocated on each
+     * {@link #redrawScreen()} call.
+     */
     private char[][] screenBuffer;
-    private AttributedStyle[][] colorBuffer;
-    private int screenW, screenH;
 
+    /**
+     * Colour/style buffer parallel to {@link #screenBuffer}.
+     * Each cell holds the {@link AttributedStyle} for the corresponding
+     * character, defaulting to {@link AttributedStyle#DEFAULT}.
+     */
+    private AttributedStyle[][] colorBuffer;
+
+    /** Current terminal width in columns, updated by {@link #computeLayout()}. */
+    private int screenW;
+
+    /** Current terminal height in rows (minus one for the prompt), updated by {@link #computeLayout()}. */
+    private int screenH;
+
+    /** Row index where the three panel boxes start. */
     private int layoutStartRow;
+    /** Height (in rows) of the three panel boxes. */
     private int layoutPanelHeight;
+    /** Column width allocated to the left (queue) panel. */
     private int layoutLeftSize;
+    /** Column width allocated to the centre (board) panel. */
     private int layoutCenterSize;
+    /** Column width allocated to the right (players) panel. */
     private int layoutRightSize;
+    /** Row index of the separator line between the panels and the log area. */
     private int layoutSepStart;
+    /** Row index of the first log line. */
     private int layoutLogStart;
+
+    /**
+     * {@code true} when the last {@link #computeLayout()} call succeeded and
+     * the cached layout values are valid for the current terminal dimensions.
+     * Partial-redraw methods skip their work and fall back to a full
+     * {@link #redrawScreen()} when this flag is {@code false}.
+     */
     private boolean layoutValid = false;
 
+    /**
+     * Card types whose instances are collapsed into a count label
+     * (e.g. {@code "3x PAINTER"}) in the players panel to save horizontal
+     * space. Non-groupable types are always listed individually.
+     */
     private static final Set<String> GROUPABLE_CHARACTERS = Set.of(
             "PAINTER", "GATHERER", "SHAMAN"
     );
 
+    /**
+     * Helper method to identify types of card that can be grouped, in order to
+     * save space in the terminal
+     * @param type is the type of the card that the method wants to know if it is groupable
+     * @return {@code true} if it can be grouped or {@code false} if it can't
+     */
     private boolean isGroupable(String type) {
         return type != null && GROUPABLE_CHARACTERS.contains(type.toUpperCase());
     }
-
+    /**
+     * Creates a new {@code ViewTUI}, initializes the JLine terminal, and
+     * prints the ASCII splash logo.
+     *
+     * @param model  the shared virtual model populated by the network layer;
+     *               must not be {@code null}
+     * @param client the network client used to send player commands to the
+     *               server; must not be {@code null}
+     */
     public ViewTUI(VirtualModel model, Client client) {
         this.model = model;
         this.client = client;
         initJline();
         printLogo();
     }
-
+    /**
+     * Initialises the JLine {@link Terminal} and {@link LineReader}.
+     *
+     * <p>Sets up:</p>
+     * <ul>
+     *   <li>System properties to prefer Jansi over JNA for ANSI handling.</li>
+     *   <li>Alternate-screen mode ({@code enter_ca_mode}) so the game UI does
+     *       not contaminate the shell scroll-back buffer.</li>
+     *   <li>An invisible cursor for cleaner rendering.</li>
+     *   <li>A {@code WINCH} signal handler that calls {@link #redrawScreen()}
+     *       whenever the terminal is resized.</li>
+     *   <li>A {@link TUICompleter} that provides context-sensitive tab
+     *       completion for game commands.</li>
+     * </ul>
+     * <p>Errors during terminal construction are printed to {@code stderr}; the
+     * application can still run in degraded mode without a full terminal.</p>
+     */
     public void initJline() {
         System.setProperty("jansi.passthrough", "true");
         System.setProperty("org.jline.terminal.jansi", "true");
@@ -110,7 +235,19 @@ public class ViewTUI implements UserInterface {
             System.err.println("Errore inizializzazione terminale: " + e.getMessage());
         }
     }
-
+    /**
+     * Runs the main input loop: prompts for a nickname until login succeeds,
+     * then enters a blocking readline loop that parses and executes
+     * {@link Command} objects.
+     *
+     * <p>The loop terminates on {@link UserInterruptException} (Ctrl-C) or
+     * {@link EndOfFileException} (Ctrl-D) by calling {@link System#exit(int)}
+     * with status {@code 0}. All other exceptions are caught and reported via
+     * {@link #log(String)}.</p>
+     *
+     * <p>This method blocks the calling thread indefinitely and should be
+     * invoked from the application's main thread.</p>
+     */
     public void start() {
         boolean loggedIn = false;
         while (!loggedIn) {
@@ -142,7 +279,18 @@ public class ViewTUI implements UserInterface {
         }
     }
 
-
+    /**
+     * Reads the current terminal dimensions, selects the appropriate
+     * {@link LayoutTier}, and computes all layout metrics stored in the
+     * {@code layout*} fields.
+     *
+     * <p>Returns {@code false} and sets {@link #layoutValid} to {@code false}
+     * if the terminal is too small to render a meaningful UI (width &lt; 20 or
+     * height &lt; 10). In that case callers should skip rendering.</p>
+     *
+     * @return {@code true} if the layout was computed successfully;
+     *         {@code false} if the terminal is too small
+     */
     private boolean computeLayout() {
         screenW = terminal.getWidth();
         screenH = terminal.getHeight() - 1;
@@ -177,7 +325,28 @@ public class ViewTUI implements UserInterface {
         return true;
     }
 
-
+    /**
+     * Performs a full re-render of the entire screen.
+     *
+     * <p>Steps performed:</p>
+     * <ol>
+     *   <li>Pauses the terminal to suppress partial output.</li>
+     *   <li>Clears the scrollback buffer ({@code \033[3J}).</li>
+     *   <li>Calls {@link #computeLayout()}; aborts if the terminal is too
+     *       small.</li>
+     *   <li>Allocates fresh {@link #screenBuffer} and {@link #colorBuffer}
+     *       arrays filled with spaces and {@link AttributedStyle#DEFAULT}.</li>
+     *   <li>Draws the banner, the three panel boxes, and their content.</li>
+     *   <li>Renders the separator line and the log entries.</li>
+     *   <li>Flushes the buffers to the terminal via {@link #flushBuffers()}
+     *       and restores the readline prompt via {@link #redisplayPrompt()}.</li>
+     * </ol>
+     * <p>If the model is not yet ready (null queue or empty queue), a waiting
+     * message is displayed instead of the game panels.</p>
+     *
+     * <p>This method is {@code synchronized} to prevent interleaved writes
+     * from concurrent server-callback threads.</p>
+     */
     private synchronized void redrawScreen() {
         if (terminal == null || reader == null) return;
 
@@ -227,7 +396,15 @@ public class ViewTUI implements UserInterface {
         terminal.resume();
     }
 
-
+    /**
+     * Clears a rectangular region of both the character buffer and the color
+     * buffer, filling it with spaces and {@link AttributedStyle#DEFAULT}.
+     *
+     * @param startRow first row of the region (inclusive)
+     * @param startCol first column of the region (inclusive)
+     * @param rows     number of rows to clear
+     * @param cols     number of columns to clear
+     */
     private void clearRegion(int startRow, int startCol, int rows, int cols) {
         for (int r = startRow; r < startRow + rows && r < screenH; r++) {
             for (int c = startCol; c < startCol + cols && c < screenW; c++) {
@@ -237,7 +414,13 @@ public class ViewTUI implements UserInterface {
         }
     }
 
-
+    /**
+     * Partially redraws only the left (queue) panel without touching the other
+     * two panels or the log area.
+     *
+     * <p>Falls back to a full {@link #redrawScreen()} if the cached layout is
+     * invalid or the screen buffers have not been allocated yet.</p>
+     */
     private synchronized void redrawQueuePanel() {
         if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
         clearRegion(layoutStartRow + 1, 1, layoutPanelHeight - 2, layoutLeftSize - 3);
@@ -245,7 +428,13 @@ public class ViewTUI implements UserInterface {
         flushBuffers();
         redisplayPrompt();
     }
-
+    /**
+     * Partially redraws only the center (board) panel without touching the
+     * other two panels or the log area.
+     *
+     * <p>Falls back to a full {@link #redrawScreen()} if the cached layout is
+     * invalid or the screen buffers have not been allocated yet.</p>
+     */
     private synchronized void redrawCenterBoard() {
         if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
         clearRegion(layoutStartRow + 1, layoutLeftSize + 1, layoutPanelHeight - 2, layoutCenterSize - 3);
@@ -253,7 +442,13 @@ public class ViewTUI implements UserInterface {
         flushBuffers();
         redisplayPrompt();
     }
-
+    /**
+     * Partially redraws only the right (players) panel without touching the
+     * other two panels or the log area.
+     *
+     * <p>Falls back to a full {@link #redrawScreen()} if the cached layout is
+     * invalid or the screen buffers have not been allocated yet.</p>
+     */
     private synchronized void redrawPlayersPanel() {
         if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
         clearRegion(layoutStartRow + 1, layoutLeftSize + layoutCenterSize + 1, layoutPanelHeight - 2, layoutRightSize - 3);
@@ -261,7 +456,13 @@ public class ViewTUI implements UserInterface {
         flushBuffers();
         redisplayPrompt();
     }
-
+    /**
+     * Redraws only the separator line and the log area without touching the
+     * three game panels.
+     *
+     * <p>Falls back to a full {@link #redrawScreen()} if the cached layout is
+     * invalid or the screen buffers have not been allocated yet.</p>
+     */
     private synchronized void redrawLogs() {
         if (!layoutValid || screenBuffer == null) { redrawScreen(); return; }
         for (int c = 0; c < screenW; c++) {
@@ -280,7 +481,16 @@ public class ViewTUI implements UserInterface {
         redisplayPrompt();
     }
 
-
+    /**
+     * Serialises {@link #screenBuffer} and {@link #colorBuffer} into a single
+     * ANSI-styled string and writes it to the terminal in one pass.
+     *
+     * <p>Surrogate pairs (characters outside the Basic Multilingual Plane) are
+     * handled by detecting high-surrogate / low-surrogate pairs and emitting
+     * them together with the style of the high-surrogate cell. After writing,
+     * {@link InfoCmp.Capability#clr_eos} clears any stale content below the
+     * last rendered row.</p>
+     */
     private void flushBuffers() {
         terminal.puts(InfoCmp.Capability.cursor_home);
         AttributedStringBuilder asb = new AttributedStringBuilder();
@@ -310,7 +520,14 @@ public class ViewTUI implements UserInterface {
         terminal.writer().flush();
     }
 
-
+    /**
+     * Moves the cursor to the last terminal row and asks the JLine
+     * {@link LineReader} to repaint the readline prompt and any partial input
+     * the user has typed.
+     *
+     * <p>The {@link IllegalStateException} thrown by JLine when the reader is
+     * not in an active read operation is silently ignored.</p>
+     */
     private void redisplayPrompt() {
         terminal.puts(InfoCmp.Capability.cursor_address, terminal.getHeight() - 1, 0);
         terminal.puts(InfoCmp.Capability.clr_eol);
@@ -324,24 +541,50 @@ public class ViewTUI implements UserInterface {
         terminal.writer().flush();
     }
 
-
+    /**
+     * Removes all entries from the log buffer and triggers a log-area redraw.
+     */
     private synchronized void clearLogs() {
         logs.clear();
     }
-
+    /**
+     * Appends a plain-styled message to the log buffer and redraws the log
+     * area. If the buffer is full (size > {@value #MAX_LOGS}), the oldest
+     * entry is evicted.
+     *
+     * @param message the text to display in the log area
+     */
     private synchronized void log(String message) {
         logs.add(new LogEntry(message, AttributedStyle.DEFAULT));
         if (logs.size() > MAX_LOGS) logs.removeFirst();
         redrawLogs();
     }
-
+    /**
+     * Appends a styled message to the log buffer and redraws the log area.
+     * If the buffer is full (size > {@value #MAX_LOGS}), the oldest entry is
+     * evicted.
+     *
+     * @param message the text to display
+     * @param color   the {@link AttributedStyle} applied to the text
+     */
     private synchronized void logColored(String message, AttributedStyle color) {
         logs.add(new LogEntry(message, color));
         if (logs.size() > MAX_LOGS) logs.removeFirst();
         redrawLogs();
     }
 
-
+    /**
+     * Renders the left panel: the local player's nickname, the turn-order
+     * queue (one row per queue slot), the current game phase, round, era, and
+     * active player.
+     *
+     * <p>Player nicknames are coloured with their assigned
+     * {@link AttributedStyle} via {@link #getNicknameStyle(String)}.</p>
+     *
+     * @param startRow first usable row inside the panel box
+     * @param startCol first usable column inside the panel box
+     * @param maxWidth maximum number of columns available for text
+     */
     private void drawQueuePanel(int startRow, int startCol, int maxWidth) {
         int row = startRow;
 
@@ -373,7 +616,13 @@ public class ViewTUI implements UserInterface {
         printAt(row++, startCol, "Giocatore corrente:", maxWidth);
         printAt(row, startCol, model.getCurrPlayer(), maxWidth, getNicknameStyle(model.getCurrPlayer()));
     }
-
+    /**
+     * Converts a {@link GamePhaseEnum} value to its Italian display label for
+     * use in the TUI queue panel.
+     *
+     * @param currentPhase the phase to convert; {@code null} returns {@code "-"}
+     * @return a short Italian label (e.g. {@code "Pesca"}, {@code "Setup"})
+     */
     private String phaseToLabel(GamePhaseEnum currentPhase) {
         if (currentPhase == null) return "-";
         return switch (currentPhase) {
@@ -387,7 +636,23 @@ public class ViewTUI implements UserInterface {
             case NONE               -> "";
         };
     }
-
+    /**
+     * Renders the centre panel: the upper drawable-card row, the board tiles
+     * with totem indicators and draw-arrow counts, and the lower drawable-card
+     * row.
+     *
+     * <p>Each board tile is rendered as {@code [N:<player><arrows>]}.
+     * When the local player is on a tile during {@code DRAW_PHASE}, the
+     * remaining draw counts from {@link VirtualModel#getToDoActions()} are
+     * substituted for the tile's static values.</p>
+     *
+     * <p>Cards are coloured with the type-specific style returned by
+     * {@link it.polimi.ingsw.client.ui.TUI.utility.CardColorMapper#getCardJlineColor(String)}.</p>
+     *
+     * @param startRow first usable row inside the panel box
+     * @param startCol first usable column inside the panel box
+     * @param maxWidth maximum number of columns available for text
+     */
     private void drawCenterBoard(int startRow, int startCol, int maxWidth) {
         int row = startRow;
         int half = maxWidth / 2;
@@ -458,7 +723,15 @@ public class ViewTUI implements UserInterface {
             row++;
         }
     }
-
+    /**
+     * Draws a Unicode box (using box-drawing characters ┌ ┐ └ ┘ ─ │) at the
+     * specified position.
+     *
+     * @param startRow top-left row of the box
+     * @param startCol top-left column of the box
+     * @param width    outer width of the box in columns (must be ≥ 2)
+     * @param height   outer height of the box in rows (must be ≥ 2)
+     */
     private void drawBox(int startRow, int startCol, int width, int height) {
         if (width < 2 || height < 2) return;
         int endRow = startRow + height - 1;
@@ -476,17 +749,46 @@ public class ViewTUI implements UserInterface {
             printCharAt(i, endCol,   '\u2502');
         }
     }
-
+    /**
+     * Writes a single character with the given style into the screen buffer at
+     * the specified position. Out-of-bounds writes are silently ignored.
+     *
+     * @param row   target row
+     * @param col   target column
+     * @param c     character to write
+     * @param style style to apply
+     */
     private void printCharAt(int row, int col, char c, AttributedStyle style) {
         if (row < 0 || row >= screenH || col < 0 || col >= screenW) return;
         screenBuffer[row][col] = c;
         colorBuffer[row][col]  = style;
     }
-
+    /**
+     * Writes a single character with the default style into the screen buffer.
+     * Equivalent to {@link #printCharAt(int, int, char, AttributedStyle)} with
+     * {@link AttributedStyle#DEFAULT}.
+     *
+     * @param row target row
+     * @param col target column
+     * @param c   character to write
+     */
     private void printCharAt(int row, int col, char c) {
         printCharAt(row, col, c, AttributedStyle.DEFAULT);
     }
-
+    /**
+     * Renders the right panel: per-player nickname (colored), stats line
+     * (PP, food, stars), discount line, and the card inventory.
+     *
+     * <p>Cards belonging to {@link #GROUPABLE_CHARACTERS} types are collapsed
+     * into a count label (e.g. {@code "3x GATHERER"}) to save space. All other
+     * character cards and all building cards are listed individually via
+     * {@link #buildCardLabel(CardDTO)}. Labels wrap to the next line when they
+     * exceed the available width.</p>
+     *
+     * @param startRow first usable row inside the panel box
+     * @param startCol first usable column inside the panel box
+     * @param maxWidth maximum number of columns available for text
+     */
     private void drawPlayersPanel(int startRow, int startCol, int maxWidth) {
         class Etichetta {
             final String testo, tipo;
@@ -560,7 +862,30 @@ public class ViewTUI implements UserInterface {
 
 
 
-
+    /**
+     * Writes a string into the screen and color buffers at the given position,
+     * truncating to fit within {@code maxWidth} columns.
+     *
+     * <p>Truncation rules:</p>
+     * <ul>
+     *   <li>If the display width of {@code text} fits within
+     *       {@code maxWidth - 1}, it is written as-is.</li>
+     *   <li>If {@code maxWidth ≤ 3}, as many code points as fit are written
+     *       without an ellipsis.</li>
+     *   <li>Otherwise the string is cut and {@code "..."} (3 columns) is
+     *       appended.</li>
+     * </ul>
+     * <p>Wide characters (CJK, emoji, etc.) and surrogate pairs are handled
+     * correctly: a wide character is never split across a boundary.</p>
+     *
+     * @param row      target row; ignored if out of bounds
+     * @param col      starting column; ignored if out of bounds
+     * @param text     the string to write; {@code null} or empty is a no-op
+     * @param maxWidth maximum number of terminal columns to use (including the
+     *                 one reserved as a guard column)
+     * @param style    the {@link AttributedStyle} applied to every cell of the
+     *                 output
+     */
     private void printAt(int row, int col, String text, int maxWidth, AttributedStyle style) {
         if (maxWidth <= 0 || text == null || text.isEmpty()) return;
         if (row < 0 || row >= screenH || col < 0 || col >= screenW) return;
@@ -626,17 +951,37 @@ public class ViewTUI implements UserInterface {
 
 
 
-
+    /**
+     * Writes a string with {@link AttributedStyle#DEFAULT} style.
+     * Convenience overload of {@link #printAt(int, int, String, int, AttributedStyle)}.
+     *
+     * @param row      target row
+     * @param col      starting column
+     * @param text     the string to write
+     * @param maxWidth maximum number of terminal columns to use
+     */
     private void printAt(int row, int col, String text, int maxWidth) {
         printAt(row, col, text, maxWidth, AttributedStyle.DEFAULT);
     }
 
-
+    /**
+     * {@inheritDoc}
+     * Triggers a full screen redraw.
+     */
     @Override
     public void showBoard() {
         redrawScreen();
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws the centre panel and logs a move-notification message. If the
+     * moving player is the local player, the message is in the second person;
+     * otherwise it names the player.
+     *
+     * @param tile       the tile the player moved to; the tile label is derived
+     *                   from its ID ({@code 'A' + id})
+     * @param currPlayer the nickname of the player who moved
+     */
     @Override
     public void onMoveUpdate(TileDTO tile, String currPlayer) {
         redrawCenterBoard();
@@ -645,7 +990,13 @@ public class ViewTUI implements UserInterface {
         else
             log(currPlayer + " si e' mossə alla tile: " + (char) ('A' + tile.getId()));
     }
-
+    /**
+     * {@inheritDoc}
+     * Clears the log area and redraws the queue panel. If the new current
+     * player is the local player, a turn-start prompt is logged.
+     *
+     * @param nickname the nickname of the player whose turn has just started
+     */
     @Override
     public void onCurrPlayerUpdate(String nickname) {
         clearLogs();
@@ -656,18 +1007,39 @@ public class ViewTUI implements UserInterface {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Redraws the queue panel to reflect the new phase label.
+     *
+     * @param phaseDTO DTO carrying the updated {@link GamePhaseEnum}
+     */
     @Override
     public void onPhaseUpdate(PhaseDTO phaseDTO) {
         redrawQueuePanel();
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws the centre panel. If the drawing player is not the local player,
+     * a notification is logged with the card ID.
+     *
+     * @param c        the card that was drawn
+     * @param nickname the nickname of the player who drew the card
+     */
     @Override
     public void onDrawUpdate(CardDTO c, String nickname) {
         redrawCenterBoard();
         if (!model.getNickname().equals(nickname))
             log(nickname + " ha pescato la carta: " + c.getId());
     }
-
+    /**
+     * {@inheritDoc}
+     * Delegates to {@link EventScreen} for a full-screen event display. If the
+     * event DTO is empty the call is a no-op. After the screen is dismissed
+     * (or on error), a full {@link #redrawScreen()} restores the main layout.
+     *
+     * @param events      DTO containing the event cards and post-event stats
+     * @param statsBefore per-player stats captured before the events were applied
+     */
     @Override
     public void onEvent(EventDTO events, List<PlayerStatsDTO> statsBefore) {
         try {
@@ -681,7 +1053,14 @@ public class ViewTUI implements UserInterface {
             redrawScreen();
         }
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws all three panels and logs a draw-completion message via
+     * {@link #showCompletedDraw()}.
+     *
+     * @param tileDTO        the queue tile the player returned to
+     * @param playerStatsDTO the returning player's updated stats
+     */
     @Override
     public void onReturnToQueue(TileDTO tileDTO, PlayerStatsDTO playerStatsDTO) {
         redrawQueuePanel();
@@ -689,25 +1068,47 @@ public class ViewTUI implements UserInterface {
         redrawPlayersPanel();
         showCompletedDraw();
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws the queue and center panels and logs an era-change notification.
+     *
+     * @param age the new era number
+     */
     @Override
     public void onChangeAge(int age) {
         redrawQueuePanel();
         redrawCenterBoard();
         log("E' cambiata l'era! Adesso siamo nell'era: " + age);
     }
-
+    /**
+     * {@inheritDoc}
+     * Forwards the update to the virtual model and redraws the players panel.
+     *
+     * @param stats the updated stats for a single player
+     */
     @Override
     public void onStatsUpdate(PlayerStatsDTO stats) {
         model.onStatsUpdate(stats);
         redrawPlayersPanel();
     }
-
+    /**
+     * {@inheritDoc}
+     * Forwards the status update to the virtual model; no visual redraw is
+     * performed here because status flags are not directly displayed in the
+     * main TUI layout (they are shown on demand via {@link #showStatusScreen()}).
+     *
+     * @param status the updated status for a single player
+     */
     @Override
     public void onStatusUpdate(PlayerStatusDTO status) {
         model.onStatusUpdate(status);
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws the center panel and logs the number of remaining draw actions
+     * available from each row. Also informs the player whether the draw phase
+     * can be skipped.
+     */
     @Override
     public void showDrawable() {
         redrawCenterBoard();
@@ -723,18 +1124,34 @@ public class ViewTUI implements UserInterface {
                 log("Non hai la possibilita' di saltare la fase di pesca.");
         }
     }
-
+    /**
+     * Logs a message confirming that the local player has completed their draw
+     * turn.
+     */
     public void showCompletedDraw(){
         log("Hai completato il turno di pesca!");
     }
-
+    /**
+     * {@inheritDoc}
+     * Logs a skip notification; uses the second person for the local player
+     * and the third person for opponents.
+     *
+     * @param nickname the player who skipped their draw turn
+     */
     @Override
     public void notifySkip(String nickname) {
         if (model.getNickname().equals(nickname)) log("Hai saltato il turno.");
         else log(nickname + " ha saltato il turno.");
     }
 
-
+    /**
+     * {@inheritDoc}
+     * Clears the terminal, resets the virtual model, invalidates the layout,
+     * and triggers a full redraw. Returns the (now reset) virtual model so the
+     * caller can wire it to a fresh {@link Client} instance.
+     *
+     * @return the reset {@link VirtualModel}
+     */
     @Override
     public VirtualModel quit() {
         if (terminal != null) {
@@ -749,19 +1166,34 @@ public class ViewTUI implements UserInterface {
         redrawScreen();
         return model;
     }
-
+    /**
+     * {@inheritDoc}
+     * Redraws the screen, logs the quit reason, and hints at the available
+     * post-game commands.
+     *
+     * @param reason human-readable explanation of why the match ended
+     */
     @Override
     public void onQuit(String reason) {
         redrawScreen();
         log(reason);
         log("Digitare create <numeroPersone> per creare una nuova partita o join per visualizzare le partite disponibili.");
     }
-
+    /**
+     * {@inheritDoc}
+     * Logs a server-crash notification instructing the player to restart and
+     * reconnect.
+     */
     @Override
     public void onServerCrash() {
         log("Il server è crashato. Riavviare e riconnettersi ad esso per riprendere la partita.");
     }
-
+    /**
+     * {@inheritDoc}
+     * Logs a disconnection message, waits 500 ms, exits alternate-screen mode,
+     * restores cursor visibility, closes the terminal, and calls
+     * {@link System#exit(int)} with status {@code 0}.
+     */
     @Override
     public void exit() {
         log("Disconnessione in corso...");
@@ -774,7 +1206,12 @@ public class ViewTUI implements UserInterface {
         }
         System.exit(0);
     }
-
+    /**
+     * Opens the {@link StatusScreen} full-screen overlay showing the active
+     * status flags for all players, then restores the main layout.
+     *
+     * <p>Errors opening the screen are reported via {@link #log(String)}.</p>
+     */
     public void showStatusScreen() {
         try {
             StatusScreen statusScreen = new StatusScreen(terminal, model.getPlayerStatuses(), model.getPlayers());
@@ -784,7 +1221,18 @@ public class ViewTUI implements UserInterface {
             log("Errore nell'apertura della schermata status: " + e.getMessage());
         }
     }
-
+    /**
+     * {@inheritDoc}
+     * Updates the virtual model with the final stats, redraws the main screen,
+     * and opens the {@link EndGameScreen} full-screen overlay. If the overlay
+     * cannot be rendered (e.g. terminal too small or I/O error), a compact
+     * text summary is printed in the log area instead.
+     *
+     * @param stats      final per-player stats
+     * @param rankingPos the local player's 1-based finishing position
+     * @param globalPos  the local player's position in the persistent global
+     *                   leaderboard, or {@code -1} if unavailable
+     */
     @Override
     public void onGameEnding(List<PlayerStatsDTO> stats, int rankingPos, int globalPos) {
         model.updateAllStats(stats);
@@ -806,7 +1254,13 @@ public class ViewTUI implements UserInterface {
                     .forEach(s -> log("- " + s.getNickname() + ": " + s.getPPs() + " Punti, " + s.getnFood() + " Cibo"));
         }
     }
-
+    /**
+     * {@inheritDoc}
+     * Opens the {@link RankingScreen} full-screen overlay showing the global
+     * leaderboard for the current player count, then restores the main layout.
+     *
+     * @param ranks map from player nickname to cumulative global points
+     */
     @Override
     public void showRanking(Map<String, Integer> ranks) {
         try {
@@ -817,7 +1271,14 @@ public class ViewTUI implements UserInterface {
             log("Errore nell'apertura della classifica: " + e.getMessage());
         }
     }
-
+    /**
+     * {@inheritDoc}
+     * Logs the list of joinable lobbies grouped by player capacity. If no
+     * lobbies are available, a "none found" message is logged instead.
+     *
+     * @param lobbies map from player capacity to the list of open lobbies with
+     * that capacity
+     */
     @Override
     public void displayLobbies(Map<Integer, List<LobbyDTO>> lobbies) {
         if (lobbies == null || lobbies.isEmpty() || lobbies.values().stream().allMatch(List::isEmpty)) {
@@ -833,20 +1294,38 @@ public class ViewTUI implements UserInterface {
         });
         log("Usa il comando 'choose <id>' per entrare in una partita.");
     }
-
+    /** {@inheritDoc} Not implemented in the TUI. */
     @Override
     public void showLeaderboard(Map<PlayerDTO, Integer> ranks) {}
-
+    /**
+     * {@inheritDoc}
+     * Logs the exception message prefixed with {@code "ERRORE: "}.
+     *
+     * @param e the exception to report
+     */
     @Override
     public void printError(Exception e) { log("ERRORE: " + e.getMessage()); }
-
+    /**
+     * {@inheritDoc}
+     * Clears the log area and logs a login-confirmation message followed by
+     * hints for the next steps.
+     *
+     * @param nickname the nickname under which the player logged in
+     */
     @Override
     public void onLogin(String nickname) {
         clearLogs();
         log("Login effettuato come " + nickname);
         log("Digitare create <numeroPersone> per creare una nuova partita o join per visualizzare le partite disponibili.");
     }
-
+    /**
+     * {@inheritDoc}
+     * Looks up the card in the virtual model, retrieves its formatted details
+     * from {@link CardInfoHelper}, and logs each detail line with the card's
+     * type colour.
+     *
+     * @param cardId the unique identifier of the card to inspect
+     */
     @Override
     public void info(int cardId) {
         try {
@@ -858,25 +1337,46 @@ public class ViewTUI implements UserInterface {
             printError(e);
         }
     }
-
+    /**
+     * {@inheritDoc}
+     * Clears the log area and logs a match-creation confirmation with the
+     * assigned match ID.
+     *
+     * @param id the server-assigned ID of the newly created match
+     */
     @Override
     public void onCreate(int id) {
         clearLogs();
         log("Partita creata con ID: " + id);
     }
-
+    /**
+     * {@inheritDoc}
+     * Clears the log area and logs a join-confirmation message.
+     *
+     * @param id the ID of the match the player joined
+     */
     @Override
     public void onJoin(int id) {
         clearLogs();
         log("Ti sei unito alla partita con ID: " + id);
     }
-
+    /**
+     * {@inheritDoc}
+     * Clears the log area and logs a reconnection confirmation followed by a
+     * waiting message.
+     *
+     * @param matchId the ID of the match the player reconnected to
+     */
     @Override
     public void reconnect(int matchId) {
         clearLogs();
         log("Ti sei riunito alla partita con ID: " + matchId + "\nIn attesa degli altri giocatori.");
     }
-
+    /**
+     * Clears the screen and prints the large ASCII art Mesos logo directly to
+     * the terminal writer, bypassing the double-buffer. Called once at
+     * construction time.
+     */
     private void printLogo() {
         String logo =
                 """
@@ -912,7 +1412,12 @@ public class ViewTUI implements UserInterface {
         terminal.writer().println(logo);
         terminal.writer().flush();
     }
-
+    /**
+     * Opens the {@link HelpScreen} full-screen overlay listing all available
+     * commands, then restores the main layout.
+     *
+     * <p>Errors opening the screen are reported via {@link #log(String)}.</p>
+     */
     public void displayHelpMessage() {
         try {
             HelpScreen helpScreen = new HelpScreen(terminal);
@@ -922,14 +1427,31 @@ public class ViewTUI implements UserInterface {
             log("Errore nell'apertura della schermata di help: " + e.getMessage());
         }
     }
-
+    /**
+     * Returns the {@link AttributedStyle} colour assigned to the player with
+     * the given nickname, or {@link AttributedStyle#DEFAULT} if the player is
+     * not found in the model.
+     *
+     * @param nickname the player whose colour style is requested
+     * @return the JLine colour style for the player, or the default style
+     */
     private AttributedStyle getNicknameStyle(String nickname) {
         for (PlayerDTO p : model.getPlayers())
             if (p.getNickname().equals(nickname))
                 return getPlayerJlineColor(p.getColor());
         return AttributedStyle.DEFAULT;
     }
-
+    /**
+     * Returns the display width (in terminal columns) of the given Unicode
+     * code point.
+     *
+     * <p>East-Asian wide characters (Hangul, CJK, fullwidth Latin, emoji, and
+     * all Supplementary Multilingual Plane code points) return {@code 2};
+     * all other code points return {@code 1}.</p>
+     *
+     * @param cp the Unicode code point to measure
+     * @return {@code 1} for narrow characters, {@code 2} for wide characters
+     */
     private static int cpWidth(int cp) {
         if (cp < 0x1100) return 1;
         // CJK and East-Asian wide ranges (below U+1F000)
@@ -951,7 +1473,13 @@ public class ViewTUI implements UserInterface {
         return 1;
     }
 
-
+    /**
+     * Returns the total display width (in terminal columns) of a string,
+     * correctly accounting for wide Unicode characters via {@link #cpWidth(int)}.
+     *
+     * @param s the string to measure; {@code null} returns {@code 0}
+     * @return the number of terminal columns required to display the string
+     */
     private static int displayWidth(String s) {
         if (s == null) return 0;
         int w = 0;
@@ -963,11 +1491,36 @@ public class ViewTUI implements UserInterface {
         return w;
     }
 
-
+    /**
+     * Returns the {@link VirtualModel} associated with this view.
+     *
+     * @return the virtual model; never {@code null} after construction
+     */
     public VirtualModel getModel() { return model; }
-
+    /**
+     * Replaces the {@link Client} reference used to send player commands.
+     * Intended for reconnection scenarios where a new {@code Client} instance
+     * is created after a disconnect.
+     *
+     * @param client the new client instance; must not be {@code null}
+     */
     public void setClient(Client client) { this.client = client; }
-
+    /**
+     * Builds a compact display label for a card, including its ID, type, and
+     * any type-specific attributes:
+     * <ul>
+     *   <li><strong>BUILDING</strong> — appends the food cost if &gt; 0.</li>
+     *   <li><strong>CRAFTER</strong> — appends the crafter symbol via
+     *       {@link CrafterSymbolMapper}.</li>
+     *   <li><strong>HUNTER</strong> — appends a flag icon (⚑) if the card has
+     *       the mark attribute set.</li>
+     *   <li><strong>BUILDER</strong> — appends food discount and/or PP value
+     *       if either is &gt; 0.</li>
+     * </ul>
+     *
+     * @param card the card DTO to label
+     * @return a formatted string such as {@code "[ID: 42] BUILDING (Cost: 3)"}
+     */
     private String buildCardLabel(CardDTO card) {
         String tipo = card.getType().toString();
         StringBuilder label = new StringBuilder("[ID: ").append(card.getId()).append("] ").append(tipo);
@@ -1001,9 +1554,22 @@ public class ViewTUI implements UserInterface {
         return label.toString();
     }
 
+    /**
+     * Immutable container for a single log entry, pairing the display text
+     * with its {@link AttributedStyle}.
+     */
     private static class LogEntry {
+        /** The text content of the log message. */
         final String message;
+        /** The JLine style applied when rendering this entry. */
         final AttributedStyle style;
+
+        /**
+         * Creates a new log entry.
+         *
+         * @param message the text to display
+         * @param style   the style to apply
+         */
         LogEntry(String message, AttributedStyle style) {
             this.message = message;
             this.style   = style;
