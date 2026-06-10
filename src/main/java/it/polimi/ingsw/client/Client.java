@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Abstract base class for all client implementations.
  *
- * <p>Centralises shared state ({@code matchId}, {@code vm}, {@code ui}) and all
+ * <p>Centralizes shared state ({@code matchId}, {@code vm}, {@code ui}) and all
  * game-action validation logic ({@link #login}, {@link #createGame},
  * {@link #joinGame}, {@link #move}, {@link #draw}, {@link #skip},
  * {@link #requestRanking}), eliminating duplication between
@@ -28,29 +28,64 @@ import java.util.List;
  */
 public abstract class Client implements ClientToServerActions {
 
+    /** The ID of the match the client is currently participating in, or {@code 0} if not in a match. */
     protected int matchId = 0;
+
+    /** The client-side model holding the current game state. */
     protected VirtualModel vm;
+
+    /** The user interface used to display game state and error messages to the player. */
     protected UserInterface ui;
+
+    /** Whether the current match has ended, used to gate the ranking request. */
     protected volatile boolean gameEnded = false;
+
+    /** Whether the client has received an up-to-date list of available lobbies from the server. */
     protected boolean lobbiesAvailable = false;
 
+    /**
+     * Creates a new client with the given virtual model.
+     *
+     * @param vm the client-side model to use for this client
+     */
     protected Client(VirtualModel vm) {
         this.vm = vm;
     }
 
+    /**
+     * @return {@code true} if the client is currently participating in a match
+     */
     public boolean isInGame() { return matchId != 0; }
 
+    /**
+     * @return the current {@link VirtualModel} holding the client-side game state
+     */
     public VirtualModel getModel() { return vm; }
 
+    /**
+     * Sets the user interface for this client. Has no effect if a UI has already been set.
+     *
+     * @param ui the user interface to associate with this client
+     */
     public void setUi(UserInterface ui) {
         if (this.ui == null)
             this.ui = ui;
     }
 
+    /**
+     * @return the local player's nickname as stored in the {@link VirtualModel}
+     */
     public String getNickname() { return vm.getNickname(); }
 
+    /**
+     * @return {@code true} if the client has received an up-to-date lobby list from the server
+     */
     public boolean hasAvailableLobbies() { return lobbiesAvailable; }
 
+    /**
+     * Requests the UI to display the status screen for all players.
+     * Shows an error if the client is not currently in a match.
+     */
     public void showStatus() {
         if (isInGame())
             ui.showStatusScreen();
@@ -59,10 +94,19 @@ public abstract class Client implements ClientToServerActions {
                     "Non è possibile richiedere informazioni prima che la partita sia iniziata."));
     }
 
+    /**
+     * Requests the UI to display the list of available commands.
+     */
     public void help() {
         ui.displayHelpMessage();
     }
 
+    /**
+     * Requests the UI to display the details of the card with the given ID.
+     * Shows an error if the client is not currently in a match.
+     *
+     * @param cardId the unique identifier of the card to display
+     */
     public void info(int cardId) {
         if (isInGame())
             ui.info(cardId);
@@ -71,8 +115,18 @@ public abstract class Client implements ClientToServerActions {
                     "Non è consentito richiedere informazioni prima che la partita sia iniziata."));
     }
 
+    /**
+     * Starts the UI event loop.
+     */
     public void start() { ui.start(); }
 
+    /**
+     * Validates the given nickname and delegates to {@link #doLogin} if valid.
+     * Shows an error if the nickname is null or blank.
+     *
+     * @param nickname the nickname chosen by the player
+     * @return {@code true} if login succeeded, {@code false} otherwise
+     */
     @Override
     public boolean login(String nickname) {
         if (nickname == null || nickname.isBlank()) {
@@ -82,6 +136,14 @@ public abstract class Client implements ClientToServerActions {
         return doLogin(nickname);
     }
 
+    /**
+     * Validates the player count and match state, then delegates to {@link #doCreateGame}.
+     * Shows an error if the player count is outside the valid range (2–5) or if the
+     * client is already in a match.
+     *
+     * @param nickname   the player's nickname
+     * @param numPlayers the desired number of players for the new game
+     */
     @Override
     public void createGame(String nickname, int numPlayers) {
         if (numPlayers < 2 || numPlayers > 5) {
@@ -96,6 +158,13 @@ public abstract class Client implements ClientToServerActions {
         doCreateGame(nickname, numPlayers);
     }
 
+    /**
+     * Validates the lobby ID and match state, then delegates to {@link #doJoinGame}.
+     * Shows an error if the client is already in a match or if the lobby ID is invalid.
+     *
+     * @param nickname the player's nickname
+     * @param id       the unique identifier of the lobby to join
+     */
     @Override
     public void joinGame(String nickname, int id) {
         if (isInGame()) {
@@ -110,6 +179,14 @@ public abstract class Client implements ClientToServerActions {
         doJoinGame(nickname, id);
     }
 
+    /**
+     * Validates the move action against the current game state, then delegates to {@link #doMove}.
+     * Shows an error if the client is not in a match, the current phase is not
+     * {@link GamePhaseEnum#SETUP_PHASE}, it is not the player's turn, the tile index
+     * is out of bounds, or the target tile is already occupied.
+     *
+     * @param tileId the 0-based index of the target tile
+     */
     @Override
     public void move(int tileId) {
         if (!isInGame()) {
@@ -136,6 +213,14 @@ public abstract class Client implements ClientToServerActions {
         doMove(tileId);
     }
 
+    /**
+     * Validates the draw action against the current game state, then delegates to {@link #doDraw}.
+     * Shows an error if the client is not in a match, the current phase is not a draw phase,
+     * it is not the player's turn, the card is not in either draw list, no draws remain
+     * from the appropriate list, or the player cannot afford a building card.
+     *
+     * @param card the unique identifier of the card to draw
+     */
     @Override
     public void draw(int card) {
         if (!isInGame()) {
@@ -183,6 +268,11 @@ public abstract class Client implements ClientToServerActions {
         doDraw(card);
     }
 
+    /**
+     * Validates the skip action against the current game state, then delegates to {@link #doSkip}.
+     * Shows an error if the client is not in a match, the current phase is not a draw phase,
+     * it is not the player's turn, or the skip action is not currently allowed.
+     */
     @Override
     public void skip() {
         if (!isInGame()) {
@@ -205,6 +295,10 @@ public abstract class Client implements ClientToServerActions {
         doSkip();
     }
 
+    /**
+     * Validates that the game has ended, then delegates to {@link #doRequestRanking}.
+     * Shows an error if the match is still in progress.
+     */
     @Override
     public void requestRanking() {
         if (!gameEnded) {

@@ -8,10 +8,25 @@ import javafx.application.Application;
 
 import java.util.Scanner;
 
-
-
+/**
+ * Entry point for the client application.
+ * Prompts the player to choose between the TUI and the GUI, and — for the TUI —
+ * to choose the network protocol (Socket or RMI) and the server IP address.
+ * Then creates the appropriate {@link Client} and {@link ViewTUI} instances,
+ * wires them together, and starts the client.
+ */
 public class ClientMain {
 
+    /**
+     * Launches the client application.
+     * <p>
+     * If the player chooses the GUI, the JavaFX {@link LauncherApp} is launched
+     * and handles network configuration internally. If the player chooses the TUI,
+     * the network type and server IP are collected from standard input, and a
+     * {@link ClientSocket} or {@link ClientRmi} is created accordingly.
+     *
+     * @param args command-line arguments passed to the JavaFX launcher when the GUI is selected
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -27,6 +42,7 @@ public class ClientMain {
             System.out.println("Scelta non valida");
             return;
         }
+
         System.out.println("Scegli la rete:\n1) Socket\n2) RMI");
         int networkType = scanner.nextInt();
 

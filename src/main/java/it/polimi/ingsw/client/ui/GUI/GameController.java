@@ -30,6 +30,37 @@ import javafx.util.Duration;
 
 import java.util.*;
 import java.util.stream.Collectors;
+/**
+ * JavaFX controller for the main in-game screen ({@code gameBoard.fxml}).
+ *
+ * <p>{@code GameController} is the single point of contact between the network
+ * layer and the game UI. It receives update callbacks from {@link ViewGUI}
+ * (which is itself notified by the {@link it.polimi.ingsw.client.VirtualModel})
+ * and translates them into visual changes: card rows, tile board, totem
+ * positions, player statistics, flag icons, event banners, and era curtain
+ * animations.</p>
+ *
+ * <p>All public and private methods that touch JavaFX nodes are guarded by
+ * {@link #assertFxThread()}, which throws {@link IllegalStateException} if
+ * called from outside the FX Application Thread.</p>
+ *
+ * <h2>Lifecycle</h2>
+ * <ol>
+ *   <li>{@link #initialize()} — called by the FXMLLoader; wires button handlers
+ *       and installs stat-icon tooltips.</li>
+ *   <li>{@link #refreshBoard()} — called by {@code ViewGUI} on every model
+ *       update; delegates to {@link #initStructure()} on the first call and to
+ *       {@link #syncState()} on every subsequent call.</li>
+ * </ol>
+ *
+ * <h2>Event-banner and era-animation sequencing</h2>
+ * <p>The server may send two consecutive {@code EventMessage}s in the same
+ * round (round events followed by end-game events). To prevent the second
+ * banner from being lost, incoming events are enqueued in
+ * {@link #pendingEventBanners} while a banner is already on screen. Era
+ * curtain animations are similarly deferred in {@link #pendingEraAnimations}
+ * and played once all event banners have been dismissed.</p>
+ */
 
 public class GameController {
 
@@ -98,63 +129,85 @@ public class GameController {
 
     @FXML
     VBox notificationBox;
-
+    /** The view that owns this controller and provides access to the client and the virtual model. */
     private final ViewGUI viewGUI;
-
+    /** {@code true} after {@link #initStructure()} has been executed at least once. */
     private boolean initialized = false;
-
+    /** Turn number recorded at the last {@link #refreshBoard()} call; used to detect round boundaries. */
     private int lastTurn = -1;
-
+    /** Maps each {@link CardTypeEnum} to the {@link VBox} column that holds the player's own cards of that type. */
     private final Map<CardTypeEnum, VBox> cardVBoxMap = new HashMap<>();
-
+    /** Live registry of every {@link CardGUI} currently managed by this controller, keyed by card ID. */
     private final Map<Integer, CardGUI> cardMap = new HashMap<>();
-
-
+    /** Maps each board-tile ID to its {@link TileGUI} node. */
     private final Map<Integer, TileGUI> tileMap = new HashMap<>();
-
+    /** Maps each player nickname to their {@link TotemGUI} pawn. */
     private final Map<String, TotemGUI> totemMap = new HashMap<>();
-
+    /** Maps each opponent nickname to the {@link Text} node that displays their stats in the side panel. */
     private final Map<String, Text> opponentStatsNodes = new HashMap<>();
-
+    /** Maps each player nickname to their assigned CSS hex color string. */
     private final Map<String, String> opponentColors = new HashMap<>();
-
+    /** Tracks the {@link TileGUI} each player's totem currently occupies (absent when in the queue). */
     private final Map<String, TileGUI> totemPos = new HashMap<>();
-
+    /** GUI node representing the queue tile (starting position for all totems). */
     private QTileGUI qTileGUI;
-
+    /** GUI node representing the draw deck. */
     private DeckGUI deckGUI;
-
+    /** Maps each opponent nickname to their village overlay, shown when the player clicks the "+" button. */
     private final Map<String, VillageOverlay> opponentOverlays = new HashMap<>();
-
+    /** {@code true} while a move network request is in flight; prevents concurrent move submissions. */
     private boolean loadingMove = false;
-
+    /** Floating panel at the bottom of the screen that renders the local player's cards. */
     private VillagePanel villagePanel;
-
+    /** Floating panel on the right that renders all players' statistics. */
     private StatsPanel statsPanel;
-
+    /** Animated dots timeline shown in the loading screen. */
     private javafx.animation.Timeline dotsAnimation;
+    /** Preloaded flag icon images keyed by flag name (e.g. {@code "hunt"}, {@code "protection"}). */
     private final Map<String, Image> flagImages = new HashMap<>();
+    /** Names of flags whose icons are already displayed in {@link #flagBox}; prevents duplicates. */
     private final Set<String> activeFlags = new HashSet<>();
+    /** Pending event cards received via ping while an event banner is already on screen. */
     private final List<CardDTO> pingEvents = new ArrayList<>();
+
     private PauseTransition eventBannerDelay;
+    /** {@code true} while an event banner is currently visible on screen. */
     private boolean eventBannerShowing = false;
+    /**
+     * Snapshot of every player's stats captured just before an event phase begins.
+     * Used to compute the per-player delta displayed in the event banner.
+     */
     private Optional<Map<String, PlayerStatsDTO>> statsBeforeEvent = Optional.empty();
 
     /**
-     * Coda degli eventi in attesa di essere mostrati.
-     * Serve perché al turno 10 il server manda DUE EventMessage consecutivi
-     * (eventi del round + eventi finali): il secondo non va scartato ma accodato
-     * e mostrato subito dopo che il primo banner si chiude.
+     * Queue of event banners waiting to be displayed.
+     * Necessary because the server may send two consecutive {@code EventMessage}s
+     * in the same round (round events + end-game events); the second must not be
+     * discarded but shown immediately after the first banner closes.
      */
     private final Deque<Map.Entry<EventDTO, List<PlayerStatsDTO>>> pendingEventBanners = new ArrayDeque<>();
-    /** Coda delle animazioni era da mostrare dopo che tutti i banner eventi sono stati consumati. */
+    /**
+     * Queue of era numbers for which the curtain animation has not yet been played.
+     * Era animations are deferred while event banners are on screen and replayed
+     * once all pending banners have been dismissed.
+     */
     private final Deque<Integer> pendingEraAnimations = new ArrayDeque<>();
 
-
+    /**
+     * Creates a new {@code GameController} bound to the given view.
+     *
+     * @param viewGUI the owning {@link ViewGUI}; must not be {@code null}
+     */
     public GameController(ViewGUI viewGUI) {
         this.viewGUI = viewGUI;
     }
-
+    /**
+     * Called automatically by the {@link javafx.fxml.FXMLLoader} after all
+     * {@code @FXML} fields have been injected.
+     *
+     * <p>Wires the skip-button handler, enables hover cursor on the menu icon,
+     * and installs custom tooltips on all stat icons.</p>
+     */
     @FXML
     public void initialize(){
         txtNickname.setText(viewGUI.getNickname());
@@ -172,7 +225,21 @@ public class GameController {
     private void onMenuBtnClick(MouseEvent event) {
         onMenuBtnClick(event, null);
     }
-
+    /**
+     * Opens the in-game pause menu overlay.
+     *
+     * <p>The menu exposes three actions: quit the application, abandon the
+     * current match (triggers {@link it.polimi.ingsw.client.Client#quit()}),
+     * or dismiss the menu. If {@code fallback} is non-null it is restored as
+     * the overlay content when the user navigates back from a confirmation
+     * dialog.</p>
+     *
+     * @param event    the mouse event that triggered the call, or {@code null}
+     *                 when invoked programmatically
+     * @param fallback optional node to restore when the user clicks "back"
+     *                 inside the confirm dialog; pass {@code null} to close
+     *                 the overlay entirely
+     */
     private void onMenuBtnClick(MouseEvent event, Node fallback) {
         Label titleLabel = new Label("— MENU —");
         titleLabel.setPadding(new Insets(0, 0, 10, 0));
@@ -213,11 +280,31 @@ public class GameController {
         menu.setMinHeight(330);
         showOverlay(menu);
     }
-
+    /**
+     * Shows a two-button confirmation dialog (Confirm / Back) inside the global
+     * overlay. Clicking <em>Confirm</em> hides the overlay and runs
+     * {@code onConfirm}; clicking <em>Back</em> navigates to {@code fallback}
+     * (or to the pause menu if {@code fallback} is {@code null}).
+     *
+     * @param title     bold headline text shown at the top of the dialog
+     * @param caption   secondary descriptive text shown below the headline
+     * @param onConfirm action executed when the user confirms
+     */
     private void showConfirm(String title, String caption, Runnable onConfirm) {
         showConfirm(title, caption, onConfirm, null);
     }
-
+    /**
+     * Shows a two-button confirmation dialog (Confirm / Back) inside the global
+     * overlay. Clicking <em>Confirm</em> hides the overlay and runs
+     * {@code onConfirm}; clicking <em>Back</em> restores {@code fallback} as
+     * the overlay content, or re-opens the pause menu if {@code fallback} is
+     * {@code null}.
+     *
+     * @param title     bold headline text shown at the top of the dialog
+     * @param caption   secondary descriptive text shown below the headline
+     * @param onConfirm action executed when the user confirms
+     * @param fallback  node to restore on "Back", or {@code null} to reopen the menu
+     */
     private void showConfirm(String title, String caption, Runnable onConfirm, Node fallback) {
         Text t = new Text(title);
         t.setFill(Color.WHITE);
@@ -253,7 +340,18 @@ public class GameController {
         panel.setMinHeight(300);
         showOverlay(panel);
     }
-
+    /**
+     * Installs a custom styled tooltip on the given {@link ImageView}.
+     *
+     * <p>The tooltip is composed of a bold title and a wrapping description
+     * text, styled via the {@code card-tooltip} CSS class. It is installed
+     * only once per node; repeated calls for the same target are silently
+     * ignored.</p>
+     *
+     * @param target      the node on which the tooltip is installed
+     * @param title       short label displayed in bold at the top
+     * @param descrizione longer description shown below the title
+     */
     private void creaTooltip(ImageView target, String title, String descrizione) {
 
         if (target.getProperties().containsKey("custom-tooltip-installed")) {
@@ -289,8 +387,18 @@ public class GameController {
     }
 
     /**
-     * Refreshes the board to reflect the state of {@link it.polimi.ingsw.client.VirtualModel}, the first time it is called it initialize the structure
-     * from the second time on, it only synchronizes with the state of the game
+     * Refreshes the board to reflect the current state of the
+     * {@link it.polimi.ingsw.client.VirtualModel}.
+     *
+     * <p>On the first invocation ({@link #initialized} is {@code false}) the
+     * full scene structure is built by {@link #initStructure()}. On every
+     * subsequent call only the dynamic state (card rows, totem positions,
+     * stats, phase labels) is re-synchronized via {@link #syncState()}.</p>
+     *
+     * <p>If the current turn number differs from {@link #lastTurn}, a
+     * round-boundary animation is triggered via {@link #onEndRound()}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
      */
     public void refreshBoard() {
         assertFxThread();
@@ -309,7 +417,21 @@ public class GameController {
             onEndRound();
         }
     }
-
+    /**
+     * Moves the card identified by {@code cardId} from the draw rows into the
+     * local player's village column for its type.
+     *
+     * <p>The card is explicitly removed from all four draw-row {@link HBox}es
+     * before being appended to the appropriate {@link VBox} column. If no
+     * column exists yet for the card's type, a new one is created and added to
+     * {@link #myVillage}. Duplicate insertions are prevented by checking
+     * whether a column already holds the card.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param cardId the unique identifier of the card to insert; must be
+     *               present in {@link #cardMap}
+     */
     public void insertCard(int cardId) {
         assertFxThread();
 
@@ -348,7 +470,20 @@ public class GameController {
 
         column.getChildren().add(card);
     }
-
+    /**
+     * Displays a temporary notification message at the top of the
+     * {@link #notificationBox}.
+     *
+     * <p>The message fades out after 2.5 seconds and is then removed from the
+     * scene graph. Notifications are stacked in reverse insertion order
+     * (newest on top).</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param message  the text to display
+     * @param colorHex CSS hex color string applied to the message text
+     *                 (e.g. {@code "#3498db"})
+     */
     private void showNotification(String message, String colorHex) {
         assertFxThread();
         Text notif = new Text(message);
@@ -367,7 +502,16 @@ public class GameController {
         });
         delay.play();
     }
-
+    /**
+     * Handles a move confirmation from the server: relocates the moving
+     * player's totem from the queue tile to the target board tile and
+     * refreshes the drawable-card highlights.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param tile       DTO of the tile the player moved to
+     * @param currPlayer nickname of the player who performed the move
+     */
     public void onMoveUpdate(TileDTO tile, String currPlayer) {
         assertFxThread();
         tileMap.values().forEach(t -> t.setDisable(false));
@@ -390,7 +534,16 @@ public class GameController {
         refreshDrawableHighlight();
         totemPos.put(currPlayer, target);
     }
-
+    /**
+     * Updates the "current player" label to reflect whose turn it is.
+     *
+     * <p>The nickname is rendered in the player's assigned color as returned
+     * by {@link #opponentColors}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param nickname the nickname of the player whose turn has just started
+     */
     public void onCurrPlayerUpdate(String nickname) {
         assertFxThread();
         txtCurrPlayer.setVisible(true);
@@ -400,13 +553,28 @@ public class GameController {
         System.out.println("[DEBUG] currPlayer=" + nickname + " color=" + color + " opponentColors=" + opponentColors);
         txtCurrPlayerNick.setFill(Color.web(color));
     }
-
+    /**
+     * Updates the phase label and refreshes drawable-card highlights in
+     * response to a phase-change message from the server.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param phaseDTO DTO carrying the new {@link GamePhaseEnum} value
+     */
     public void onPhaseUpdate(PhaseDTO phaseDTO) {
         assertFxThread();
         txtPhase.setText("fase: " + phaseToLabel(phaseDTO.getPhase()));
         refreshDrawableHighlight();
     }
-
+    /**
+     * Handles a player returning to the queue: moves their totem back to the
+     * queue tile and updates their stats display.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param t the queue tile DTO (currently unused beyond triggering the update)
+     * @param s stats DTO of the player who returned to the queue
+     */
     public void onReturnToQueue(TileDTO t, PlayerStatsDTO s) {
         String nick = s.getNickname();
         assertFxThread();
@@ -421,7 +589,19 @@ public class GameController {
         totemPos.remove(nick);
         updateStats(List.of(s));
     }
-
+    /**
+     * Handles an era-change notification from the server.
+     *
+     * <p>Updates the era label and the deck display. If an event banner is
+     * currently on screen (or pending banners are queued), the curtain
+     * animation is deferred in {@link #pendingEraAnimations} and will play
+     * once all banners have been dismissed; otherwise it is shown immediately
+     * via {@link #showEraCurtainAnimation(int)}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param age the new era number (1-based)
+     */
     public void onChangeAge(int age) {
         assertFxThread();
         txtAge.setText("era: " + age);
@@ -436,8 +616,22 @@ public class GameController {
     }
 
     /**
-     * Animazione "tendine" al cambio era: due pannelli scuri scendono dall'alto
-     * e salgono dal basso, si incontrano al centro, appare il testo, poi si riaprono.
+     * Plays the era-change curtain animation.
+     *
+     * <p>Two dark panels slide in from the top and bottom of the screen,
+     * meet in the center, reveal an era title (e.g. "ERA II") for roughly
+     * 1.8 seconds, then slide back out. The animation is built entirely from
+     * JavaFX {@link TranslateTransition}s and {@link FadeTransition}s
+     * assembled in a {@link SequentialTransition}.</p>
+     *
+     * <p>An {@link javafx.animation.AnimationTimer} is used to wait two
+     * rendering frames before reading the panel heights, ensuring that layout
+     * has been performed and the measurements are accurate.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param age the era number to display, converted to a Roman numeral
+     *            by {@link #toRoman(int)}
      */
     private void showEraCurtainAnimation(int age) {
         assertFxThread();
@@ -553,7 +747,12 @@ public class GameController {
         starter.start();
     }
 
-
+    /**
+     * Converts a small positive integer to its Roman-numeral string.
+     *
+     * @param n the number to convert (expected values: 1, 2, 3)
+     * @return the Roman-numeral string, or an empty string for unrecognized values
+     */
     private String toRoman(int n) {
         return switch(n){
             case 1 -> "I";
@@ -562,16 +761,30 @@ public class GameController {
             default -> "";
         };
     }
-
-
-
+    /**
+     * Handles a player-status update by refreshing the flag icons for the
+     * local player.
+     *
+     * <p>Updates are ignored for other players' status messages.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param status the updated status DTO; processed only when
+     *               {@link PlayerStatusDTO#getNickname()} equals the local
+     *               player's nickname
+     */
     public void onStatusUpdate(PlayerStatusDTO status) {
         assertFxThread();
         if (!status.getNickname().equals(viewGUI.getNickname())) return;
 
         putFlags(status);
     }
-
+    /**
+     * Evaluates the active flags from a {@link PlayerStatusDTO} and adds the
+     * corresponding icons to {@link #flagBox} for each flag that is set.
+     *
+     * @param status the status DTO from which flag values are read
+     */
     private void putFlags(PlayerStatusDTO status) {
         List.of(
                 Map.entry("hunt", status.isHuntBonus()),
@@ -586,7 +799,15 @@ public class GameController {
             if (e.getValue()) addFlagIcon(e.getKey());
         });
     }
-
+    /**
+     * Handles a draw notification for an opponent player: shows a notification
+     * banner and refreshes both the card rows and all village displays.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param card     DTO of the card the opponent drew
+     * @param nickname nickname of the player who drew the card
+     */
     public void onOpponentDraw(CardDTO card, String nickname) {
         assertFxThread();
 
@@ -599,12 +820,23 @@ public class GameController {
 
         updateVillages();
     }
-
+    /**
+     * Triggers a refresh of drawable-card highlight states, typically called
+     * when the server signals that new cards are available to draw.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     public void showDrawable() {
         assertFxThread();
         refreshDrawableHighlight();
     }
-
+    /**
+     * Displays a skip notification for the given player.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param nickname nickname of the player who skipped their draw turn
+     */
     public void notifySkip(String nickname) {
         assertFxThread();
 
@@ -614,9 +846,18 @@ public class GameController {
     }
 
     /**
-     * Displays the banner with the events, if the banner is already showing the event is queued
-     * @param events DTO passed so that it can be displayed
-     * @param statsBefore used for the difference between stats before and after the events.
+     * Displays the event banner for the given {@link EventDTO}.
+     *
+     * <p>If a banner is already on screen, the new event is enqueued in
+     * {@link #pendingEventBanners} and will be shown automatically once the
+     * current banner is dismissed. Empty event DTOs are silently ignored.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param events     DTO containing the event cards and post-event stats
+     * @param statsBefore list of per-player stats captured <em>before</em>
+     *                    the events were applied; used to compute the delta
+     *                    line shown in the banner
      */
     public void onEvent(EventDTO events, List<PlayerStatsDTO> statsBefore) {
         assertFxThread();
@@ -629,7 +870,19 @@ public class GameController {
         }
     }
 
-    /** Builds and shows the banner for a single EventDTO. */
+    /**
+     * Builds and displays the slide-in banner for a single {@link EventDTO}.
+     *
+     * <p>The banner contains the event card images, a per-player stat-delta
+     * summary, and an auto-dismissing progress bar. It slides in from the
+     * left and is automatically hidden after 8 seconds via
+     * {@link #hideBanner()}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param events      the events to display
+     * @param statsBefore pre-event stats used to compute per-player deltas
+     */
     private void showEventBanner(EventDTO events, List<PlayerStatsDTO> statsBefore) {
         assertFxThread();
         eventBannerShowing = true;
@@ -705,7 +958,19 @@ public class GameController {
         slideIn.setOnFinished(e -> countdown.play());
         slideIn.play();
     }
-
+    /**
+     * Transitions to the end-game leaderboard screen.
+     *
+     * <p>Loads {@code leaderboardBoard.fxml}, passes the final ranking data to
+     * {@link LeaderboardController}, and replaces the current scene with the
+     * leaderboard in full-screen mode.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param stats           list of final per-player stats
+     * @param pos             the local player's finishing position (1-based)
+     * @param globalRankingPos the local player's position in the persistent global leaderboard
+     */
     public void onGameEnding(List<PlayerStatsDTO> stats, int pos, int globalRankingPos) {
         assertFxThread();
         try{
@@ -743,9 +1008,16 @@ public class GameController {
     }
 
     /**
-     * Setup strutturale della scena: layout fisso, board, coda, pawn, overlay avversari.
-     * Non dipende dallo stato di gioco corrente (mani, fase, stats).
-     * Chiamato una sola volta quando initialized=false.
+     * Performs the one-time structural setup of the scene: board tiles, queue
+     * tile, deck widget, totem pawns, card rows, player stats, and opponent
+     * village overlays.
+     *
+     * <p>This method is intentionally separated from {@link #syncState()} so
+     * that the fixed scene structure is built only once, even when
+     * {@link #refreshBoard()} is called repeatedly (e.g. after a
+     * reconnection).</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
      */
     private void initStructure() {
         assertFxThread();
@@ -769,9 +1041,15 @@ public class GameController {
     }
 
     /**
-     * Sincronizza la GUI con lo stato corrente del VirtualModel.
-     * Chiamato sempre da  refreshBoard(), sia al primo avvio che alla riconnessione.
-     * Gestisce: carte pescabili, mani giocatori, stats, etichette fase/turno.
+     * Synchronises all dynamic GUI elements with the current state of the
+     * {@link it.polimi.ingsw.client.VirtualModel}.
+     *
+     * <p>Covers: totem positions, card rows, village columns, player stats,
+     * phase / turn / age labels, drawable highlights, and the deck widget.
+     * Called on every {@link #refreshBoard()} invocation, including after a
+     * reconnection.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
      */
     private void syncState() {
         assertFxThread();
@@ -792,7 +1070,15 @@ public class GameController {
             deckGUI.update(viewGUI.getModel().getDeckSize(), viewGUI.getModel().currAge);
 
     }
-
+    /**
+     * Re-reads totem positions from the virtual model and places every totem
+     * on either the queue tile or the appropriate board tile.
+     *
+     * <p>Clears all existing pawn placements before re-populating, so the
+     * result always reflects the authoritative server state.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     private void updateTotemPositions() {
         assertFxThread();
 
@@ -821,9 +1107,15 @@ public class GameController {
     }
 
     /**
-     * Crea e collega il pannello Village flottante alla radice della scena.
-     * Nasconde l'HBox FXML originale `myVillage` e reindirizza i riferimenti
-     * all'HBox interna di VillagePanel.
+     * Creates and attaches the {@link VillagePanel} floating panel to the
+     * scene root, then redirects {@link #myVillage} to the panel's inner
+     * {@link HBox}.
+     *
+     * <p>The panel is inserted immediately below {@link #globalOverlay} in the
+     * z-order so that it appears behind modal overlays. Idempotent: does
+     * nothing if the panel has already been created.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
      */
     private void initVillagePanel() {
         assertFxThread();
@@ -842,9 +1134,15 @@ public class GameController {
     }
 
     /**
-     * Crea e collega il pannello Statistiche flottante alla radice della scena.
-     * Nasconde l'HBox FXML originale `myVillage` e reindirizza i riferimenti
-     * all'HBox interna di StatsPanel.
+     * Creates and attaches the {@link StatsPanel} floating panel to the scene
+     * root, then redirects {@link #opponents} to the panel's inner
+     * {@link VBox}.
+     *
+     * <p>The panel is inserted immediately below {@link #globalOverlay} in the
+     * z-order and aligned to the right edge of the screen. Idempotent: does
+     * nothing if the panel has already been created.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
      */
     private void initStatsPanel() {
         assertFxThread();
@@ -861,7 +1159,18 @@ public class GameController {
 
         opponents = statsPanel.getOpponents();
     }
-
+    /**
+     * Builds a {@link VillageOverlay} for each opponent player and stores it
+     * in {@link #opponentOverlays}.
+     *
+     * <p>Each overlay contains one {@link VBox} column per {@link CardTypeEnum};
+     * columns are hidden until populated. The overlay is shown when the local
+     * player clicks the "+" button next to an opponent's name.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param players the full player list; the local player is skipped
+     */
     private void initOpponentOverlays(List<PlayerDTO> players){
         assertFxThread();
         for(PlayerDTO player : players){
@@ -893,7 +1202,17 @@ public class GameController {
             opponentOverlays.put(player.getNickname(), new VillageOverlay(root,content, cols));
         }
     }
-
+    /**
+     * Rebuilds all village columns from the current virtual-model snapshot.
+     *
+     * <p>For the local player, cards are inserted into {@link #myVillage} via
+     * {@link #insertCard(int)}. For opponents, cards are inserted into the
+     * corresponding {@link VillageOverlay}. Duplicate card IDs within the same
+     * player are filtered out using a local {@link Set}.</p>
+     *
+     * <p>Must be called on the FX Application Thread (indirectly via
+     * {@link #syncState()}).</p>
+     */
     private void updateVillages() {
         for (VBox col : cardVBoxMap.values()) {
             col.getChildren().clear();
@@ -958,7 +1277,12 @@ public class GameController {
             }
         }
     }
-
+    /**
+     * Clears and rebuilds the upper and lower draw-card rows from the current
+     * virtual-model snapshot, then refreshes drawable highlights.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     private void updateCardRows() {
         lowerRowChar.getChildren().clear();
         upperRowChar.getChildren().clear();
@@ -973,7 +1297,15 @@ public class GameController {
 
         refreshDrawableHighlight();
     }
-
+    /**
+     * Adds a single card DTO to the appropriate draw-row {@link HBox},
+     * routing character cards to {@code charRow} and buildings/events to
+     * {@code buildEvRow}. Character cards also have sliding behaviour enabled.
+     *
+     * @param dto        card data transfer object
+     * @param charRow    target row for character-type cards
+     * @param buildEvRow target row for building- and event-type cards
+     */
     private void addCardToRow(CardDTO dto, HBox charRow, HBox buildEvRow) {
         CardGUI cardGUI = createDrawableCard(dto.getId());
         if (dto.getType().isCharacter()) {
@@ -984,7 +1316,14 @@ public class GameController {
             buildEvRow.getChildren().add(cardGUI);
         }
     }
-
+    /**
+     * Updates the age, turn, current-player, and phase labels in the HUD.
+     *
+     * @param age        current era number
+     * @param turn       current round number
+     * @param nickname   nickname of the player whose turn it is
+     * @param phaseState current game phase, used to derive the display label
+     */
     private void updateInfos(int age, int turn, String nickname, GamePhaseEnum phaseState) {
         txtAge.setText("era: " + age);
         txtRound.setText("round: " + turn);
@@ -995,7 +1334,12 @@ public class GameController {
         txtCurrPlayerNick.setFill(Color.web(color));
         txtPhase.setText("fase: " + phaseToLabel(phaseState));
     }
-
+    /**
+     * Converts a {@link GamePhaseEnum} value to its Italian display label.
+     *
+     * @param currentPhase the phase to convert; {@code null} returns {@code "-"}
+     * @return a short Italian label suitable for display in the phase HUD field
+     */
     private String phaseToLabel(GamePhaseEnum currentPhase) {
         if (currentPhase == null)
             return "-";
@@ -1010,7 +1354,15 @@ public class GameController {
             case NONE -> "";
         };
     }
-
+    /**
+     * Performs the initial population of the draw-card rows, including the
+     * deal animation played at game start.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param cardsUp   cards to place in the upper row
+     * @param cardsDown cards to place in the lower row
+     */
     private void initCards(List<CardDTO> cardsUp, List<CardDTO> cardsDown) {
         assertFxThread();
         upperRowChar.getChildren().clear();
@@ -1025,7 +1377,15 @@ public class GameController {
         animateDeal(toAnimate);
         refreshDrawableHighlight();
     }
-
+    /**
+     * Adds a single card to the appropriate draw row and registers it for the
+     * deal animation.
+     *
+     * @param dto        card data transfer object
+     * @param charRow    target row for character-type cards
+     * @param buildEvRow target row for building- and event-type cards
+     * @param toAnimate  accumulator list; the created {@link CardGUI} is appended here
+     */
     private void addCardToRowWithAnimation(CardDTO dto, HBox charRow, HBox buildEvRow, List<CardGUI> toAnimate) {
         CardGUI cardGUI = createDrawableCard(dto.getId());
         if (dto.getType().isCharacter()) {
@@ -1037,7 +1397,18 @@ public class GameController {
         }
         toAnimate.add(cardGUI);
     }
-
+    /**
+     * Returns the {@link CardGUI} for the given card ID, creating and
+     * registering a new one if it does not yet exist in {@link #cardMap}.
+     *
+     * <p>Newly created cards have a click handler that delegates to
+     * {@link #handleDrawClick(CardGUI)}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param cardId the card identifier
+     * @return the existing or newly created {@link CardGUI}
+     */
     private CardGUI createDrawableCard(int cardId) {
         assertFxThread();
 
@@ -1048,7 +1419,13 @@ public class GameController {
         card.setOnMouseClicked(event -> handleDrawClick(card));
         return card;
     }
-
+    /**
+     * Handles a click on a drawable card: temporarily disables the card,
+     * dispatches a draw request to the server on a background thread, and
+     * re-enables the card when the request completes (success or failure).
+     *
+     * @param card the card the player intends to draw
+     */
     private void handleDrawClick(CardGUI card) {
         assertFxThread();
 
@@ -1074,7 +1451,17 @@ public class GameController {
 
         new Thread(drawTask, "draw-action").start();
     }
-
+    /**
+     * Assigns a CSS hex color to each player and creates their {@link TotemGUI}
+     * pawn node.
+     *
+     * <p>Colors are derived from the {@link it.polimi.ingsw.enumerations.ColorPawnEnum}
+     * assigned to the player by the server during lobby setup.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param players the full list of players in the match
+     */
     private void initPlayersColorsAndPawns(List<PlayerDTO> players) {
         assertFxThread();
 
@@ -1094,7 +1481,16 @@ public class GameController {
             totemMap.put(player.getNickname(), newTotem);
         }
     }
-
+    /**
+     * Handles a click on a board tile: disables all tiles to prevent concurrent
+     * move requests, dispatches the move to the server on a daemon background
+     * thread, and re-enables tiles when the request completes.
+     *
+     * <p>Calls are ignored while {@link #loadingMove} is {@code true}.</p>
+     *
+     * @param tileGUI the tile that was clicked
+     * @param index   the 0-based position index of the tile, sent to the server
+     */
     private void handleMoveClick(TileGUI tileGUI, int index) {
         assertFxThread();
 
@@ -1131,7 +1527,20 @@ public class GameController {
         thread.setDaemon(true);
         thread.start();
     }
-
+    /**
+     * Builds the board: creates and adds the {@link DeckGUI}, the
+     * {@link QTileGUI} (queue), and one {@link TileGUI} per entry in
+     * {@code tileList} to the {@link #tiles} {@link HBox}.
+     *
+     * <p>Each tile is wired to {@link #handleMoveClick(TileGUI, int)} and
+     * registered in {@link #tileMap}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param numPlayers number of players in the match; forwarded to
+     *                   {@link QTileGUI} to set the correct capacity display
+     * @param tileList   ordered list of tile DTOs from the virtual model
+     */
     private void initBoard(int numPlayers, List<TileDTO> tileList) {
         assertFxThread();
         tiles.getChildren().clear();
@@ -1156,7 +1565,15 @@ public class GameController {
             tiles.getChildren().add(nuovaTile);
         }
     }
-
+    /**
+     * Places every player's totem on the queue tile at game start.
+     *
+     * <p>Must be called on the FX Application Thread, after
+     * {@link #initPlayersColorsAndPawns(List)} and {@link #initBoard(int, List)}
+     * have both completed.</p>
+     *
+     * @param tileList the queue tile list (currently used only for length reference)
+     */
     private void initQueue(List<TileDTO> tileList) {
         assertFxThread();
         QTileGUI qTile = qTileGUI;
@@ -1167,7 +1584,15 @@ public class GameController {
             }
         }
     }
-
+    /**
+     * Populates the stats display for all players from the initial stats
+     * snapshot. The local player's stats are written to the HUD text fields;
+     * each opponent gets a new stats row in the {@link StatsPanel}.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param playerStats initial stats list, one entry per player
+     */
     private void initStats(List<PlayerStatsDTO> playerStats) {
         assertFxThread();
 
@@ -1186,7 +1611,15 @@ public class GameController {
             }
         }
     }
-
+    /**
+     * Appends a stats row for a single opponent to the {@link #opponents}
+     * {@link VBox}, including a "+" button that opens their village overlay.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param name  the opponent's nickname
+     * @param stats their current stats DTO
+     */
     private void addOpponentRows(String name, PlayerStatsDTO stats) {
         assertFxThread();
 
@@ -1223,11 +1656,20 @@ public class GameController {
         opponents.getChildren().addAll(nameRow, statsText);
     }
 
-
-
     /**
+     * Updates the stats display for all players.
      *
-     * @param playerStats
+     * <p>If the game is entering an event phase and no pre-event snapshot
+     * exists yet, one is captured now from the virtual model so that the
+     * event banner can later compute the per-player delta.</p>
+     *
+     * <p>The local player's stats are written to the HUD text fields; each
+     * opponent's stats row is updated in place via
+     * {@link #opponentStatsNodes}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param playerStats updated stats list, one entry per player
      */
     public void updateStats(List<PlayerStatsDTO> playerStats) {
         assertFxThread();
@@ -1250,7 +1692,15 @@ public class GameController {
             }
         }
     }
-
+    /**
+     * Writes the local player's current stats into the HUD text fields
+     * ({@link #txtPP}, {@link #txtFood}, {@link #txtStars},
+     * {@link #txtBuildDisc}, {@link #txtFeastDisc}).
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param stats the local player's current stats
+     */
     private void updateMyStats(PlayerStatsDTO stats) {
         assertFxThread();
 
@@ -1260,7 +1710,14 @@ public class GameController {
         txtBuildDisc.setText(String.valueOf(stats.getTotBuildDisc()));
         txtFeastDisc.setText(String.valueOf(stats.getFoodDiscount()));
     }
-
+    /**
+     * Opens the village overlay for the given opponent in the global overlay
+     * panel.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param nickname the opponent whose village should be displayed
+     */
     private void viewVillage(String nickname) {
         assertFxThread();
 
@@ -1271,7 +1728,12 @@ public class GameController {
         }
         showOverlay(overlay.root);
     }
-
+    /**
+     * Reads the active flags from the virtual model for the local player and
+     * adds their icons to {@link #flagBox} via {@link #addFlagIcon(String)}.
+     *
+     * <p>Called once during {@link #initStructure()}.</p>
+     */
     private void initFlags() {
         for(PlayerStatusDTO status : viewGUI.getModel().getPlayerStatuses()){
             if(status.getNickname().equals(viewGUI.getNickname())){
@@ -1279,7 +1741,11 @@ public class GameController {
             }
         }
     }
-
+    /**
+     * Pre-loads all flag icon {@link Image}s into {@link #flagImages}, keyed
+     * by flag name. Called once at the start of {@link #refreshBoard()}, before
+     * {@link #initStructure()}.
+     */
     private void uploadFlags() {
         flagImages.put("protection", new Image("images/icons/Protection_flag.png", true));
         flagImages.put("double", new Image("images/icons/DoubleShamanIncome.png", true));
@@ -1290,7 +1756,17 @@ public class GameController {
         flagImages.put("gatherer", new Image("images/icons/Discount_gatherer.png", true));
         flagImages.put("hunt", new Image("images/icons/Hunt_flag.png", true));
     }
-
+    /**
+     * Adds the icon for the named flag to {@link #flagBox}, if it is not
+     * already present. The icon is sized to 25 px height (preserving aspect
+     * ratio) and equipped with a custom tooltip loaded from
+     * {@link FlagRegistry}.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param flag the flag name (e.g. {@code "hunt"}, {@code "protection"});
+     *             must be a key in {@link #flagImages}
+     */
     private void addFlagIcon(String flag) {
         assertFxThread();
         if (activeFlags.contains(flag)) return;
@@ -1301,7 +1777,16 @@ public class GameController {
         flagBox.getChildren().add(icon);
         creaTooltip(icon, flag, FlagRegistry.getDescription(flag));
     }
-
+    /**
+     * Replaces the content of {@link #overlayContent} with {@code content} and
+     * makes {@link #globalOverlay} visible. Clicking on the semi-transparent
+     * backdrop (i.e. directly on {@code globalOverlay} rather than on
+     * {@code content}) dismisses the overlay.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param content the node to display inside the overlay
+     */
     private void showOverlay(Node content) {
         assertFxThread();
         overlayContent.getChildren().setAll(content);
@@ -1311,11 +1796,21 @@ public class GameController {
             if (e.getTarget().equals(globalOverlay)) hideOverlay();
         });
     }
-
+    /** Hides the global overlay and clears its content. Equivalent to {@link #hideOverlay(Node)} with {@code null}. */
     private void hideOverlay() {
         hideOverlay(null);
     }
-
+    /**
+     * Hides the global overlay. If {@code fallback} is non-null, the overlay
+     * is not closed but its content is replaced with {@code fallback} instead.
+     *
+     * <p>Also stops any running {@link #dotsAnimation} and resets
+     * {@link #eventBannerShowing} to {@code false}.</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     *
+     * @param fallback replacement content, or {@code null} to close the overlay
+     */
     private void hideOverlay(Node fallback) {
         assertFxThread();
         eventBannerShowing = false;
@@ -1331,7 +1826,23 @@ public class GameController {
             overlayContent.getChildren().clear();
         }
     }
-
+    /**
+     * Recomputes and applies highlight states to all cards and tiles.
+     *
+     * <p>Highlights are shown only when it is the local player's turn:</p>
+     * <ul>
+     *   <li>During {@code DRAW_PHASE} / {@code OPTIONAL_DRAW_PHASE}: cards
+     *       that the player can afford and are in the correct row are
+     *       highlighted; arrow indicators on the player's tile show remaining
+     *       up/down draw counts.</li>
+     *   <li>During {@code SETUP_PHASE}: unoccupied tiles are highlighted as
+     *       valid placement targets.</li>
+     * </ul>
+     * <p>The skip button is shown only when the current draw action is
+     * optional (as indicated by {@link ActionsDTO#isOptionalFlag()}).</p>
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     private void refreshDrawableHighlight() {
         assertFxThread();
 
@@ -1378,7 +1889,17 @@ public class GameController {
         skipButton.setVisible(canSkip);
         skipButton.setManaged(canSkip);
     }
-
+    /**
+     * Returns {@code true} if the local player can draw the given card.
+     *
+     * <p>Buildings are drawable only when the player has enough food to cover
+     * their cost after applying the build discount. Character cards are
+     * always drawable; event cards (Feast, Hunt, Ritual, StonePainting) are
+     * never directly drawable by the player.</p>
+     *
+     * @param c the card DTO to evaluate
+     * @return {@code true} if the card can currently be drawn by the local player
+     */
     private boolean isDrawable(CardDTO c) {
         CardTypeEnum type = c.getType();
         int id = c.getId();
@@ -1395,7 +1916,13 @@ public class GameController {
 
         return !type.equals(CardTypeEnum.FEAST) && !type.equals(CardTypeEnum.HUNT) && !type.equals(CardTypeEnum.RITUAL) && !type.equals(CardTypeEnum.STONE_PAINTING);
     }
-
+    /**
+     * Displays a full-screen "waiting for other players" overlay with an
+     * animated ellipsis. A duplicate menu button is shown inside the overlay
+     * so the player can quit even while waiting.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     public void showReconnectionWaiting() {
         assertFxThread();
         Text msg = new Text("In attesa degli altri giocatori");
@@ -1433,7 +1960,13 @@ public class GameController {
         overlayMenu.setOnMouseClicked(e -> onMenuBtnClick(e, wrapper));
         showOverlay(wrapper);
     }
-
+    /**
+     * Slides the current event banner out of view (upward), then hides the
+     * overlay. After hiding, the next pending event banner is shown (if any),
+     * or the next pending era animation is played.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     private void hideBanner(){
         assertFxThread();
         if (overlayContent.getChildren().isEmpty()) {
@@ -1461,7 +1994,11 @@ public class GameController {
         });
         slideOut.play();
     }
-
+    /**
+     * Handles a click on the skip button: hides the button immediately,
+     * dispatches a skip request to the server on a background thread, and
+     * restores the button if the request fails.
+     */
     private void handleSkipClick(){
         skipButton.setVisible(false);
         skipButton.setManaged(false);
@@ -1478,7 +2015,12 @@ public class GameController {
         }));
         new Thread(task, "skip-action").start();
     }
-
+    /**
+     * Triggers the deal animation for all cards currently in the draw rows
+     * at the start of a new round.
+     *
+     * <p>Must be called on the FX Application Thread.</p>
+     */
     private void onEndRound() {
         assertFxThread();
 
@@ -1494,7 +2036,17 @@ public class GameController {
 
         animateDeal(toAnimate);
     }
-
+    /**
+     * Builds the stat-delta summary line for a single player, showing the
+     * before/after values and the signed difference for food, prestige points,
+     * and stars.
+     *
+     * @param before stats snapshot captured before the event
+     * @param after  stats snapshot captured after the event
+     * @return a formatted string such as
+     *         {@code "cibo: 3 → 5  (+2)   |   pp: 10 → 12  (+2)"}, or an
+     *         empty string if nothing changed
+     */
     private String buildDeltaLine(PlayerStatsDTO before, PlayerStatsDTO after) {
         List<String> parts = new ArrayList<>();
         addDelta(parts, "cibo",   before.getnFood(),  after.getnFood());
@@ -1502,21 +2054,39 @@ public class GameController {
         addDelta(parts, "stelle", before.getnStars(),  after.getnStars());
         return String.join("   |   ", parts);
     }
-
+    /**
+     * Appends a formatted delta entry to {@code parts} if the value changed.
+     *
+     * @param parts  accumulator list of delta strings
+     * @param label  display label for the stat (e.g. {@code "cibo"})
+     * @param before value before the event
+     * @param after  value after the event
+     */
     private void addDelta(List<String> parts, String label, int before, int after) {
         int diff = after - before;
         if (diff == 0) return;
         String sign = diff > 0 ? "+" : "";
         parts.add(label + ": " + before + " → " + after + "  (" + sign + diff + ")");
     }
-
+    /**
+     * Creates a styled {@link Text} node displaying the given player stats.
+     *
+     * @param stats the stats to format
+     * @return a white {@link Text} node ready to be added to the scene graph
+     */
     private Text buildStatsText(PlayerStatsDTO stats) {
         Text t = new Text(formatStats(stats));
         t.setFill(Color.web("#FFFFFF"));
         t.setStyle("-fx-font-size: 20px;");
         return t;
     }
-
+    /**
+     * Formats a {@link PlayerStatsDTO} as a compact multi-line string for
+     * display in the stats panel.
+     *
+     * @param stats the stats to format
+     * @return a formatted string containing food, PP, stars, and discounts
+     */
     private static String formatStats(PlayerStatsDTO stats) {
         return "food: " + stats.getnFood()
                 + "  pp: " + stats.getPPs()
@@ -1524,7 +2094,11 @@ public class GameController {
                 + "\nsconto builder: " + stats.getTotBuildDisc()
                 + " sconto gatherer: " + stats.getFoodDiscount();
     }
-
+    /**
+     * Asserts that the current thread is the JavaFX Application Thread.
+     *
+     * @throws IllegalStateException if called from any other thread
+     */
     private static void assertFxThread() {
         if (!Platform.isFxApplicationThread()) {
             throw new IllegalStateException(
@@ -1533,7 +2107,11 @@ public class GameController {
             );
         }
     }
-
+    /**
+     * Holds the JavaFX nodes that make up an opponent's village overlay:
+     * the root container, the card-display {@link HBox}, and the per-type
+     * column map.
+     */
     private static class VillageOverlay {
         final VBox root;
         final HBox content;
@@ -1544,7 +2122,14 @@ public class GameController {
             this.cols = cols;
         }
     }
-
+    /**
+     * Plays a staggered deal animation for a list of cards: each card fades
+     * in showing its back, then flips to reveal its front via paired
+     * {@link ScaleTransition}s. Cards are animated with a base delay of
+     * {@code 80 ms × index} to produce a cascading effect.
+     *
+     * @param cards the cards to animate, in display order
+     */
     private void animateDeal(List<CardGUI> cards) {
         int baseDelayMs = 80;
 
@@ -1560,7 +2145,12 @@ public class GameController {
             wait.play();
         }
     }
-
+    /**
+     * Animates a single card's deal sequence: fade in → scale to zero
+     * (showing back) → swap to front image → scale back to full size.
+     *
+     * @param card the card to animate
+     */
     private void dealSingleCard(CardGUI card) {
         FadeTransition fadeIn = new FadeTransition(Duration.millis(120), card);
         fadeIn.setFromValue(0);
@@ -1582,7 +2172,11 @@ public class GameController {
         SequentialTransition seq = new SequentialTransition(fadeIn, scaleDown);
         seq.play();
     }
-
+    /**
+     * Returns whether an event banner is currently being displayed.
+     *
+     * @return {@code true} if an event banner is on screen
+     */
     public boolean isEventBannerShowing(){
         return eventBannerShowing;
     }

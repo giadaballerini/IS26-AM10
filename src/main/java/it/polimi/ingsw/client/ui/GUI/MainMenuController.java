@@ -29,80 +29,88 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents the controller that interacts with the main menu scene in the GUI.
+ * Controller for the main menu scene in the GUI.
+ * Manages the sequential flow of pre-game screens: network configuration,
+ * login, lobby creation, and lobby selection. Each pane is shown or hidden
+ * depending on the current step, and the controller communicates with the
+ * {@link Client} to perform network operations on background threads.
  *
- * <p> This controller expects {@link ViewGUI} and {@link SceneManager} to be injected before making it active, otherwise it will throw a {@link NullPointerException} at runtime </p>
+ * <p>This controller requires {@link ViewGUI} and {@link SceneManager} to be
+ * injected before the scene becomes active; failing to do so will cause a
+ * {@link NullPointerException} at runtime.</p>
  */
 public class MainMenuController {
-    @FXML
-    private VBox loginPane;
-    @FXML
-    private VBox retePane;
-    @FXML
-    private HBox sceltaPane;
-    @FXML
-    private VBox creaPane;
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private TextField ipField;
 
-    @FXML
-    private Label errorLabel;
-    @FXML
-    private HBox errorBanner;
-    @FXML
-    private HBox errorBannerWrapper;
-    @FXML
-    private ToggleGroup numPlayers;
-    @FXML
-    private ToggleGroup connection;
-
-    @FXML
-    private Button connectButton;
-
-    @FXML
-    private Button loginButton;
-
-    @FXML
-    private ImageView backButton;
-
+    @FXML private VBox loginPane;
+    @FXML private VBox retePane;
+    @FXML private HBox sceltaPane;
+    @FXML private VBox creaPane;
+    @FXML private TextField usernameField;
+    @FXML private TextField ipField;
+    @FXML private Label errorLabel;
+    @FXML private HBox errorBanner;
+    @FXML private HBox errorBannerWrapper;
+    @FXML private ToggleGroup numPlayers;
+    @FXML private ToggleGroup connection;
+    @FXML private Button connectButton;
+    @FXML private Button loginButton;
+    @FXML private ImageView backButton;
     @FXML Button quitBtn;
+    @FXML private TableView<LobbyRow> lobbyPane;
+    @FXML private TableColumn<LobbyRow, String> colGiocatori;
+    @FXML private TableColumn<LobbyRow, String> colProprietario;
+    @FXML private TableColumn<LobbyRow, Integer> colId;
+    @FXML private TableColumn<LobbyRow, Void> colJoin;
 
-    @FXML
-    private TableView<LobbyRow> lobbyPane;
-    @FXML
-    private TableColumn<LobbyRow, String> colGiocatori;
-    @FXML
-    private TableColumn<LobbyRow, String> colProprietario;
-    @FXML
-    private TableColumn<LobbyRow, Integer> colId;
-    @FXML
-    private TableColumn<LobbyRow, Void> colJoin;
+    /** Observable list backing the lobby table. */
     private final ObservableList<LobbyRow> lobbyData = FXCollections.observableArrayList();
+
+    /** The nickname entered by the player at login. */
     private String username;
+
+    /** The network protocol chosen by the player (RMI or Socket). */
     private NetworkType chosenNetwork;
+
+    /** The client instance created after a successful connection. */
     private Client client;
+
+    /** The server IP address entered by the player. */
     private String ip;
+
     private ViewGUI viewGUI;
     private SceneManager sceneManager;
+
+    /** Timer used to auto-dismiss the error banner after 4 seconds. */
     private Timeline hideTimer;
+
+    /**
+     * Whether the controller is expecting a reconnection attempt from the server.
+     * Set to {@code true} when the player is sent back to the menu after a disconnection.
+     */
     private boolean reconnectExpected = false;
+
+    /** Timer that waits for a reconnection confirmation before proceeding to the lobby screen. */
     private PauseTransition reconnectTimer;
+
+    /** Whether a reconnection has already been handled in this session, to avoid duplicate transitions. */
     private boolean reconnectHandled = false;
 
+    /**
+     * Initializes the controller after the FXML is loaded.
+     * Sets up the lobby table columns, the join button cell factory,
+     * and the initial visibility state of all panes.
+     */
     @FXML
     public void initialize() {
         lobbyPane.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colGiocatori.setCellValueFactory(new PropertyValueFactory<>("giocatori")); // chiama getGiocatori()
+        colGiocatori.setCellValueFactory(new PropertyValueFactory<>("giocatori"));
         colProprietario.setCellValueFactory(new PropertyValueFactory<>("proprietario"));
         CursorManager.makeNodesHoverable(backButton, quitBtn);
 
         System.out.println(getClass().getResource("/images/back_button.png"));
         try {
             java.net.URL cssUrl = getClass().getResource("/css/tableStyle.css");
-
             if (cssUrl != null) {
                 String cssPath = cssUrl.toExternalForm();
                 lobbyPane.getStylesheets().clear();
@@ -149,6 +157,10 @@ public class MainMenuController {
         });
     }
 
+    /**
+     * Called when a reconnection attempt succeeds. Stops the reconnect timer,
+     * hides all panes, and transitions directly to the game board scene.
+     */
     public void onReconnectSuccess() {
         reconnectExpected = false;
         reconnectHandled = true;
@@ -160,8 +172,10 @@ public class MainMenuController {
     }
 
     /**
-     * Fills the table with theavailable lobbies.
-     * @param lobbies a map from max players to the list of available lobbies
+     * Populates the lobby table with the available lobbies and switches to the lobby list pane.
+     * Must be called on the JavaFX application thread.
+     *
+     * @param lobbies a map from maximum player count to the list of lobbies with that capacity
      */
     public void updateLobbies(Map<Integer, List<LobbyDTO>> lobbies) {
         Platform.runLater(() -> {
@@ -184,6 +198,12 @@ public class MainMenuController {
             backButton.setManaged(true);
         });
     }
+
+    /**
+     * Handles the connect button click. Reads the IP address and selected network type,
+     * then attempts to create the client on a background thread to avoid blocking the UI.
+     * On success, transitions to the login pane; on failure, shows an error banner.
+     */
     @FXML
     public void onConnectClick() {
         if (connection.getSelectedToggle() == null) {
@@ -226,16 +246,18 @@ public class MainMenuController {
         t.start();
     }
 
-
     /**
-     * This method is called after the connection choice is made to create the client
+     * Creates the appropriate {@link Client} implementation based on the selected network type,
+     * and wires it to the {@link ViewGUI} and {@link VirtualModel}.
+     * Called on a background thread by {@link #onConnectClick()}.
+     *
      * @throws NotBoundException if the RMI registry cannot be reached
-     * @throws IOException if the socket connection cannot be established.
+     * @throws IOException       if the socket connection cannot be established
      */
     private void createClient() throws NotBoundException, IOException {
         Toggle selected = connection.getSelectedToggle();
         if (selected == null) {
-            Platform.runLater(() ->showError("Seleziona il tipo di rete"));
+            Platform.runLater(() -> showError("Seleziona il tipo di rete"));
             return;
         }
         this.chosenNetwork = NetworkType.valueOf((String) selected.getUserData());
@@ -250,6 +272,11 @@ public class MainMenuController {
         viewGUI.setClient(client);
     }
 
+    /**
+     * Handles the login button click. Reads the username from the text field
+     * and attempts to log in on a background thread.
+     * On failure, shows an appropriate error banner.
+     */
     @FXML
     public void onLoginClick() {
         username = usernameField.getText();
@@ -273,7 +300,6 @@ public class MainMenuController {
             if (!success) {
                 showError("Il nickname è già in uso");
             }
-
         });
 
         loginTask.setOnFailed(e -> {
@@ -286,6 +312,13 @@ public class MainMenuController {
         t.start();
     }
 
+    /**
+     * Called by {@link ViewGUI} when the server confirms a successful login.
+     * Transitions to the lobby choice pane, unless a reconnection flow is in progress,
+     * in which case it waits briefly for a reconnection confirmation before proceeding.
+     *
+     * @param nickname the nickname that was accepted by the server
+     */
     public void onLoginSuccess(String nickname) {
         hideAll();
         if (reconnectHandled) return;
@@ -311,6 +344,9 @@ public class MainMenuController {
         reconnectTimer.play();
     }
 
+    /**
+     * Handles the "Create" button click. Transitions to the lobby creation pane.
+     */
     @FXML
     public void onCreaClick() {
         hideAll();
@@ -320,6 +356,11 @@ public class MainMenuController {
         backButton.setManaged(true);
     }
 
+    /**
+     * Handles the confirm button click in the lobby creation pane.
+     * Reads the selected player count, requests game creation, and transitions
+     * to the game board scene.
+     */
     @FXML
     public void onConfermaClick() {
         Toggle selected = numPlayers.getSelectedToggle();
@@ -334,11 +375,17 @@ public class MainMenuController {
         loadScene("/fxml/gameBoard.fxml", stage);
     }
 
+    /**
+     * Handles the "Join" button click. Requests the list of available lobbies from the server.
+     */
     @FXML
     public void onJoinClick() {
         client.requestJoin();
     }
 
+    /**
+     * Handles the back button click. Returns to the lobby choice pane.
+     */
     @FXML
     public void onBackClick() {
         hideAll();
@@ -346,18 +393,31 @@ public class MainMenuController {
         sceltaPane.setManaged(true);
     }
 
+    /**
+     * Called by {@link ViewGUI} when the server confirms the player has joined a lobby.
+     * Transitions to the game board scene.
+     *
+     * @param id the unique identifier of the lobby that was joined
+     */
     public void onJoinSuccess(int id) {
         hideAll();
         Stage stage = (Stage) loginPane.getScene().getWindow();
         loadScene("/fxml/gameBoard.fxml", stage);
     }
 
+    /**
+     * Called by {@link ViewGUI} when the server confirms the game was successfully created.
+     * Hides all panes while waiting for the game board scene to be loaded.
+     *
+     * @param id the unique identifier of the created game
+     */
     public void onCreateSuccess(int id) {
         hideAll();
     }
 
-
-
+    /**
+     * Hides all panes and clears the error banner.
+     */
     private void hideAll() {
         loginPane.setVisible(false);
         loginPane.setManaged(false);
@@ -380,10 +440,23 @@ public class MainMenuController {
         errorLabel.setText("");
     }
 
+    /**
+     * Injects the client instance into this controller.
+     *
+     * @param client the client to use for network operations
+     */
     public void setClient(Client client) {
         this.client = client;
     }
 
+    /**
+     * Loads the given FXML scene, wires a new {@link GameController} to it,
+     * applies the application stylesheet and custom cursors, and sets it as
+     * the current scene on the given stage in fullscreen mode.
+     *
+     * @param fxmlPath the classpath path of the FXML file to load
+     * @param stage    the stage on which to set the new scene
+     */
     private void loadScene(String fxmlPath, Stage stage) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -411,13 +484,33 @@ public class MainMenuController {
         }
     }
 
-    public void setViewGUI(ViewGUI viewGUI){
+    /**
+     * Injects the {@link ViewGUI} instance into this controller.
+     *
+     * @param viewGUI the GUI view to associate with this controller
+     */
+    public void setViewGUI(ViewGUI viewGUI) {
         this.viewGUI = viewGUI;
     }
-    public void setSceneManager(SceneManager sceneManager){
+
+    /**
+     * Injects the {@link SceneManager} instance into this controller.
+     *
+     * @param sceneManager the scene manager used to switch between application scenes
+     */
+    public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
     }
 
+    /**
+     * Sends the player back to the network configuration pane, typically after
+     * a disconnection from the server. Sets the reconnect flag so that the next
+     * successful login triggers a reconnection attempt rather than a fresh lobby flow.
+     * Shows the given reason in the error banner if non-empty.
+     *
+     * @param reason the reason for returning to the menu, displayed in the error banner;
+     *               may be {@code null} or empty if no message should be shown
+     */
     public void returnToMenu(String reason) {
         Platform.runLater(() -> {
             reconnectExpected = true;
@@ -435,6 +528,13 @@ public class MainMenuController {
         });
     }
 
+    /**
+     * Sends the player back to the lobby choice pane, typically after a match ends normally.
+     * Shows the given reason in the error banner if non-empty.
+     *
+     * @param reason the reason for returning to the lobby, displayed in the error banner;
+     *               may be {@code null} or empty if no message should be shown
+     */
     public void returnToLobby(String reason) {
         Platform.runLater(() -> {
             reconnectExpected = false;
@@ -446,14 +546,16 @@ public class MainMenuController {
             sceltaPane.setManaged(true);
             quitBtn.setVisible(true);
             quitBtn.setManaged(true);
-            if(reason != null && !reason.isEmpty())
+            if (reason != null && !reason.isEmpty())
                 showError(reason);
         });
     }
 
     /**
-     * Shows the banner with the error, it disappears after 4 seconds
-     * @param message is the error, it should be not empty and not null
+     * Displays an animated error banner with the given message.
+     * The banner slides in from the top and fades out automatically after 4 seconds.
+     *
+     * @param message the error message to display; should be non-null and non-empty
      */
     public void showError(String message) {
         errorLabel.setText(message);
@@ -498,9 +600,11 @@ public class MainMenuController {
         dismiss.play();
     }
 
+    /**
+     * Handles the quit button click. Terminates the JavaFX application.
+     */
     @FXML
-    public void onExit(){
+    public void onExit() {
         Platform.exit();
     }
-
 }
