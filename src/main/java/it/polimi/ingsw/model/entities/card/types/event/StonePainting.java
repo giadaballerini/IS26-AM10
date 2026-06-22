@@ -23,7 +23,7 @@ public class StonePainting extends Event {
 
     /**
      * The painter count threshold: players with this many painters or fewer
-     * are penalised; those with more are rewarded.
+     * are penalized; those with more are rewarded.
      */
     private final int nPainterSup;
 

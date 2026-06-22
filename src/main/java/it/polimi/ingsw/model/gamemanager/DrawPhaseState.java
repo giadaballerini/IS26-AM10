@@ -55,4 +55,9 @@ class DrawPhaseState implements GamePhaseState {
         context.checkBoardTileEffects();
         context.checkCanDraw();
     }
+    /**
+     * Creates a new {@code DrawPhaseState} instance.
+     */
+    DrawPhaseState() {
+    }
 }

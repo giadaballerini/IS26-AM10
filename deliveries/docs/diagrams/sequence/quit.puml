@@ -1,0 +1,126 @@
+@startuml graceful_quit
+title Graceful Quit & Exit — RMI vs. Socket
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+== RMI — Quit ==
+
+participant "ClientRmi" as CR
+participant "ServerRmi" as SR
+participant "MatchManager" as MM
+participant "ClientHandler\n[other players]" as CH_others
+
+CR -> SR : quit(nickname)  [RMI call]
+SR -> MM : quit(nickname)
+
+alt active match
+    MM -> MM : removes match and performs cleanup\nclientToMatch.remove(all players)
+    MM -> CH_others : onQuitServer(reason)  [broadcast to others, quitter excluded]
+    MM --> SR : [return]
+    SR --> CR : [return]
+else pending reconnection
+    MM -> MM : removes pendingRestoration\nreconnectedPlayers.remove(nickname)
+    MM -> CH_others : onQuitServer(reason)  [others waiting, quitter excluded]
+    MM --> SR : [return]
+    SR --> CR : [return]
+else in lobby
+    MM -> MM : lobbies.remove(matchId)\nclientToMatch.remove(all in lobby)
+    MM -> CH_others : onQuitServer(reason)  [others in lobby, quitter excluded]
+    MM --> SR : [return]
+    SR --> CR : [return]
+else not in clientToMatch (includes post-game)
+    MM --> SR : throws InvalidTimingException\n("Non puoi usare questo comando al momento.")
+    SR --> CR : InvalidTimingException (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+note over CR
+  resetMatch() and ui.onQuit(...) are ALWAYS called
+  after the try/catch block, regardless of the outcome
+  of any branch above (including the exception case,
+  which is the actual path taken when quitting from
+  the post-game screen, since MatchManager.quit() has
+  no dedicated post-game branch).
+  The message shown is chosen from the LOCAL "gameEnded"
+  flag, not from any server response:
+    gameEnded == true  -> "Sei tornato al menu principale."
+    gameEnded == false -> "Hai abbandonato la partita."
+end note
+CR -> CR : resetMatch()
+CR -> CR : ui.onQuit(gameEnded ?\n  "Sei tornato al menu principale." :\n  "Hai abbandonato la partita.")
+
+== RMI — Exit (app closed) ==
+
+CR -> SR : handleDisconnection(nickname)  [RMI call]
+SR -> MM : disconnect(nickname)
+MM -> MM : clients.remove(nickname)\ncleanup match/lobby/reconnection\n(no post-game handling: postMatch is never touched)
+MM -> CH_others : onQuitServer(reason)  [if others are involved]
+SR --> CR : [return]
+CR -> CR : resetMatch()\nui.exit()
+
+== Socket — Quit ==
+
+participant "ClientSocket" as CS
+participant "ClientHandlerSocket\n(quitter)" as CHS
+participant "ClientMessageVisitorImpl" as CMV
+participant "MatchManager" as MM2
+participant "ClientHandler\n[other players]" as CH_others2
+
+note over CS
+  ClientSocket.quit() sends sendMessage(QuitMessage),
+  then immediately and UNCONDITIONALLY executes
+  resetMatch() and ui.onQuit(...) on the calling thread —
+  WITHOUT waiting for any server response, and WITHOUT
+  branching on what the server does with the QuitMessage.
+  The message is chosen purely from the local "gameEnded"
+  flag, exactly as on the RMI side.
+end note
+
+CS -> CS : if (!isInGame()) return
+CS -> CHS : [TCP] QuitMessage
+CS -> CS : resetMatch()\nthis.visitor = new ServerMessageVisitorImpl(...)
+CS -> CS : ui.onQuit(gameEnded ?\n  "Sei tornato al menu principale." :\n  "Hai abbandonato la partita.")
+
+CHS -> CMV : visit(QuitMessage)
+CMV -> MM2 : matchManager.quit(nickname)
+
+alt active match
+    MM2 -> MM2 : removes match and performs cleanup
+    MM2 -> CH_others2 : onQuitServer(reason)  [broadcast to others, quitter excluded]
+    MM2 --> CMV : [return]
+else pending reconnection
+    MM2 -> MM2 : removes pendingRestoration\nreconnectedPlayers.remove(nickname)
+    MM2 -> CH_others2 : onQuitServer(reason)  [others waiting, quitter excluded]
+    MM2 --> CMV : [return]
+else in lobby
+    MM2 -> MM2 : lobbies.remove(matchId)\nclientToMatch.remove(all in lobby)
+    MM2 -> CH_others2 : onQuitServer(reason)  [others in lobby, quitter excluded]
+    MM2 --> CMV : [return]
+else not in clientToMatch (includes post-game)
+    MM2 --> CMV : throws InvalidTimingException\n("Non puoi usare questo comando al momento.")
+    CMV -> CHS : clientHandler.onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+    note over CS
+      Reader thread receives ErrorMessage and shows it,
+      but the quitter's UI state was already reset
+      synchronously above by ClientSocket.quit() —
+      no QuitAckMessage is ever sent to the quitter
+      by this code path.
+    end note
+end
+
+== Socket — Exit (app close) ==
+
+CS -> CS : intentionalDisconnect = true
+CS -> CHS : [TCP] ExitMessage
+CS -> CS : resetMatch()\nui.exit()\ndisconnect()  [closes in/out/socket, connected = false]
+CHS -> CMV : visit(ExitMessage)
+CMV -> CHS : clientHandler.handleDisconnection(nickname)
+CHS -> CHS : tryMarkDisconnected()\ncloseStreams()
+CHS -> MM2 : matchManager.disconnect(nickname)
+MM2 -> MM2 : clients.remove(nickname)\ncleanup match/lobby/reconnection\n(no post-game handling: postMatch is never touched)
+MM2 -> CH_others2 : onQuitServer(reason)  [if others are involved]
+
+@enduml

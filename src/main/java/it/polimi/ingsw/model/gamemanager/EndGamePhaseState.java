@@ -43,4 +43,9 @@ class EndGamePhaseState implements GamePhaseState {
      */
     @Override
     public GamePhaseEnum getPhase() { return GamePhaseEnum.END_GAME; }
+    /**
+     * Creates a new {@code EndGamePhaseState} instance.
+     */
+    EndGamePhaseState() {
+    }
 }

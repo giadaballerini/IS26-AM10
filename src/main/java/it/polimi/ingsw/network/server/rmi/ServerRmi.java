@@ -1,10 +1,12 @@
 package it.polimi.ingsw.network.server.rmi;
 
+import it.polimi.ingsw.client.rmi.ClientRmi;
 import it.polimi.ingsw.client.rmi.VirtualViewRmi;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.network.dto.LobbyDTO;
-import it.polimi.ingsw.network.server.MatchManager;
+import it.polimi.ingsw.network.server.DisconnectionListener;
 import it.polimi.ingsw.network.server.VirtualServerRmi;
+import it.polimi.ingsw.server.MatchManager;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -15,7 +17,7 @@ import java.util.Map;
  * RMI server stub registered in the RMI registry under the name
  * {@code "GameServer"}.
  *
- * <p>Acts as the thin RMI transport layer between a remote {@link it.polimi.ingsw.network.client.rmi.ClientRmi}
+ * <p>Acts as the thin RMI transport layer between a remote {@link ClientRmi}
  * and the shared {@link MatchManager}. Each incoming RMI call is validated at
  * the transport level (exceptions declared by the interface) and then
  * forwarded directly to the match manager.
@@ -28,7 +30,7 @@ public class ServerRmi extends UnicastRemoteObject
         implements VirtualServerRmi, DisconnectionListener {
 
     /** The shared match coordinator that all server-side handlers route through. */
-    private MatchManager matchManager;
+    private final MatchManager matchManager;
 
     /**
      * Creates and exports a new {@code ServerRmi} bound to the given
@@ -52,9 +54,10 @@ public class ServerRmi extends UnicastRemoteObject
      */
     @Override
     public void login(String nickname, VirtualViewRmi clientStub)
-            throws RemoteException, AlreadyExistingUsernameException, InvalidTimingException {
+            throws RemoteException, InvalidUsernameException {
         ClientHandlerRmi rmiHandler = new ClientHandlerRmi(nickname, clientStub, this);
         matchManager.login(nickname, rmiHandler);
+        rmiHandler.startHealthCheck();
     }
 
     /**
@@ -80,7 +83,7 @@ public class ServerRmi extends UnicastRemoteObject
      */
     @Override
     public void move(String nickname, int tileId)
-            throws RemoteException, InvalidMoveException, InvalidPhaseException,
+            throws RemoteException, InvalidMoveException, OccupiedTileException, InvalidPhaseException,
             InvalidPlayerException, InvalidTimingException {
         matchManager.move(nickname, tileId);
     }

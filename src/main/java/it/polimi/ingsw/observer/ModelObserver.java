@@ -6,7 +6,6 @@ import it.polimi.ingsw.visitors.ClientMessageVisitor;
 import it.polimi.ingsw.visitors.GameMessageVisitor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Observer interface through which the model (and server-side logic) notifies
@@ -40,13 +39,6 @@ public interface ModelObserver {
     void setVisitor(ClientMessageVisitor visitor);
 
     /**
-     * Notifies the observer that an error has occurred.
-     *
-     * @param errorMsg human-readable description of the error; never {@code null}
-     */
-    void onErrorMessage(String errorMsg);
-
-    /**
      * Notifies the observer that the active player has changed.
      *
      * @param nickname nickname of the player who is now taking their turn
@@ -67,15 +59,6 @@ public interface ModelObserver {
      * @param phaseDTO descriptor of the new game phase
      */
     void onPhaseUpdate(PhaseDTO phaseDTO);
-
-    /**
-     * Notifies the observer that the leaderboard has been requested,
-     * providing the current rankings.
-     *
-     * @param ranks map from each player to their current score;
-     *              never {@code null}
-     */
-    void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks);
 
     /**
      * Notifies the observer that the game has ended, providing final
@@ -107,9 +90,8 @@ public interface ModelObserver {
      * triggered by a specific card effect.
      *
      * @param stats  the updated statistics for the player
-     * @param cardId identifier of the card that caused the update
      */
-    void onStatsUpdate(PlayerStatsDTO stats, int cardId);
+    void onStatsUpdate(PlayerStatsDTO stats);
 
     /**
      * Notifies the observer that a player has skipped their action.

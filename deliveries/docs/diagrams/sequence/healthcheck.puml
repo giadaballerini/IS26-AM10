@@ -1,0 +1,79 @@
+@startuml health_check
+title Health Check & Disconnection — RMI vs. Socket
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+== RMI Health Check ==
+
+participant "ClientHandlerRmi" as CHR
+participant "pingExecutor" as PE
+participant "VirtualViewRmi\n(client stub)" as STUB
+participant "DisconnectionListener\n(ServerRmi)" as DL
+participant "MatchManager" as MM
+
+note over CHR
+  startHealthCheck() spawns a daemon thread
+  that iterates every PING_INTERVAL (2s).
+end note
+
+loop every PING_INTERVAL (2s)
+    CHR -> PE : submit(clientStub::ping)
+    PE -> STUB : ping()  [remote, timeout 3s]
+    alt success
+        STUB --> PE : return
+        CHR -> CHR : failures = 0
+    else TimeoutException / ExecutionException
+        CHR -> CHR : ping.cancel(true)
+        CHR -> CHR : failures++
+        alt failures >= MAX_FAILURES (2)
+            CHR -> CHR : tryMarkDisconnected()\n  → disconnected = true\n  → messageSender.shutdownNow()\n  → pingExecutor.shutdownNow()
+            CHR -> DL : disconnectionListener\n.handleDisconnection(nickname)
+            DL -> MM : disconnect(nickname)
+        end
+    end
+end
+
+note over CHR
+  handleTransportError() follows the same path
+  (tryMarkDisconnected → handleDisconnection)
+  if a sendAsync callback throws a RemoteException.
+end note
+
+== Socket Health Check ==
+
+participant "ClientHandlerSocket\n(self DisconnectionListener)" as CHS
+participant "MatchManager" as MM2
+
+note over CHS
+  startHealthCheck() is called by onLogin(),
+  spawning a daemon thread that iterates every PING_INTERVAL (2s).
+  lastMessageReceivedTime is updated upon every
+  readObject() inside the run() loop (including PongMessage).
+end note
+
+loop every PING_INTERVAL (2s)
+    CHS -> CHS : sendAsync(PingMessage)
+    CHS -> CHS : check inactivity\n(now - lastMessageReceivedTime)
+    alt inactivity > TIMEOUT_LIMIT (6s)
+        CHS -> CHS : handleDisconnection(nickname)\n  → tryMarkDisconnected()\n      → disconnected = true\n      → messageSender.shutdownNow()\n      → closeStreams()
+        CHS -> MM2 : matchManager.disconnect(nickname)
+    end
+end
+
+note over CHS
+  Unlike the RMI handler, ClientHandlerSocket implements
+  DisconnectionListener itself: there is no separate listener
+  object. handleDisconnection() is called directly by the
+  health-check thread and, internally, ends with the single
+  call to matchManager.disconnect(nickname) shown above.
+end note
+
+note over CHS
+  An IOException in the readObject() loop of run()
+  triggers handleDisconnection() directly,
+  handling sudden TCP drops.
+end note
+
+@enduml

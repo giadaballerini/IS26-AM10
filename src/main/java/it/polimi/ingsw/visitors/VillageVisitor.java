@@ -1,6 +1,8 @@
 package it.polimi.ingsw.visitors;
 
+import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.*;
+import it.polimi.ingsw.model.entities.card.types.event.Event;
 
 /**
  * Visitor for character cards present in a player's village.
@@ -10,6 +12,7 @@ import it.polimi.ingsw.model.entities.card.types.character.*;
  * character types they need to handle.
  * </p>
  */
+@SuppressWarnings("EmptyMethod")
 public interface VillageVisitor {
 
     /**
@@ -53,4 +56,18 @@ public interface VillageVisitor {
      * @param shaman the shaman card to visit
      */
     default void visit(Shaman shaman) {}
+
+    /**
+     * Visits a {@link Building} card.
+     *
+     * @param building the building card to visit
+     */
+    default void visit(Building building){}
+
+    /**
+     * Visits an {@link Event} card.
+     *
+     * @param event the event card to visit
+     */
+    default void visit(Event event){}
 }

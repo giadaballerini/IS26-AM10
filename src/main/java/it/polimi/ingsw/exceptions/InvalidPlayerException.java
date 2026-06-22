@@ -3,7 +3,7 @@ package it.polimi.ingsw.exceptions;
 /**
  * Exception thrown when a player tries to do an action not during his turn.
  */
-public class InvalidPlayerException extends RuntimeException {
+public class InvalidPlayerException extends GameException{
 
     /**
      * Creates a new {@code InvalidPlayerException} with the given detail message.

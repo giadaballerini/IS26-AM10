@@ -21,7 +21,6 @@ public enum LossIfBrokeEnum implements LossIfBrokeModifier {
         } else p.addFood(-e.getFoodCost());
     });
 
-
     /** The strategy used to apply this penalty effect to a player. */
     private final LossIfBrokeModifier modifier;
 
@@ -49,5 +48,5 @@ public enum LossIfBrokeEnum implements LossIfBrokeModifier {
      *
      * @return {@code false}, as this effect can be applied multiple times
      */
-    public boolean isOneTime() { return false; }
+    public boolean isOneTime() { return false;}
 }

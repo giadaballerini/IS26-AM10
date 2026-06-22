@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,7 +11,10 @@ import java.util.List;
  * can display the available matches and let the player choose one to join.
  */
 public class LobbyDTO implements Serializable {
-
+    /**
+     *  Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Unique identifier of this lobby. */

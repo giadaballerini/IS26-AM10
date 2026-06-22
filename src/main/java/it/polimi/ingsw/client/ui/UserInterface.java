@@ -173,16 +173,18 @@ public interface UserInterface {
     void onEvent(EventDTO events, List<PlayerStatsDTO> stats);
 
     /**
-     * Handles the player quitting the application. Cleans up the UI state and
-     * returns the current {@link VirtualModel} for any final processing.
+     * Handles the player leaving the current match, lobby, or post-game
+     * screen and returning to the main menu, without terminating the
+     * application. Cleans up the UI state and returns the current
+     * {@link VirtualModel} for any final processing.
      *
      * @return the current {@link VirtualModel} at the time of quitting
      */
     VirtualModel quit();
 
     /**
-     * Handles the player exiting the current match, returning them to the lobby screen
-     * without terminating the application.
+     * Handles the player exiting the application entirely, disconnecting
+     * from the server and terminating the program.
      */
     void exit();
 
@@ -242,4 +244,13 @@ public interface UserInterface {
      * in the current match.
      */
     void showStatusScreen();
+
+    /**
+     * Scrolls the players panel by the given number of rows.
+     * Positive {@code delta} scrolls down; negative scrolls up.
+     * The default implementation is a no-op for UIs that do not support scrolling.
+     *
+     * @param delta number of rows to scroll
+     */
+    default void scrollPlayersPanel(int delta) {}
 }

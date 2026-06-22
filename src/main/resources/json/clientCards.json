@@ -179,8 +179,6 @@
     "type": "RITUAL",
     "id": 23,
     "age": 1,
-    "ppGain": 5,
-    "ppLoss": 3,
     "caption": "Ottieni 5 PP se hai più stelle degli altri giocatori, perdi 3 PP se ne hai meno degli altri."
   },
   {
@@ -195,9 +193,6 @@
     "type": "STONE_PAINTING",
     "id": 25,
     "age": 1,
-    "thresh": 0,
-    "ppGain": 1,
-    "ppLoss": 2,
     "caption": "Se hai più di 0 artisti nella tua tribù ottieni 1 PP per ognuno di essi, altrimenti perdi 2 PP."
   },
   {
@@ -212,8 +207,6 @@
     "type": "RITUAL",
     "id": 27,
     "age": 2,
-    "ppGain": 10,
-    "ppLoss": 5,
     "caption": "Ottieni 10 PP se hai più stelle degli altri giocatori, perdi 5 PP se ne hai meno degli altri."
   },
   {
@@ -228,9 +221,6 @@
     "type": "STONE_PAINTING",
     "id": 29,
     "age": 2,
-    "thresh": 1,
-    "ppGain": 2,
-    "ppLoss": 2,
     "caption": "Se hai più di 1 artisti nella tua tribù ottieni 2 PP per ognuno di essi, altrimenti perdi 2 PP."
   },
   {
@@ -245,8 +235,6 @@
     "type": "RITUAL",
     "id": 31,
     "age": 3,
-    "ppGain": 15,
-    "ppLoss": 7,
     "caption": "Ottieni 15 PP se hai più stelle degli altri giocatori, perdi 7 PP se ne hai meno degli altri."
   },
   {
@@ -261,9 +249,6 @@
     "type": "STONE_PAINTING",
     "id": 33,
     "age": 3,
-    "thresh": 2,
-    "ppGain": 3,
-    "ppLoss": 2,
     "caption": "Se hai più di 2 artisti nella tua tribù ottieni 3 PP per ognuno di essi, altrimenti perdi 2 PP."
   },
   {
@@ -358,28 +343,28 @@
     "id": 47,
     "age": 1,
     "symbol": "AMIGDALA",
-    "caption": "Invenzione: Amigdala"
+    "caption": "Invenzione: Amigdala. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 48,
     "age": 1,
     "symbol": "ARROWHEAD",
-    "caption": "Invenzione: Punta di freccia"
+    "caption": "Invenzione: Punta di freccia. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 49,
     "age": 1,
     "symbol": "LEATHER",
-    "caption": "Invenzione: Pelle"
+    "caption": "Invenzione: Pelle. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 50,
     "age": 1,
     "symbol": "BREAD",
-    "caption": "Invenzione: Pane"
+    "caption": "Invenzione: Pane. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "SHAMAN",
@@ -467,35 +452,35 @@
     "id": 63,
     "age": 2,
     "symbol": "LEATHER",
-    "caption": "Invenzione: Pelle."
+    "caption": "Invenzione: Pelle. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 64,
     "age": 2,
     "symbol": "FLUTE",
-    "caption": "Invenzione: Flauto."
+    "caption": "Invenzione: Flauto. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 65,
     "age": 2,
     "symbol": "BOWL",
-    "caption": "Invenzione: Ciotola."
+    "caption": "Invenzione: Ciotola. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 66,
     "age": 2,
     "symbol": "ROPE",
-    "caption": "Invenzione: Corda."
+    "caption": "Invenzione: Corda. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 67,
     "age": 2,
     "symbol": "DOLL",
-    "caption": "Invenzione: Bambola."
+    "caption": "Invenzione: Bambola. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "SHAMAN",
@@ -589,28 +574,28 @@
     "id": 81,
     "age": 3,
     "symbol": "NECKLACE",
-    "caption": "Invenzione: Collana."
+    "caption": "Invenzione: Collana. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 82,
     "age": 3,
     "symbol": "BREAD",
-    "caption": "Invenzione: Pane."
+    "caption": "Invenzione: Pane. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 83,
     "age": 3,
     "symbol": "HOOK",
-    "caption": "Invenzione: Amo."
+    "caption": "Invenzione: Amo. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 84,
     "age": 1,
     "symbol": "DOLL",
-    "caption": "Invenzione: Bambola."
+    "caption": "Invenzione: Bambola. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "PAINTER",
@@ -676,14 +661,14 @@
     "id": 94,
     "age": 3,
     "symbol": "AMIGDALA",
-    "caption": "Invenzione: Amigdala"
+    "caption": "Invenzione: Amigdala. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 95,
     "age": 1,
     "symbol": "ARROWHEAD",
-    "caption": "Invenzione: Punta di Freccia."
+    "caption": "Invenzione: Punta di Freccia. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "SHAMAN",
@@ -702,21 +687,21 @@
     "id": 98,
     "age": 1,
     "symbol": "ROPE",
-    "caption": "Invenzione: Rope."
+    "caption": "Invenzione: Rope. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 99,
     "age": 1,
     "symbol": "BOWL",
-    "caption": "Invenzione: Ciotola."
+    "caption": "Invenzione: Ciotola. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "CRAFTER",
     "id": 100,
     "age": 1,
     "symbol": "FLUTE",
-    "caption": "Invenzione: Flauto."
+    "caption": "Invenzione: Flauto. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "GATHERER",
@@ -736,7 +721,7 @@
     "id": 103,
     "age": 2,
     "symbol": "HOOK",
-    "caption": "Invenzione: Amo."
+    "caption": "Invenzione: Amo. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "SHAMAN",
@@ -755,7 +740,7 @@
     "id": 106,
     "age": 3,
     "symbol": "NECKLACE",
-    "caption": "Invenzione: Collana."
+    "caption": "Invenzione: Collana. A fine partita i punti complessivi dati dagli inventori saranno: (numero di carte inventore) x (numero di invenzioni diverse possedute)."
   },
   {
     "type": "SHAMAN",

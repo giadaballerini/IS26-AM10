@@ -46,13 +46,6 @@ public class GainStars extends CardEffectInstant {
         gainStarsType.apply(p, this);
     }
 
-    /**
-     * Prints the number of stars granted, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.println("\nAggiunte " + starsAmount + " stelle");
-    }
 
     /**
      * Returns the number of stars awarded by this effect.

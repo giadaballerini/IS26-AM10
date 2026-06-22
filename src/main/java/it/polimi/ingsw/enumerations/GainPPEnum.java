@@ -3,7 +3,6 @@ package it.polimi.ingsw.enumerations;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.interfaces.GainPPModifier;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 
 /**
@@ -12,32 +11,19 @@ import it.polimi.ingsw.model.player.Player;
  * <p>Each constant defines a specific PP gain strategy by implementing {@link GainPPModifier}.
  * Some effects depend on the player's card composition or passives.</p>
  */
-public enum GainPPEnum implements GainPPModifier, GainPPVisitor {
+public enum GainPPEnum implements GainPPModifier {
 
     /**
      * Grants PP based on the number of cards of a specific category the player owns.
      */
-    PP_FOR_CAT((p, e, c) -> {
-        p.addPP(e.getPpAmount() * p.getNumType(e.getCat()));
-    }),
+    PP_FOR_CAT((p, e, c) -> p.addPP(e.getPpAmount() * p.getNumType(e.getCat()))),
 
     /**
      * Grants PP when the player completes a new set of all character types.
      * Checks whether the newly drawn card increases the number of complete sets.
      */
     PP_FOR_SET((p, e, c) -> {
-        int newNSets = Integer.MAX_VALUE;
-        int oldNSets = Integer.MAX_VALUE;
-        for (CardTypeEnum type : CardTypeEnum.values()) {
-            if (type.isCharacter()) {
-                newNSets = Math.min(newNSets, p.getNumType(type));
-                if (type.equals(c.getType()))
-                    oldNSets = Math.min(oldNSets, p.getNumType(type) - 1);
-                else
-                    oldNSets = Math.min(oldNSets, p.getNumType(type));
-            }
-        }
-        if (newNSets > oldNSets)
+        if (p.completesNewCharacterSet(c.getType()))
             p.addPP(e.getPpAmount());
     }),
 
@@ -45,26 +31,20 @@ public enum GainPPEnum implements GainPPModifier, GainPPVisitor {
      * Grants a flat amount of PP to the player.
      * This is a one-time effect.
      */
-    PP_FLAT((p, e, c) -> {
-        p.addPP(e.getPpAmount());
-    }) { public boolean isOneTime() { return true; } },
+    PP_FLAT((p, e, c) -> p.addPP(e.getPpAmount())) { public boolean isOneTime() { return true; } },
 
     /**
      * Activates the shaman's double PP passive for the player.
      */
-    DOUBLE_PP_SHAMAN((p, e, c) -> {
-        p.activateDoubleShaman();
-    }),
+    DOUBLE_PP_SHAMAN((p, e, c) -> p.activateDoubleShaman()),
 
     /**
      * Grants PP equal to the player's current builder points.
      */
-    DOUBLE_BUILDER((p, e, c) -> {
-        p.addPP(p.getBuilderPoints());
-    });
+    DOUBLE_BUILDER((p, e, c) -> p.addPP(p.getBuilderPoints()));
 
 
-    /** The strategy used to apply this PP gain effect to a player. */
+    /** The strategy used to apply this PP gaining effect to a player. */
     private final GainPPModifier modifier;
 
     /**

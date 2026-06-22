@@ -12,12 +12,14 @@ import java.io.Serializable;
  * clients can update their UI accordingly.
  */
 public class PhaseDTO implements Serializable {
-
+    /**
+     * Required by the {@link Serializable} interface.
+     */
     @Serial
     private static final long serialVersionUID = 1L;
 
     /** The game phase this DTO represents. */
-    private GamePhaseEnum gamePhase;
+    private final GamePhaseEnum gamePhase;
 
     /**
      * Creates a {@code PhaseDTO} wrapping the given game phase.

@@ -27,13 +27,13 @@ public class PlayEventVisitor implements CardVisitor {
     Event feastEvent = null;
 
     /** The list of players on which event effects are applied. */
-    private List<Player> players;
+    private final List<Player> players;
 
     /** The current game phase, passed to each event for context-dependent effects. */
-    private GamePhaseEnum currPhase;
+    private final GamePhaseEnum currPhase;
 
     /** The DTO accumulating the events executed during this visitation. */
-    private EventDTO events;
+    private final EventDTO events;
 
     /**
      * Constructs a new {@code PlayEventVisitor}.

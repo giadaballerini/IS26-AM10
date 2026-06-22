@@ -8,15 +8,13 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.dto.EventDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PlayEventVisitorTest {
     public class TestablePlayEventVisitor extends PlayEventVisitor{
@@ -28,7 +26,7 @@ class PlayEventVisitorTest {
     private TestablePlayEventVisitor pev;
     @BeforeEach
     void setUp() {
-        pev = new TestablePlayEventVisitor(null, null, null);
+        pev = new TestablePlayEventVisitor(null, null, new EventDTO());
     }
     @Test
     void visitValidityEvent() {

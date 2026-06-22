@@ -15,8 +15,10 @@ import it.polimi.ingsw.model.player.Player;
  * </p>
  */
 public class CanDrawVisitor implements CardVisitor {
-
-    private Player currPlayer;
+    /**
+     * The player whose draw eligibility is to be evaluated.
+     */
+    private final Player currPlayer;
 
     /**
      * {@code true} if the player must mandatorily draw the visited card
@@ -73,6 +75,7 @@ public class CanDrawVisitor implements CardVisitor {
      *
      * @param event the event card being visited
      */
+    @SuppressWarnings("EmptyMethod")
     public void visit(Event event) {}
 
     /**

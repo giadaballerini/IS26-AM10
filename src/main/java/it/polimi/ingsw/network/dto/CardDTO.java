@@ -15,6 +15,9 @@ import java.io.Serializable;
  */
 public class CardDTO implements Serializable {
 
+    /**
+     *  Required by the {@link Serializable} interface.
+     */
     @Serial
     private static final long serialVersionUID = 1L;
 

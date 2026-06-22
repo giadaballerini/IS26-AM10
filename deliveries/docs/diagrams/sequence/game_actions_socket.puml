@@ -1,0 +1,96 @@
+'
+ @startuml all_actions
+ title All Client Actions — Socket (success and errors)
+
+ skinparam sequenceArrowThickness 2
+ skinparam round corner 5
+ skinparam backgroundColor #FAFAFA
+
+participant "ClientSocket" as CS
+participant "ClientHandlerSocket" as CHS
+participant "ClientMessageVisitorImpl" as CMV
+participant "Controller" as C2
+participant "GameManager" as GM2
+participant "ClientHandlerSocket\n[all players]" as CHS_all
+
+
+== Socket — getLobbies ==
+CS -> CHS : [TCP] AskLobbiesMessage
+CHS -> CMV : visit(AskLobbiesMessage)
+CMV -> MM : getLobbies(nickname)
+alt success
+    MM --> CMV : lobbies
+    CMV -> CHS : onLobbiesRequested(lobbies)
+    CHS -> CS : [TCP] AvailableLobbiesMessage(lobbies)
+else Exception
+    MM --> CMV : throws exception
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+end
+
+== Socket — move ==
+
+CS -> CHS : [TCP] MoveMessage(nickname, tileId)
+CHS -> CMV : visit(MoveMessage)
+alt success
+    CMV -> CMV : if (gameVisitor == null) throw InvalidTimingException
+    CMV -> MM : matchManager.move(nickname, tileId)
+    MM -> C2 : controller.visit(new MoveMessage(nickname, tileId))
+    C2 -> GM2 : onMoveRequested(nickname, tilePos)
+    GM2 -> GM2 : validate + apply move
+    GM2 -> CHS_all : onMoveUpdate(tile, currPlayer)  [broadcast]
+    CHS_all -> CS : [TCP] MoveUpdateMessage
+else InvalidMoveException / InvalidPlayerException\n  / InvalidPhaseException / InvalidTimingException / OccupiedTileException
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+end
+
+== Socket — draw ==
+
+CS -> CHS : [TCP] DrawMessage(id, nickname)
+CHS -> CMV : visit(DrawMessage)
+alt success
+    CMV -> CMV : if (gameVisitor == null) throw InvalidTimingException
+    CMV -> MM : matchManager.drawCard(id, nickname)
+    MM -> C2 : controller.visit(new DrawMessage(id, nickname))
+    C2 -> GM2 : onDrawCardRequested(nickname, cardId)
+    GM2 -> GM2 : validate + apply draw
+    GM2 -> CHS_all : onDrawUpdate(card, nickname)  [broadcast]
+    CHS_all -> CS : [TCP] DrawUpdateMessage
+else Exception
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+end
+
+== Socket — skip ==
+
+CS -> CHS : [TCP] SkipMessage(nickname)
+CHS -> CMV : visit(SkipMessage)
+alt success
+    CMV -> CMV : if (gameVisitor == null) throw InvalidTimingException
+    CMV -> MM : matchManager.skip(nickname)
+    MM -> C2 : controller.visit(new SkipMessage(nickname))
+    C2 -> GM2 : onSkipRequested(nickname)
+    GM2 -> GM2 : validate + apply skip
+    GM2 -> CHS_all : notifySkip(nickname)  [broadcast]
+    CHS_all -> CS : [TCP] NotifySkipMessage
+else Exception
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+end
+
+== Socket — requestRanking ==
+CS -> CHS : [TCP] RankingRequestMessage
+CHS -> CMV : visit(RankingRequestMessage)
+CMV -> MM : requestRanking(nickname)
+alt success
+    MM --> CMV : ranking
+    CMV -> CHS : onRankingResponse(ranking)
+    CHS -> CS : [TCP] RankingResponseMessage
+else Exception
+    MM --> CMV : throws exception
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+end
+
+@enduml

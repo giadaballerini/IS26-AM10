@@ -39,4 +39,9 @@ class PlayEventPhaseState implements GamePhaseState {
      */
     @Override
     public GamePhaseEnum getPhase() { return GamePhaseEnum.PLAY_EVENT; }
+    /**
+     * Creates a new {@code PlayEventPhaseState} instance.
+     */
+    PlayEventPhaseState() {
+    }
 }

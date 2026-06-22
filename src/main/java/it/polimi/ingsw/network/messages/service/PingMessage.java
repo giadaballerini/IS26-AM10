@@ -19,4 +19,9 @@ public class PingMessage implements ServerMessage {
     public void accept(ServerMessageVisitor visitor) {
         visitor.visit(this);
     }
+    /**
+     * Creates a new {@code PingMessage} instance.
+     */
+    public PingMessage() {
+    }
 }

@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.net.URL?>
 
-<?import javafx.scene.text.TextFlow?>
-<StackPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane maxHeight="Infinity" maxWidth="Infinity" minHeight="-Infinity" minWidth="-Infinity"
+           prefHeight="400.0" prefWidth="600.0"
+           styleClass="main-background, personalized-text"
+           xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <BorderPane prefHeight="200.0" prefWidth="200.0">
             <center>
@@ -25,14 +18,14 @@
                     <children>
                         <VBox alignment="CENTER" spacing="15.0" style="-fx-padding: 10px 10px 10px 10px;">
                             <children>
-                                <HBox fx:id="filaSuperiore" alignment="CENTER">
+                                <HBox fx:id="upperRow" alignment="CENTER">
                                     <children>
                                         <HBox fx:id="upperRowChar" alignment="CENTER" spacing="-55.0" />
                                         <HBox fx:id="upperRowBuildsEv" spacing="5.0" />
                                     </children>
                                 </HBox>
                                 <HBox fx:id="tiles" alignment="CENTER" spacing="5.0" />
-                                <HBox fx:id="filaInferiore" alignment="CENTER">
+                                <HBox fx:id="lowerRow" alignment="CENTER">
                                     <children>
                                         <HBox fx:id="lowerRowChar" alignment="CENTER" spacing="-55.0" />
                                         <HBox fx:id="lowerRowBuildsEv" spacing="5.0" />
@@ -43,7 +36,7 @@
                                         <Insets top="30.0" />
                                     </VBox.margin>
                                     <children>
-                                        <Button fx:id="skipButton" managed="false" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-size: 20; -fx-padding: 12 32 12 32;" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="Salta pesca" visible="false" />
+                                        <Button fx:id="skipButton" managed="false" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-size: 20; -fx-padding: 12 32 12 32;" styleClass="mesos-button" stylesheets="@../css/style.css" text="Salta pesca" visible="false" />
                                     </children>
                                 </HBox>
                             </children>
@@ -56,15 +49,17 @@
                     <children>
                         <StackPane>
                             <children>
-                                <HBox alignment="CENTER" prefHeight="33.0" prefWidth="123.0" spacing="20.0" style="-fx-background-color: rgba(0,0,0,0.3);">
+                                <HBox alignment="CENTER" prefHeight="33.0" prefWidth="123.0" spacing="20.0" style="-fx-background-color: rgba(0,0,0,0.7);">
                                     <children>
-                                        <Text fx:id="txtAge" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="in " />
-                                        <Text fx:id="txtRound" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="attesa " />
-                                        <TextFlow fx:id="txtCurrPlayer" lineSpacing="0" style="-fx-padding: 9 10 0 10;" visible = "false">
-                                            <Text text="turno di: " fill="white" styleClass="testo-personalizzato" />
-                                            <Text fx:id="txtCurrPlayerNick" />
+                                        <Text fx:id="txtAge" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="personalized-text" text="in " />
+                                        <Text fx:id="txtRound" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="personalized-text" text="attesa di " />
+                                        <TextFlow fx:id="txtCurrPlayer" lineSpacing="0" style="-fx-padding: 9 10 0 10;" visible="false" managed="false">
+                                            <children>
+                                                <Text text="turno di: " fill="white" styleClass="personalized-text" />
+                                                <Text fx:id="txtCurrPlayerNick" text=""/>
+                                            </children>
                                         </TextFlow>
-                                        <Text fx:id="txtPhase" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="testo-personalizzato" text="giocatori!" />
+                                        <Text fx:id="txtPhase" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="personalized-text" text="giocatori!" />
                                     </children>
                                 </HBox>
                                 <HBox alignment="CENTER_RIGHT" StackPane.alignment="CENTER_RIGHT">
@@ -90,7 +85,7 @@
                                 </HBox>
                             </children>
                         </StackPane>
-                        <AnchorPane prefHeight="54.0" prefWidth="600.0" style="-fx-background-color: rgba(0,0,0,0.3); -fx-border-color: #000000;">
+                        <AnchorPane prefHeight="54.0" prefWidth="600.0" style="-fx-background-color: rgba(0,0,0,0.7); -fx-border-color: #000000;">
                             <children>
                                 <GridPane alignment="CENTER" layoutX="200.0" layoutY="-18.0" prefHeight="54.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <columnConstraints>
@@ -116,7 +111,7 @@
                                                         </ImageView>
                                                     </children>
                                                 </StackPane>
-                                                <Text fx:id="txtPP" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="testo-personalizzato" text="0" wrappingWidth="35.58123779296875" HBox.hgrow="ALWAYS" />
+                                                <Text fx:id="txtPP" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="personalized-text" text="0" wrappingWidth="35.58123779296875" HBox.hgrow="ALWAYS" />
                                             </children>
                                         </HBox>
                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2">
@@ -130,7 +125,7 @@
                                                         </ImageView>
                                                     </children>
                                                 </StackPane>
-                                                <Text fx:id="txtFood" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="testo-personalizzato" text="0" wrappingWidth="39.58129954338074" />
+                                                <Text fx:id="txtFood" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="personalized-text" text="0" wrappingWidth="39.58129954338074" />
                                             </children>
                                         </HBox>
                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="3">
@@ -144,7 +139,7 @@
                                                         </ImageView>
                                                     </children>
                                                 </StackPane>
-                                                <Text fx:id="txtStars" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="testo-personalizzato" text="0" wrappingWidth="40.381287384032476" />
+                                                <Text fx:id="txtStars" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="personalized-text" text="0" wrappingWidth="40.381287384032476" />
                                             </children>
                                         </HBox>
                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="4">
@@ -158,7 +153,7 @@
                                                         </ImageView>
                                                     </children>
                                                 </StackPane>
-                                                <Text fx:id="txtBuildDisc" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="testo-personalizzato" text="0" wrappingWidth="40.38128352165222" />
+                                                <Text fx:id="txtBuildDisc" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="personalized-text" text="0" wrappingWidth="40.38128352165222" />
                                             </children>
                                         </HBox>
                                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="5">
@@ -172,19 +167,27 @@
                                                         </ImageView>
                                                     </children>
                                                 </StackPane>
-                                                <Text fx:id="txtFeastDisc" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="testo-personalizzato" text="0" wrappingWidth="37.18115711212158" />
+                                                <Text fx:id="txtFeastDisc" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" styleClass="personalized-text" text="0" wrappingWidth="37.18115711212158" />
                                             </children>
                                         </HBox>
                                         <StackPane prefHeight="150.0" prefWidth="200.0">
                                             <children>
-                                                <Text fx:id="txtNickname" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20; -fx-padding: 0 0 0 10px " styleClass="testo-personalizzato" text="" StackPane.alignment="CENTER" />
+                                                <Text fx:id="txtNickname" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20; -fx-padding: 0 0 0 10px " styleClass="personalized-text" text="" StackPane.alignment="CENTER" />
                                             </children>
                                         </StackPane>
                                     </children>
                                 </GridPane>
                             </children>
                         </AnchorPane>
-                        <HBox fx:id="flagBox" prefHeight="22.0" prefWidth="600.0" style="-fx-background-color: rgba(160,160,160,0.3); -fx-border-color: #000000;" />
+                        <HBox fx:id="flagBox" prefHeight="35.0" prefWidth="600.0" style="-fx-background-color: rgba(160,160,160,0.7); -fx-border-color: #000000;" >
+                            <children>
+                                <StackPane>
+                                    <children>
+                                        <Text fx:id="flagTxt" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20; -fx-padding: 5px " styleClass="personalized-text" text="bonus aggiuntivi: " translateY="6" translateX="5" StackPane.alignment="CENTER"  />
+                                    </children>
+                                </StackPane>
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
             </top>
@@ -203,8 +206,4 @@
     <stylesheets>
         <URL value="@../css/style.css" />
     </stylesheets>
-    <styleClass>
-        <String fx:value="main_backgroud" />
-        <String fx:value="testo-personalizzato" />
-    </styleClass>
 </StackPane>

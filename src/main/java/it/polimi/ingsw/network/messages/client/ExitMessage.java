@@ -19,4 +19,9 @@ public class ExitMessage implements ClientMessage {
     public void accept(ClientMessageVisitor visitor) {
         visitor.visit(this);
     }
+    /**
+     * Creates a new {@code ExitMessage} instance.
+     */
+    public ExitMessage() {
+    }
 }

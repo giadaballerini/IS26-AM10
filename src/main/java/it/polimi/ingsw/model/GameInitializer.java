@@ -30,6 +30,9 @@ public class GameInitializer {
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+    /**
+     * Logger for this class.
+     */
     private static final Logger LOG = Logger.getLogger(GameInitializer.class.getName());
 
     /**
@@ -59,7 +62,8 @@ public class GameInitializer {
             if (is == null)
                 throw new IOException("File tribes.json non trovato nelle risorse");
 
-            List<Card> allCards = MAPPER.readValue(is, new TypeReference<List<Card>>() {});
+            List<Card> allCards = MAPPER.readValue(is, new TypeReference<>() {
+            });
             List<Card> deck = allCards.subList(0, deckSize);
 
             List<Card> age1 = new ArrayList<>(deck.stream()
@@ -111,7 +115,8 @@ public class GameInitializer {
             if (is == null)
                 throw new IOException("File buildings.json non trovato nelle risorse");
 
-            List<Card> buildings = MAPPER.readValue(is, new TypeReference<List<Card>>() {});
+            List<Card> buildings = MAPPER.readValue(is, new TypeReference<>() {
+            });
 
             List<Card> age1Buildings = buildings.stream().filter(c -> c.getAge() == 1).collect(Collectors.toList());
             List<Card> age2Buildings = buildings.stream().filter(c -> c.getAge() == 2).collect(Collectors.toList());
@@ -180,7 +185,8 @@ public class GameInitializer {
             if (is == null)
                 throw new IOException("File qtiles.json non trovato nelle risorse");
 
-            List<Tile> allBoardTiles = MAPPER.readValue(is, new TypeReference<List<Tile>>() {});
+            List<Tile> allBoardTiles = MAPPER.readValue(is, new TypeReference<>() {
+            });
 
             return new LinkedList<>(allBoardTiles.stream()
                     .filter(t -> t.getId() >= minId && t.getId() <= maxId)
@@ -212,7 +218,8 @@ public class GameInitializer {
             if (is == null)
                 throw new IOException("File tiles.json non trovato nelle risorse");
 
-            List<Tile> allTiles = MAPPER.readValue(is, new TypeReference<List<Tile>>() {});
+            List<Tile> allTiles = MAPPER.readValue(is, new TypeReference<>() {
+            });
 
             return new ArrayList<>(allTiles.stream()
                     .filter(t -> t.getMinPlayers() <= numPlayers)
@@ -293,5 +300,10 @@ public class GameInitializer {
         }
 
         return lowerList;
+    }
+    /**
+     * Creates a new {@code GameInitializer} instance.
+     */
+    public GameInitializer() {
     }
 }

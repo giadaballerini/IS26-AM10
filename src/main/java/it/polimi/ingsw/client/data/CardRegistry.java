@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Static registry that holds all card data loaded from the client-side JSON resource file.
@@ -22,6 +24,8 @@ public class CardRegistry {
 
     /** Map from card ID to its corresponding {@link CardData}, populated at class initialization. */
     private static final Map<Integer, CardData> registry = new HashMap<>();
+    /** Logger used to report failures during the card data loading in the static initializer block. */
+    private static final Logger LOG = Logger.getLogger(CardRegistry.class.getName());
 
     static {
         loadDescriptions();
@@ -40,14 +44,15 @@ public class CardRegistry {
             if (is == null) {
                 throw new RuntimeException("Impossibile trovare clientCards.json nelle risorse.");
             }
-            List<CardData> cards = mapper.readValue(is, new TypeReference<List<CardData>>() {});
+            List<CardData> cards = mapper.readValue(is, new TypeReference<>() {
+            });
 
             for (CardData card : cards) {
                 registry.put(card.getId(), card);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Errore nel caricamento clientCards.json", e);
         }
     }
 
@@ -92,17 +97,17 @@ public class CardRegistry {
     public static String getName(int id) {
         CardData data = registry.get(id);
         return switch (data.getType()) {
-            case CardTypeEnum.BUILDING      -> "Building ";
-            case CardTypeEnum.GATHERER      -> "Gatherer ";
-            case CardTypeEnum.HUNTER        -> "Hunter ";
-            case CardTypeEnum.PAINTER       -> "Painter ";
-            case CardTypeEnum.BUILDER       -> "Builder ";
-            case CardTypeEnum.SHAMAN        -> "Shaman ";
-            case CardTypeEnum.CRAFTER       -> "Crafter ";
-            case CardTypeEnum.FEAST         -> "Feast ";
-            case CardTypeEnum.HUNT          -> "Hunt ";
-            case CardTypeEnum.STONE_PAINTING-> "Stone_painting ";
-            case CardTypeEnum.RITUAL        -> "Ritual ";
+            case CardTypeEnum.BUILDING      -> "Edificio ";
+            case CardTypeEnum.GATHERER      -> "Raccoglitore ";
+            case CardTypeEnum.HUNTER        -> "Cacciatore ";
+            case CardTypeEnum.PAINTER       -> "Pittore ";
+            case CardTypeEnum.BUILDER       -> "Costruttore ";
+            case CardTypeEnum.SHAMAN        -> "Sciamano ";
+            case CardTypeEnum.CRAFTER       -> "Inventore ";
+            case CardTypeEnum.FEAST         -> "Sostentamento ";
+            case CardTypeEnum.HUNT          -> "Caccia ";
+            case CardTypeEnum.STONE_PAINTING-> "Pitture Rupestri ";
+            case CardTypeEnum.RITUAL        -> "Rituale ";
         };
     }
 
@@ -136,4 +141,7 @@ public class CardRegistry {
     public static Set<Integer> getIds() {
         return registry.keySet();
     }
+
+    /** Prevents instantiation of this static registry class; all access is through static methods only. */
+    private CardRegistry() {}
 }

@@ -43,26 +43,13 @@ public class CardData {
      */
     @JsonProperty("PP")
     private Integer PP = null;
+
     /**
-     * Prestige Points gained when the card effect triggers. {@code null} if not applicable.
-     */
-    @JsonProperty("ppGain")
-    private Integer ppGain = null;
-    /**
-     * Prestige Points lost when a condition is met. {@code null} if not applicable.
-     */
-    @JsonProperty("ppLoss")
-    private Integer ppLoss = null;
-    /**
-     * Food gained when the card effect triggers. {@code null} if not applicable.
+     * Food gained when the card's effect triggers. {@code null} if the card does not grant food.
      */
     @JsonProperty("food")
     private Integer food = null;
-    /**
-     * Number of painters threshold to gain PP during the Stone Painting event. {@code null} if not a {@link CardTypeEnum#STONE_PAINTING}.
-     */
-    @JsonProperty("thresh")
-    private Integer thresh = null;
+
     /**
      * Whether the hunter has the mark. {@code null} if not a {@link CardTypeEnum#HUNTER}.
      */
@@ -80,6 +67,7 @@ public class CardData {
     private Integer foodDiscount = null;
 
     /**
+     * The unique identifier of this card.
      * @return the unique identifier of this card
      */
     public int getId() {
@@ -87,6 +75,7 @@ public class CardData {
     }
 
     /**
+     * The type of this card.
      * @return the type of this card
      */
     public CardTypeEnum getType() {
@@ -94,6 +83,7 @@ public class CardData {
     }
 
     /**
+     * The display text shown on the card.
      * @return the display text shown on the card
      */
     public String getDescription() {
@@ -101,13 +91,15 @@ public class CardData {
     }
 
     /**
-     * @return the age (1–3) this card belongs to
+     * The age this card belongs to.
+     * @return the age this card belongs to
      */
     public int getAge() {
         return age;
     }
 
     /**
+     * The food cost to buy this building, or {@code 0} if not applicable.
      * @return the food cost to buy this building, or {@code 0} if not applicable
      */
     public int getCost() {
@@ -115,6 +107,7 @@ public class CardData {
     }
 
     /**
+     * The Prestige Points value of this card, or {@code 0} if not applicable.
      * @return the Prestige Points value of this card, or {@code 0} if not applicable
      */
     public int getPp() {
@@ -122,20 +115,7 @@ public class CardData {
     }
 
     /**
-     * @return the Prestige Points gained when this card's effect triggers, or {@code 0} if not applicable
-     */
-    public int getPpGain() {
-        return ppGain != null ? ppGain : 0;
-    }
-
-    /**
-     * @return the Prestige Points lost when a condition is met, or {@code 0} if not applicable
-     */
-    public int getPpLoss() {
-        return ppLoss != null ? ppLoss : 0;
-    }
-
-    /**
+     * The food gained when this card's effect triggers, or {@code 0} if not applicable.
      * @return the food gained when this card's effect triggers, or {@code 0} if not applicable
      */
     public int getFood() {
@@ -143,19 +123,16 @@ public class CardData {
     }
 
     /**
-     Number of painters threshold to gain PP during the Stone Painting event. {@code null} if not a {@link CardTypeEnum#STONE_PAINTING}.     */
-    public int getThresh() {
-        return thresh != null ? thresh : 0;
-    }
-
-    /**
      * Whether the hunter has the mark. {@code null} if not a {@link CardTypeEnum#HUNTER}.
+     *
+     * @return {@code true} if the hunter has the mark, {@code false} otherwise
      */
     public boolean isMark() {
         return mark != null && mark;
     }
 
     /**
+     * The crafter symbol associated with this card, or {@code null} if not a crafter card.
      * @return the {@link CrafterSymbolEnum} associated with this card, or {@code null} if not a crafter card
      */
     public CrafterSymbolEnum getSymbol() {
@@ -163,6 +140,7 @@ public class CardData {
     }
 
     /**
+     * The food discount granted by this card, or {@code 0} if not applicable.
      * @return the food discount granted by this card, or {@code 0} if not applicable
      */
     public int getFoodDiscount() {
@@ -185,4 +163,6 @@ public class CardData {
         } else
             return "Back_card_" + age;
     }
+    /** No-arg constructor required by Jackson for JSON deserialization. */
+    private CardData() { }
 }

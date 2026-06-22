@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -10,32 +11,35 @@ import java.io.Serializable;
  * rewards it grants when occupied.
  */
 public class TileDTO implements Serializable {
-
+    /**
+     * Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Whether a player's pawn is currently placed on this tile. */
-    private boolean occupied;
+    private final boolean occupied;
 
     /** Unique identifier of this tile. */
-    private int id;
+    private final int id;
 
     /**
      * Minimum number of players required in the match for this tile to be
      * available.
      */
-    private int minPlayers;
+    private final int minPlayers;
 
     /** Nickname of the player whose pawn is on this tile, or {@code null} if unoccupied. */
-    private String player;
+    private final String player;
 
     /** Number of upper row draws the player earns by occupying this tile. */
-    private int upDraws;
+    private final int upDraws;
 
     /** Number of lower row draws the player earns by occupying this tile. */
-    private int downDraws;
+    private final int downDraws;
 
     /** Amount of food the player earns by occupying this tile. */
-    private int foodAmount;
+    private final int foodAmount;
 
     /**
      * Creates a {@code TileDTO} with all attributes specified explicitly.

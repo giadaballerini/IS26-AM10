@@ -1,0 +1,133 @@
+@startuml lobby_create_join
+title Lobby Creation & Join — RMI vs. Socket
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+== RMI — Create Game ==
+
+participant "ClientRmi" as CR
+participant "ServerRmi\n(VirtualServerRmi)" as SR
+participant "MatchManager" as MM
+
+CR -> SR : createGame(nickname, numPlayers)  [RMI call]
+SR -> MM : createGame(nickname, numPlayers)
+alt success
+    MM -> MM : allocate matchId\nlobbies.put(matchId, lobby)\nclientToMatch.put(nickname, matchId)
+    MM --> SR : matchId
+    SR --> CR : matchId
+    CR -> CR : this.matchId = matchId\nui.onCreate(matchId)
+else InvalidTimingException / RemoteException
+    MM --> SR : throws InvalidTimingException
+    SR --> CR : exception (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+== RMI — Join Game ==
+
+participant "ClientRmi\n(joiner)" as CR2
+
+CR2 -> SR : joinGame(nickname, id)  [RMI call]
+SR -> MM : joinGame(nickname, id)
+alt success
+    MM -> MM : lobby.addPlayer(nickname)\nclientToMatch.put(nickname, id)
+    MM --> SR : [return]
+    SR --> CR2 : [return]
+    CR2 -> CR2 : matchId = id\nui.onJoin(matchId)
+    alt lobby full
+        MM -> MM : scheduler.schedule(startGame, 0s)
+        note over MM
+          startGame() calls injectGameVisitor() on all handlers,
+          then launches gm::initGame on a new thread — which
+          broadcasts showBoard and onCurrPlayerUpdate to all players.
+        end note
+    end
+else InvalidLobbyException / InvalidTimingException / RemoteException
+    MM --> SR : throws InvalidLobbyException\n       or InvalidTimingException
+    SR --> CR2 : exception (rethrown)
+    CR2 -> CR2 : ui.printError(e)
+end
+
+== Socket — Create Game ==
+
+participant "ClientSocket\n(creator)" as CS
+participant "ClientHandlerSocket\n(creator)" as CHS
+participant "ClientMessageVisitorImpl" as CMV
+participant "MatchManager" as MM2
+
+note over CS
+  doCreateGame() calls sendMessage(new CreateGameMessage(...))
+  and returns immediately — it does NOT block waiting for a response.
+  The server reply is handled asynchronously by the Socket reader thread.
+end note
+
+CS -> CHS : [TCP] CreateGameMessage(numPlayers)
+CHS -> CMV : visit(CreateGameMessage)
+CMV -> MM2 : createGame(nickname, numPlayers)
+alt success
+    MM2 --> CMV : matchId
+    CMV -> CHS : onGameCreated(matchId)
+    CHS -> CS : [TCP] GameCreatedMessage(matchId)
+    note over CS
+      Reader thread dispatches to ServerMessageVisitorImpl:
+        visit(GameCreatedMessage)
+          → clientSocket.setMatchId(message.getGameId())
+          → ui.onCreate(message.getGameId())
+    end note
+else Exception
+    MM2 --> CMV : throws Exception
+    CMV -> CHS : onErrorMessage(e.getMessage())
+    CHS -> CS : [TCP] ErrorMessage
+    note over CS
+      Reader thread dispatches to ServerMessageVisitorImpl:
+        visit(ErrorMessage)
+          → ui.printError(new Exception(message.getMessage()))
+    end note
+end
+
+== Socket — Join Game ==
+
+participant "ClientSocket\n(joiner)" as CS2
+participant "ClientHandlerSocket\n(joiner)" as CHS2
+
+note over CS2
+  doJoinGame() calls sendMessage(new JoinGameMessage(...))
+  and returns immediately — reply is handled asynchronously
+  by the Socket reader thread.
+end note
+
+CS2 -> CHS2 : [TCP] JoinGameMessage(id)
+CHS2 -> CMV : visit(JoinGameMessage)
+CMV -> MM2 : joinGame(nickname, id)
+alt success
+    MM2 -> MM2 : lobby.addPlayer(nickname)\nclientToMatch.put(nickname, id)
+    MM2 --> CMV : [return]
+    CMV -> CHS2 : onJoinGame(id)
+    CHS2 -> CS2 : [TCP] GameJoinedMessage(id)
+    note over CS2
+      Reader thread dispatches to ServerMessageVisitorImpl:
+        visit(GameJoinedMessage)
+          → clientSocket.setMatchId(message.getId())
+          → ui.onJoin(message.getId())
+    end note
+    alt lobby full
+        MM2 -> MM2 : scheduler.schedule(startGame, 0s)
+        note over MM2
+          startGame() calls injectGameVisitor() on all handlers,
+          then launches gm::initGame on a new thread — which
+          broadcasts showBoard and onCurrPlayerUpdate to all players.
+        end note
+    end
+else Exception
+    MM2 --> CMV : throws Exception
+    CMV -> CHS2 : onErrorMessage(e.getMessage())
+    CHS2 -> CS2 : [TCP] ErrorMessage
+    note over CS2
+      Reader thread dispatches to ServerMessageVisitorImpl:
+        visit(ErrorMessage)
+          → ui.printError(new Exception(message.getMessage()))
+    end note
+end
+
+@enduml

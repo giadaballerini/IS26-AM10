@@ -53,4 +53,9 @@ public class OptionalDrawPhaseState implements GamePhaseState {
     public GamePhaseEnum getPhase() {
         return GamePhaseEnum.OPTIONAL_DRAW_PHASE;
     }
+    /**
+     * Creates a new {@code OptionalDrawPhaseState} instance.
+     */
+    public OptionalDrawPhaseState() {
+    }
 }

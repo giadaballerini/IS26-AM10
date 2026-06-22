@@ -82,7 +82,6 @@ public class RankingCalculator {
      *   <li>4 players: 1st → +2, 2nd → +1, 3rd → 0, 4th → −1</li>
      *   <li>5 players: 1st → +2, 2nd → +1, 3rd → 0, 4th → −1, 5th → −2</li>
      * </ul>
-     * </p>
      *
      * @param rank       the finishing rank (1-based)
      * @param numPlayers the total number of players in the match (2–5)
@@ -98,5 +97,10 @@ public class RankingCalculator {
             };
             default -> 0;
         };
+    }
+    /**
+     * Creates a new {@code RankingCalculator} instance.
+     */
+    public RankingCalculator() {
     }
 }

@@ -55,4 +55,9 @@ class SetupPhaseState implements GamePhaseState {
      */
     @Override
     public GamePhaseEnum getPhase() { return GamePhaseEnum.SETUP_PHASE; }
+    /**
+     * Creates a new {@code SetupPhaseState} instance.
+     */
+    SetupPhaseState() {
+    }
 }

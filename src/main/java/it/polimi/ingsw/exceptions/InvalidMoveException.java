@@ -3,7 +3,7 @@ package it.polimi.ingsw.exceptions;
 /**
  * Exception thrown when an invalid or unrecognized tile is selected to move into.
  */
-public class InvalidMoveException extends RuntimeException {
+public class InvalidMoveException extends GameException {
 
     /**
      * Creates a new {@code InvalidMoveException} with the given detail message.

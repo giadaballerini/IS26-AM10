@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.DrawCountVisitor;
 
 /**
  * Abstract base class for interactive card effects.
@@ -34,28 +35,20 @@ public abstract class CardEffectInteractive {
     public abstract Action apply(Player p);
 
     /**
-     * Prints a human-readable description of this effect, used for debugging
-     * or TUI display.
-     */
-    public abstract void displayEffect();
-
-    /**
-     * Returns the number of upper-row draws this effect grants.
-     * The default implementation returns {@code 0}.
+     * Accepts a {@link DrawCountVisitor}, allowing it to accumulate the draw
+     * counts contributed by this effect.
      *
-     * @return number of upper draws
-     */
-    public int getUpDraws() {
-        return 0;
-    }
-
-    /**
-     * Returns the number of lower-row draws this effect grants.
-     * The default implementation returns {@code 0}.
+     * <p>Concrete subclasses that grant draw actions must forward themselves
+     * to {@link DrawCountVisitor#visit(DrawCard)}; subclasses that do not
+     * grant draws should implement this as a no-op.</p>
      *
-     * @return number of lower draws
+     * @param visitor the visitor to accept; must not be {@code null}
      */
-    public int getDownDraws() {
-        return 0;
+    public abstract void accept(DrawCountVisitor visitor);
+    /**
+     * Creates a new {@code CardEffectInteractive} instance.
+     * Intended for use by subclasses only.
+     */
+    protected CardEffectInteractive() {
     }
 }

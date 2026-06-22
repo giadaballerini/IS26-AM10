@@ -1,36 +1,44 @@
 package it.polimi.ingsw.model.interfaces;
 
 import it.polimi.ingsw.model.entities.card.types.building.Building;
-import it.polimi.ingsw.model.entities.card.types.character.Builder;
+import it.polimi.ingsw.model.entities.card.types.character.Character;
 import it.polimi.ingsw.model.entities.card.types.event.Event;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class CardVisitorTest {
 
+    @Mock Event mockEvent;
+    @Mock Building mockBuilding;
+    @Mock Character mockCharacter;
 
-    @Mock
-    Event mockEvent;
+    private CardVisitor visitor;
 
-    @Mock
-    Building mockBuilding;
-
-    @Mock
-    Builder mockCharacter;
+    @BeforeEach
+    void setUp() {
+        visitor = mock(CardVisitor.class, Mockito.CALLS_REAL_METHODS);
+    }
 
     @Test
-    void testShouldVisit() {
+    void testVisitEventDefaultIsNoop() {
+        assertDoesNotThrow(() -> visitor.visit(mockEvent));
+    }
 
-        CardVisitor mockCardVisitor = spy(CardVisitor.class);
+    @Test
+    void testVisitBuildingDefaultIsNoop() {
+        assertDoesNotThrow(() -> visitor.visit(mockBuilding));
+    }
 
-        mockCardVisitor.visit(mockEvent);
-        mockCardVisitor.visit(mockCharacter);
-        mockCardVisitor.visit(mockBuilding);
+    @Test
+    void testVisitCharacterDefaultIsNoop() {
+        assertDoesNotThrow(() -> visitor.visit(mockCharacter));
     }
 }

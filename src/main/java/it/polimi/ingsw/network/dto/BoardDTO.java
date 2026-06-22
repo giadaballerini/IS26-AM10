@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,10 @@ import java.util.List;
  * client can fully rebuild its local {@code VirtualModel}.
  */
 public class BoardDTO implements Serializable {
-
+    /**
+     *  Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Cards currently visible in the upper row. */
@@ -27,6 +31,9 @@ public class BoardDTO implements Serializable {
 
     /** Current statistics for every player. */
     private final List<PlayerStatsDTO> playerStats;
+
+    /** Current statuses for every player. */
+    private final List<PlayerStatusDTO> playerStatuses;
 
     /** Actions still available to the active player this turn. */
     private final ActionsDTO toDoActions;
@@ -61,6 +68,7 @@ public class BoardDTO implements Serializable {
      * @param boardTiles            tiles on the board
      * @param queueTiles            tiles of the queue
      * @param playerStats           current statistics for every player
+     * @param playerStatuses        current statuses for every player
      * @param currentPlayerNickname nickname of the active player
      * @param toDoActions           actions still available this turn
      * @param currentPhase          current game phase
@@ -70,7 +78,8 @@ public class BoardDTO implements Serializable {
      */
     public BoardDTO(List<CardDTO> upperList, List<CardDTO> lowerList, List<PlayerDTO> players,
                     List<TileDTO> boardTiles, List<TileDTO> queueTiles, List<PlayerStatsDTO> playerStats,
-                    String currentPlayerNickname, ActionsDTO toDoActions, GamePhaseEnum currentPhase,
+                    List<PlayerStatusDTO> playerStatuses, String currentPlayerNickname,
+                    ActionsDTO toDoActions, GamePhaseEnum currentPhase,
                     int currTurn, int numPlayers, int deckSize) {
         this.upperList = upperList;
         this.lowerList = lowerList;
@@ -78,6 +87,7 @@ public class BoardDTO implements Serializable {
         this.boardTiles = boardTiles;
         this.queueTiles = queueTiles;
         this.playerStats = playerStats;
+        this.playerStatuses = playerStatuses;
         this.currentPlayerNickname = currentPlayerNickname;
         this.toDoActions = toDoActions;
         this.currentPhase = currentPhase;
@@ -109,7 +119,7 @@ public class BoardDTO implements Serializable {
      *
      * @return board tiles
      */
-    public List<TileDTO> getboardTiles() {
+    public List<TileDTO> getBoardTiles() {
         return new ArrayList<>(boardTiles);
     }
 
@@ -118,7 +128,7 @@ public class BoardDTO implements Serializable {
      *
      * @return queue tiles
      */
-    public List<TileDTO> getqueueTiles() {
+    public List<TileDTO> getQueueTiles() {
         return new ArrayList<>(queueTiles);
     }
 
@@ -149,6 +159,13 @@ public class BoardDTO implements Serializable {
         return new ArrayList<>(playerStats);
     }
 
+    /**
+     * Returns a copy of the statuses for every player.
+     * @return player statuses list
+     */
+    public List<PlayerStatusDTO> getPlayerStatuses() {
+        return new ArrayList<>(playerStatuses);
+    }
     /**
      * Returns the current game phase.
      *

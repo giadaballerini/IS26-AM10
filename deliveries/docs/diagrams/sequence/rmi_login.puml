@@ -1,0 +1,63 @@
+@startuml rmi_login
+title RMI — Login & Message Flow
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+actor Client
+
+participant "Client\n(base class)" as CB
+participant "ClientRmi\n(doLogin)" as CR
+participant "ServerRmi" as SR
+participant "ClientHandlerRmi" as CHR
+participant "MatchManager" as MM
+
+note over CB, CR
+  Client.login() is defined in the abstract base class.
+  ClientRmi.doLogin() is the transport-specific implementation
+  called after validation passes.
+end note
+
+== Login — Success ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ no: proceed
+CB -> CR : doLogin(nickname)
+CR -> SR : login(nickname, clientStub)  [remote call]
+SR -> CHR : new ClientHandlerRmi(nickname, clientStub, this)
+SR -> MM : login(nickname, rmiHandler)
+MM --> SR : [no exception]
+SR -> CHR : rmiHandler.startHealthCheck()
+SR --> CR : [return]
+CR -> CR : vm.setNickname(nickname)\nui.onLogin(nickname)\nstartHealthCheck()  [client-side health check]
+CR --> CB : true
+CB --> Client : true
+
+== Login — Alt: Empty/Null Nickname ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ yes: ui.printError(new InvalidUsernameException("Il nickname non può essere vuoto."))\nreturn false (without remote call)
+CB --> Client : false
+
+== Login — Alt: InvalidUsernameException ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ no: proceed
+CB -> CR : doLogin(nickname)
+CR -> SR : login(nickname, clientStub)  [remote call]
+SR -> CHR : new ClientHandlerRmi(nickname, clientStub, this)
+SR -> MM : login(nickname, rmiHandler)
+note right of MM
+  nickname already registered → InvalidUsernameException("Username già esistente nella lobby, inserire un nuovo username")
+  (the null/blank check was already performed in Client.login(),
+  but MatchManager re-executes it as a server-side defense)
+end note
+MM --> SR : throws InvalidUsernameException("Username già esistente nella lobby, inserire un nuovo username")
+
+SR --> CR : InvalidUsernameException (rethrown)
+CR -> CR : ui.printError(e)\nreturn false
+CR --> CB : false
+CB --> Client : false
+
+@enduml

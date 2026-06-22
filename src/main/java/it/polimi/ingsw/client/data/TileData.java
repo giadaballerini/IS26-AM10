@@ -24,12 +24,12 @@ public class TileData {
      * Bounds of the rectangle highlighting the card slot area.
      * Always present for every tile.
      */
-    @JsonProperty("cardSlot")
-    private HighlightBounds cardSlot;
+    @JsonProperty("pawnSlot")
+    private HighlightBounds pawnSlot;
 
     /**
      * Bounds of the rectangle highlighting the arrow area.
-     * {@code null} for tiles that have no draw actions (e.g. Tile 0).
+     * {@code null} for tiles that have no draw actions.
      */
     @JsonProperty("arrowArea")
     private HighlightBounds arrowArea;
@@ -45,7 +45,7 @@ public class TileData {
     /**
      * Defines the pixel bounds of a highlighted rectangular area overlaid on a tile image.
      * Used by the GUI to position the card slot highlight and the arrow area indicator.
-     * All coordinates are in pixels, relative to a tile rendered at 110px width.
+     * All coordinates are in pixels, relative to a tile rendered at 110 px width.
      */
     public static class HighlightBounds {
 
@@ -64,32 +64,57 @@ public class TileData {
         /** Height of the highlighted rectangle (px). */
         @JsonProperty("height")
         public double height;
+
+        /**
+         * Creates a new empty {@code HighlightBounds} instance.
+         * Required by Jackson for JSON deserialization.
+         */
+        public HighlightBounds() {
+        }
     }
 
-    /** @return the display description of this tile */
+    /**
+     * Returns the textual description of this tile.
+     *  @return the display description of this tile */
     public String getDescription() { return description; }
 
-    /** @return the unique identifier of this tile */
+    /**
+     * Returns the unique identifier of this tile.
+     *  @return the unique identifier of this tile */
     public int getId() { return id; }
 
-    /** @return the {@link HighlightBounds} of the card slot area */
-    public HighlightBounds getCardSlot() { return cardSlot; }
+    /**
+     * Returns the {@link HighlightBounds} of the card slot area.
+    * @return the {@link HighlightBounds} of the card slot area
+    */
+    public HighlightBounds getPawnSlot() { return pawnSlot; }
 
     /**
+     * Returns the {@link HighlightBounds} of the arrow area,
      * @return the {@link HighlightBounds} of the arrow area,
      *         or {@code null} if this tile has no draw actions
      */
     public HighlightBounds getArrowArea() { return arrowArea; }
 
     /**
-     * @return {@code true} if this tile has an arrow area (i.e. supports draw actions),
-     *         {@code false} otherwise
+     * Returns {@code true} if this tile has an arrow area, {@code false} otherwise.
+     * @return {@code true} if this tile has an arrow area, {@code false} otherwise
      */
     public boolean hasArrows() { return arrowArea != null; }
 
-    /** @return the maximum number of up-draw indicators to display in the GUI for this tile */
+    /**
+     * Returns the maximum number of up-draw indicators to display in the GUI for this tile.
+     * @return the maximum number of up-draw indicators to display in the GUI for this tile */
     public int getMaxUpDraws() { return maxUpDraws; }
 
-    /** @return the maximum number of down-draw indicators to display in the GUI for this tile */
+    /**
+     * Returns the maximum number of down-draw indicators to display in the GUI for this tile.
+     * @return the maximum number of down-draw indicators to display in the GUI for this tile */
     public int getMaxDownDraws() { return maxDownDraws; }
+    /**
+     * Creates a new empty {@code TileData} instance.
+     * Required by Jackson for JSON deserialization.
+     */
+    public TileData() {
+    }
 }

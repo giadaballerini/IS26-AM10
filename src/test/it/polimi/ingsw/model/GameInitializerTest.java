@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.tile.Tile;
 import org.junit.jupiter.api.Test;
@@ -8,8 +9,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,14 +45,36 @@ class GameInitializerTest {
 
     }
 
+    @Test
+    void initLowerListEmptyDeck() {
+        GameInitializer gi = new GameInitializer();
+        List<Card> result = gi.initLowerList(new ArrayList<>(), new ArrayList<>(), 3);
+        assertEquals(0, result.size());
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {2,3,4,5})
+    @ValueSource(ints = {0, 1})
+    void testInitBoardInvalid(int num) {
+        GameInitializer gi = new GameInitializer();
+        List<Tile> board = gi.initBoard(num);
+        assertEquals(0, board.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3, 4, 5})
     void initBuildingDeck(int num) {
         GameInitializer gameInitializer = new GameInitializer();
 
-        List<Card> buildings = gameInitializer.initBuildingDeck(num);
-        assertEquals(21,buildings.size());
+        int expectedSize = switch (num) {
+            case 2 -> 6;
+            case 3 -> 8;
+            case 4 -> 9;
+            case 5 -> 10;
+            default -> 0;
+        };
 
+        List<Card> buildings = gameInitializer.initBuildingDeck(num);
+        assertEquals(expectedSize, buildings.size());
     }
     @ParameterizedTest
     @ValueSource(ints = {0,1})
@@ -123,8 +146,7 @@ class GameInitializerTest {
         int expectedCardsFromDeck = numPlayers + 4;
         int expectedBuildings = switch (numPlayers) {
             case 2 -> 1;
-            case 3, 4 -> 2;
-            case 5 -> 3;
+            case 3, 4, 5 -> 2;
             default -> 0;
         };
 
@@ -169,13 +191,53 @@ class GameInitializerTest {
         }
     }
 
+    @Test
+    void testInitUpperList_deckExhaustedBeforeTarget() {
+        GameInitializer gi = new GameInitializer();
+
+        List<Card> deck = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Card c = mock(Card.class);
+            when(c.getType()).thenReturn(CardTypeEnum.GATHERER);
+            deck.add(c);
+        }
+
+        List<Card> buildings = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            Card b = mock(Card.class);
+            when(b.getType()).thenReturn(CardTypeEnum.BUILDING);
+            buildings.add(b);
+        }
+
+        List<Card> upperList = new ArrayList<>();
+        int numPlayers = 3;
+
+        gi.initUpperList(deck, buildings, upperList, numPlayers);
+
+        assertTrue(deck.isEmpty(), "Il deck deve essere esaurito");
+        assertEquals(3 + 2, upperList.size(),
+                "upperList deve contenere tutte le carte dal deck + gli edifici");
+    }
 
     @Test
-    void testInitBoard_IOException_Coverage() {
-        try (MockedStatic<GameInitializer> mocked = mockStatic(GameInitializer.class)) {
-            // Simuliamo che getResourceAsStream restituisca null per forzare l'eccezione
-            ClassLoader mockLoader = mock(ClassLoader.class);
-            when(mockLoader.getResourceAsStream(anyString())).thenReturn(null);
+    void testInitLowerList_deckExhaustedDuringLoop() {
+        GameInitializer gi = new GameInitializer();
+
+        List<Card> deck = new LinkedList<>();
+        for (int i = 0; i < 2; i++) {
+            Card c = mock(Card.class);
+            when(c.getType()).thenReturn(CardTypeEnum.GATHERER);
+            deck.add(c);
         }
+
+        List<Card> upperList = new ArrayList<>();
+        int numPlayers = 3;
+
+        List<Card> lowerList = gi.initLowerList(deck, upperList, numPlayers);
+
+        assertTrue(deck.isEmpty(), "Il deck deve essere vuoto dopo l'esaurimento");
+        assertEquals(2, lowerList.size(),
+                "La lowerList deve contenere solo le carte disponibili nel deck");
+        assertTrue(upperList.isEmpty());
     }
 }

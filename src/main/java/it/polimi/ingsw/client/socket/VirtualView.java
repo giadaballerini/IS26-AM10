@@ -91,4 +91,12 @@ public interface VirtualView extends ModelObserver {
      *                in the global leaderboard
      */
     void onRankingResponse(Map<String, Integer> ranking);
+
+
+    /**
+     * Notifies the observer that an error has occurred.
+     *
+     * @param errorMsg human-readable description of the error; never {@code null}
+     */
+    void onErrorMessage(String errorMsg);
 }

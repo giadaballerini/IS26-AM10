@@ -1,0 +1,111 @@
+@startuml reconnection
+title Reconnection Flow — RMI vs. Socket
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+note over MatchManager
+  On startup, MatchManager loads persisted GameSnapshot files.
+  Each snapshot keeps the set of player nicknames.
+  pendingRestorations: Map<matchId, GameSnapshot>
+  reconnectedPlayers: Map<matchId, Map<nickname, ModelObserver>>
+end note
+
+== RMI Reconnection ==
+
+participant "ClientRmi" as CR
+participant "ServerRmi" as SR
+participant "ClientHandlerRmi" as CHR
+participant "MatchManager" as MM
+participant "GameNotifier" as GN
+participant "RestoredGameManager" as RGM
+
+CR -> SR : login(nickname, clientStub)  [RMI call]
+SR -> CHR : new ClientHandlerRmi(nickname, clientStub, this)
+SR -> MM : login(nickname, rmiHandler)
+MM -> MM : clients.put(nickname, rmiHandler)
+MM -> MM : scan pendingRestorations for nickname
+
+alt nickname belongs to a pending match
+    MM -> MM : reconnectedPlayers[matchId].put(nickname, rmiHandler)\nclientToMatch.put(nickname, matchId)
+    MM -> CHR : onReconnection(matchId)
+    CHR -> CR : clientStub.reconnect(matchId)  [via sendAsync]
+
+    alt reconnectedPlayers[matchId].size() == snapshot.numPlayers
+        MM -> MM : restoreGame(matchId, snapshot)
+        MM -> CHR : obs.injectGameVisitor(controller)\n[for each reconnected observer]
+        MM -> MM : persistenceManager.register(matchId, gm)
+        MM -> RGM : new Thread(gm::resume).start()
+
+        note over RGM
+          resume() runs on its own thread, independently of
+          MatchManager.login() returning to ServerRmi below.
+        end note
+
+        RGM -> GN : notifier.showBoard(boardDTO)
+        GN -> CHR : showBoard(boardDTO)  [broadcast]
+        CHR -> CR : clientStub.showBoard(boardDTO)  [via sendAsync]
+        RGM -> GN : notifier.notifyPhaseUpdate(currPhaseState)
+        GN -> CHR : onPhaseUpdate(phaseDTO)  [broadcast]
+        CHR -> CR : clientStub.onPhaseUpdate(phaseDTO)  [via sendAsync]
+        RGM -> GN : notifier.notifyCurrPlayerUpdate(currPlayer)
+        GN -> CHR : onCurrPlayerUpdate(currPlayer)  [broadcast]
+        CHR -> CR : clientStub.onCurrPlayerUpdate(currPlayer)  [via sendAsync]
+    end
+end
+
+MM --> SR : [return]
+SR -> CHR : startHealthCheck()
+SR --> CR : [return]
+
+== Socket Reconnection ==
+
+participant "ClientSocket" as CS
+participant "ClientHandlerSocket" as CHS
+participant "ClientMessageVisitorImpl" as CMVI
+participant "MatchManager" as MM2
+participant "GameNotifier" as GN2
+participant "RestoredGameManager" as RGM2
+
+CS -> CHS : [TCP] LoginMessage(nickname)
+CHS -> CMVI : visit(LoginMessage)
+CMVI -> MM2 : login(nickname, clientHandlerSocket)
+MM2 -> MM2 : clients.put(nickname, handler)
+MM2 -> MM2 : scan pendingRestorations for nickname
+
+alt nickname belongs to a pending match
+    MM2 -> MM2 : reconnectedPlayers[matchId].put(nickname, handler)\nclientToMatch.put(nickname, matchId)
+    MM2 -> CHS : onReconnection(matchId)
+    CHS -> CS : [TCP] ReconnectionMessage(matchId)  [via sendAsync]
+
+    alt reconnectedPlayers[matchId].size() == snapshot.numPlayers
+        MM2 -> MM2 : restoreGame(matchId, snapshot)
+
+        MM2 -> CHS : obs.injectGameVisitor(controller)\n[for each reconnected observer]
+        MM2 -> MM2 : persistenceManager.register(matchId, gm)
+        MM2 -> RGM2 : new Thread(gm::resume).start()
+
+        note over RGM2
+          resume() runs on its own thread, independently of
+          MatchManager.login() returning to ClientMessageVisitorImpl below.
+        end note
+
+        RGM2 -> GN2 : notifier.showBoard(boardDTO)
+        GN2 -> CHS : showBoard(boardDTO)  [broadcast]
+        CHS -> CS : [TCP] ShowBoardMessage  [via sendAsync]
+        RGM2 -> GN2 : notifier.notifyPhaseUpdate(currPhaseState)
+        GN2 -> CHS : onPhaseUpdate(phaseDTO)  [broadcast]
+        CHS -> CS : [TCP] PhaseUpdateMessage  [via sendAsync]
+        RGM2 -> GN2 : notifier.notifyCurrPlayerUpdate(currPlayer)
+        GN2 -> CHS : onCurrPlayerUpdate(currPlayer)  [broadcast]
+        CHS -> CS : [TCP] CurrPlayerUpdateMessage  [via sendAsync]
+    end
+end
+
+MM2 --> CMVI : [return]
+CMVI -> CHS : onLogin(nickname)\n(sets nickname, starts health check)
+CMVI -> CHS : onLoginSuccess(nickname)
+CHS -> CS : [TCP] LoginSuccessMessage(nickname)
+
+@enduml

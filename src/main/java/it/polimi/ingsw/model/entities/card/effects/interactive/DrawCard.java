@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.enumerations.DrawCardEnum;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.visitors.DrawCardVisitor;
+import it.polimi.ingsw.visitors.DrawCountVisitor;
 
 /**
  * An interactive card effect that grants the owning player a card draw.
@@ -41,13 +43,6 @@ public class DrawCard extends CardEffectInteractive {
         return drawCardType.apply(p, drawCardType);
     }
 
-    /**
-     * Prints a confirmation message indicating that a draw action was created.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.printf("Pescata effettuata");
-    }
 
     /**
      * Returns {@code 1} if this effect grants an upper-row draw, {@code 0}
@@ -55,7 +50,6 @@ public class DrawCard extends CardEffectInteractive {
      *
      * @return number of upper draws granted
      */
-    @Override
     public int getUpDraws() {
         return drawCardType.equals(DrawCardEnum.UP_DRAW) ? 1 : 0;
     }
@@ -66,8 +60,15 @@ public class DrawCard extends CardEffectInteractive {
      *
      * @return number of lower draws granted
      */
-    @Override
     public int getDownDraws() {
         return drawCardType.equals(DrawCardEnum.DOWN_DRAW) ? 1 : 0;
     }
+
+    /**
+     * Forwards this effect to the given {@link DrawCountVisitor}, contributing
+     * its upper- or lower-row draw count to the visitor's running totals.
+     *
+     * @param visitor the visitor to accept; must not be {@code null}
+     */
+    public void accept(DrawCountVisitor visitor){ visitor.visit(this);}
 }

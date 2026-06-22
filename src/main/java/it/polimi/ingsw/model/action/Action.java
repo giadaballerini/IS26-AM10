@@ -12,10 +12,10 @@ import it.polimi.ingsw.model.player.Player;
 public class Action {
 
     /** The player who owns and must resolve this action. */
-    private Player owner;
+    private final Player owner;
 
     /** The type of draw or effect to be resolved. */
-    private DrawCardEnum type;
+    private final DrawCardEnum type;
 
     /**
      * Constructs an {@code Action} for the given player and action type.

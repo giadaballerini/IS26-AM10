@@ -1,6 +1,6 @@
 package it.polimi.ingsw.network.server.socket;
 
-import it.polimi.ingsw.network.server.MatchManager;
+import it.polimi.ingsw.server.MatchManager;
 import it.polimi.ingsw.visitors.ClientMessageVisitorImpl;
 
 import java.io.IOException;

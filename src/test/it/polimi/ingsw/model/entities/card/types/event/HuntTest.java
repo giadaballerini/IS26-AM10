@@ -11,61 +11,61 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HuntTest {
 
-    public class PlayerTest extends Player {
-        public PlayerTest(String name, ColorPawnEnum color) {
-            super(name, color);
-        }
+    static class TestPlayer extends Player {
+        public TestPlayer(String name, ColorPawnEnum color) { super(name, color); }
         public Village getVillage() { return myVillage; }
     }
 
+    private final Hunt hunt = new Hunt(4, GamePhaseEnum.PLAY_EVENT,
+            new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.HUNT);
+
+    private Hunter newHunter(int id) {
+        return new Hunter(id, GamePhaseEnum.DRAW_PHASE,
+                new ArrayList<>(), new ArrayList<>(), 2, CardTypeEnum.HUNTER);
+    }
+
     @Test
-    void execEvent_WithHuntBonus() {
-        Hunt hunt = new Hunt(4, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.HUNT);
+    void execEvent_CorrectPhase_GivesFoodAndPP() {
+        TestPlayer p1 = new TestPlayer("P1", ColorPawnEnum.BLUE);
+        p1.addCard(newHunter(1));
+        p1.addCard(newHunter(2));
+        p1.activateHuntBonus();
 
-        PlayerTest p = new PlayerTest("Test", ColorPawnEnum.BLUE);
-        PlayerTest p2 = new PlayerTest("Test2", ColorPawnEnum.BLUE);
-        List<Player> players = new ArrayList<>();
-        players.add(p);
-        players.add(p2);
+        TestPlayer p2 = new TestPlayer("P2", ColorPawnEnum.ORANGE);
+        p2.addCard(newHunter(3));
+        p2.addCard(newHunter(4));
+        p2.addCard(newHunter(5));
 
-        Hunter hunter1 = new Hunter(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, true, CardTypeEnum.HUNTER);
-        Hunter hunter2 = new Hunter(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, false, CardTypeEnum.HUNTER);
-        Hunter hunter3 = new Hunter(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, true, CardTypeEnum.HUNTER);
+        hunt.execEvent(List.of(p1, p2), GamePhaseEnum.PLAY_EVENT);
 
-        // p: 2 hunter, con huntBonus attivato
-        p.addCard(hunter1);
-        p.addCard(hunter2);
-        p.activateHuntBonus();
-
-        // p2: 3 hunter, senza huntBonus
-        p2.addCard(hunter1);
-        p2.addCard(hunter3);
-        p2.addCard(hunter2);
-
-        hunt.execEvent(players, GamePhaseEnum.PLAY_EVENT);
-
-        // p: 2 hunter * 1 foodGain + bonus 2*1 = 4 food; stesso per PP
-        assertEquals(4, p.getNFood());
-        assertEquals(4, p.getPP());
-
-        // p2: 3 hunter * 1 foodGain = 3 food, nessun bonus
+        assertEquals(4, p1.getNFood());
+        assertEquals(4, p1.getPP());
         assertEquals(3, p2.getNFood());
         assertEquals(3, p2.getPP());
     }
 
     @Test
     void execEvent_WrongPhase_DoesNothing() {
-        Hunt hunt = new Hunt(4, GamePhaseEnum.PLAY_EVENT, new ArrayList<>(), new ArrayList<>(), 2, 1, 1, CardTypeEnum.HUNT);
-        PlayerTest p = new PlayerTest("Test", ColorPawnEnum.BLUE);
-        Hunter hunter = new Hunter(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, true, CardTypeEnum.HUNTER);
-        p.addCard(hunter);
+        TestPlayer p = new TestPlayer("P", ColorPawnEnum.BLUE);
+        p.addCard(newHunter(1));
         p.activateHuntBonus();
 
         hunt.execEvent(List.of(p), GamePhaseEnum.SETUP_PHASE);
+
+        assertEquals(0, p.getNFood());
+        assertEquals(0, p.getPP());
+    }
+
+    @Test
+    void execEvent_NoHunters_ZeroGain() {
+        TestPlayer p = new TestPlayer("P", ColorPawnEnum.BLUE);
+        p.activateHuntBonus();
+
+        hunt.execEvent(List.of(p), GamePhaseEnum.PLAY_EVENT);
 
         assertEquals(0, p.getNFood());
         assertEquals(0, p.getPP());

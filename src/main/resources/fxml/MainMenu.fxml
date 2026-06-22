@@ -1,180 +1,260 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.effect.GaussianBlur?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Font?>
-
-<StackPane maxHeight="1080.0" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.ui.GUI.MainMenuController">
+<?import javafx.scene.text.*?>
+<StackPane fx:id="root"
+           maxWidth="Infinity" maxHeight="Infinity"
+           stylesheets="@../css/style.css"
+           xmlns="http://javafx.com/javafx/26"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.polimi.ingsw.client.ui.gui.MainMenuController">
     <children>
-        <ImageView fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true">
+
+        <ImageView fitWidth="${root.width}" fitHeight="${root.height}"
+                   pickOnBounds="true" preserveRatio="false">
             <image>
-                <Image url="@../images/SfondoLogin.png" />
+                <Image url="@../images/LoginBackground.png" />
             </image>
             <effect>
                 <GaussianBlur radius="63.0" />
             </effect>
         </ImageView>
-        <Rectangle arcHeight="5.0" arcWidth="5.0" height="1080.0" opacity="0.5" stroke="BLACK" strokeType="INSIDE" width="1920.0" />
-        <ImageView fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
+
+        <Rectangle width="${root.width}" height="${root.height}"
+                   opacity="0.5" stroke="BLACK" strokeType="INSIDE"
+                   arcWidth="5.0" arcHeight="5.0" />
+
+        <ImageView fitHeight="730.0" fitWidth="1280.0"
+                   pickOnBounds="true" preserveRatio="true">
             <image>
-                <Image url="@../images/SfondoLogin.png" />
+                <Image url="@../images/LoginBackground.png" />
             </image>
         </ImageView>
-        <AnchorPane maxHeight="1080.0" prefHeight="1080.0" prefWidth="1920.0">
+
+        <AnchorPane maxWidth="Infinity" maxHeight="Infinity">
             <children>
 
-                <VBox fx:id="loginPane" alignment="CENTER" managed="false" maxHeight="720.0" maxWidth="1280.0" spacing="150.0" stylesheets="@../css/style.css" translateY="120.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox fx:id="loginPane" alignment="CENTER" managed="false"
+                      maxHeight="720.0" maxWidth="1280.0" spacing="150.0"
+                      stylesheets="@../css/style.css" translateY="120.0"
+                      visible="false"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <VBox alignment="CENTER" prefWidth="1088.0">
                             <children>
-                                <Label prefHeight="0.0" prefWidth="28.0" style="-fx-text-fill: RED;">
-                                    <font>
-                                        <Font size="24.0" />
-                                    </font></Label>
-                                <TextField fx:id="usernameField" alignment="CENTER" maxHeight="62.0" maxWidth="400.0" minHeight="62.0" minWidth="250.0" promptText="Inserisci il Nickname" styleClass="campo-ip">
-                                    <font>
-                                        <Font size="24.0" />
-                                    </font>
+                                <Label prefHeight="0.0" prefWidth="28.0"
+                                       style="-fx-text-fill: RED;">
+                                    <font><Font size="24.0" /></font>
+                                </Label>
+                                <TextField fx:id="usernameField" alignment="CENTER"
+                                           maxHeight="62.0" maxWidth="400.0"
+                                           minHeight="62.0" minWidth="250.0"
+                                           promptText="Inserisci il Nickname"
+                                           styleClass="ip-field">
+                                    <font><Font size="24.0" /></font>
                                 </TextField>
                             </children>
                         </VBox>
-                        <Button fx:id="loginButton" maxHeight="60.0" maxWidth="250.0" minHeight="60.0" minWidth="250.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="60.0" prefWidth="250.0" style="-fx-background-radius: 40;" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="conferma">
-                            <font>
-                                <Font size="24.0" />
-                            </font>
+                        <Button fx:id="loginButton"
+                                maxHeight="60.0" maxWidth="250.0"
+                                minHeight="60.0" minWidth="250.0"
+                                mnemonicParsing="false" onAction="#onLoginClick"
+                                prefHeight="60.0" prefWidth="250.0"
+                                style="-fx-background-radius: 40;"
+                                styleClass="mesos-button"
+                                stylesheets="@../css/style.css"
+                                text="conferma">
+                            <font><Font size="24.0" /></font>
                         </Button>
                     </children>
                 </VBox>
 
-
-                <HBox fx:id="sceltaPane" alignment="CENTER" managed="false" prefHeight="1080.0" prefWidth="1920.0" spacing="90.0" visible="false">
+                <HBox fx:id="choicePane" alignment="CENTER" managed="false"
+                      maxHeight="Infinity" maxWidth="Infinity"
+                      spacing="90.0" visible="false"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
-                        <Button minHeight="60.0" minWidth="250.0" mnemonicParsing="false" onAction="#onCreaClick" style="-fx-background-radius: 35;" styleClass="bottone-mesos" text="nuova partita">
-                            <font>
-                                <Font size="23.0" />
-                            </font>
+                        <Button minHeight="60.0" minWidth="250.0" mnemonicParsing="false"
+                                onAction="#onCreateClick"
+                                style="-fx-background-radius: 35;"
+                                styleClass="mesos-button" text="nuova partita">
+                            <font><Font size="23.0" /></font>
                         </Button>
-                        <Button minHeight="60.0" minWidth="250.0" mnemonicParsing="false" onAction="#onJoinClick" style="-fx-background-radius: 35;" styleClass="bottone-mesos" text="unisciti">
-                            <font>
-                                <Font size="23.0" />
-                            </font>
+                        <Button minHeight="60.0" minWidth="250.0" mnemonicParsing="false"
+                                onAction="#onJoinClick"
+                                style="-fx-background-radius: 35;"
+                                styleClass="mesos-button" text="unisciti">
+                            <font><Font size="23.0" /></font>
                         </Button>
                     </children>
                 </HBox>
 
-                <VBox fx:id="retePane" alignment="CENTER" fillWidth="false" managed="false" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox fx:id="networkPane" alignment="CENTER" fillWidth="false"
+                      managed="false" visible="false"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <HBox alignment="CENTER" spacing="50.0">
-                            <VBox.margin>
-                                <Insets top="70.0" />
-                            </VBox.margin>
+                            <VBox.margin><Insets top="70.0" /></VBox.margin>
                             <children>
-                                <ToggleButton maxHeight="70.0" maxWidth="160.0" minHeight="70.0" minWidth="160.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="160.0" styleClass="toggle-rete" stylesheets="@../css/toggleConnessioneStyle.css" text="socket" userData="SOCKET">
+                                <ToggleButton maxHeight="70.0" maxWidth="160.0"
+                                              minHeight="70.0" minWidth="160.0"
+                                              mnemonicParsing="false"
+                                              prefHeight="70.0" prefWidth="160.0"
+                                              styleClass="network-toggle"
+                                              stylesheets="@../css/networkToggleStyle.css"
+                                              text="socket" userData="SOCKET">
                                     <toggleGroup>
                                         <ToggleGroup fx:id="connection" />
                                     </toggleGroup>
                                 </ToggleButton>
-                                <TextField fx:id="ipField" alignment="CENTER" prefHeight="25.0" prefWidth="250.0" promptText="Indirizzo IP" styleClass="campo-ip" />
-                                <ToggleButton maxHeight="40.0" maxWidth="160.0" minHeight="70.0" minWidth="160.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="160.0" styleClass="toggle-rete" stylesheets="@../css/toggleConnessioneStyle.css" text="rmi" toggleGroup="$connection" userData="RMI" />
+                                <TextField fx:id="ipField" alignment="CENTER"
+                                           prefHeight="25.0" prefWidth="250.0"
+                                           promptText="Indirizzo IP"
+                                           styleClass="ip-field" />
+                                <ToggleButton maxHeight="40.0" maxWidth="160.0"
+                                              minHeight="70.0" minWidth="160.0"
+                                              mnemonicParsing="false"
+                                              prefHeight="70.0" prefWidth="160.0"
+                                              styleClass="network-toggle"
+                                              stylesheets="@../css/networkToggleStyle.css"
+                                              text="rmi" toggleGroup="$connection"
+                                              userData="RMI" />
                             </children>
                         </HBox>
-
-                        <Button fx:id="connectButton" mnemonicParsing="false" maxHeight="60.0" maxWidth="250.0" minHeight="60.0" minWidth="250.0" onAction="#onConnectClick" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="connettiti">
-                            <VBox.margin>
-                                <Insets top="130.0" />
-                            </VBox.margin>
+                        <Button fx:id="connectButton" mnemonicParsing="false"
+                                maxHeight="60.0" maxWidth="250.0"
+                                minHeight="60.0" minWidth="250.0"
+                                onAction="#onConnectClick"
+                                styleClass="mesos-button"
+                                stylesheets="@../css/style.css"
+                                text="connettiti">
+                            <VBox.margin><Insets top="130.0" /></VBox.margin>
                         </Button>
                     </children>
                 </VBox>
-                <Button fx:id="quitBtn" mnemonicParsing="false" onMouseClicked="#onExit"
-                        styleClass="bottone-quit"
-                        managed="false" visible="false"
-                        maxWidth="180"
-                        maxHeight="70"
-                        minWidth="180"
-                        minHeight="70"
-                        AnchorPane.rightAnchor="240.0"
-                        AnchorPane.bottomAnchor="960.0" />
-                <VBox fx:id="creaPane" alignment="CENTER" managed="false" spacing="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+                <VBox fx:id="creationPane" alignment="CENTER" managed="false"
+                      spacing="100.0" visible="false"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <VBox alignment="CENTER">
                             <children>
-                                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="954.0" spacing="50.0">
+                                <HBox alignment="CENTER" prefHeight="100.0"
+                                      prefWidth="954.0" spacing="50.0">
                                     <children>
-                                        <ToggleButton mnemonicParsing="false" styleClass="toggle-giocatori" stylesheets="@../css/toggleGiocatoriStyle.css" text="2 giocatori" userData="2">
+                                        <ToggleButton mnemonicParsing="false"
+                                                      styleClass="toggle-player"
+                                                      stylesheets="@../css/playerToggleStyle.css"
+                                                      text="2 giocatori" userData="2">
                                             <toggleGroup>
                                                 <ToggleGroup fx:id="numPlayers" />
                                             </toggleGroup>
                                         </ToggleButton>
-                                        <ToggleButton mnemonicParsing="false" styleClass="toggle-giocatori" stylesheets="@../css/toggleGiocatoriStyle.css" text="3 giocatori" toggleGroup="$numPlayers" userData="3" />
+                                        <ToggleButton mnemonicParsing="false"
+                                                      styleClass="toggle-player"
+                                                      stylesheets="@../css/playerToggleStyle.css"
+                                                      text="3 giocatori" toggleGroup="$numPlayers"
+                                                      userData="3" />
                                     </children>
                                 </HBox>
                                 <HBox alignment="CENTER" spacing="50.0">
                                     <children>
-                                        <ToggleButton mnemonicParsing="false" styleClass="toggle-giocatori" stylesheets="@../css/toggleGiocatoriStyle.css" text="4 giocatori" toggleGroup="$numPlayers" userData="4" />
-                                        <ToggleButton mnemonicParsing="false" styleClass="toggle-giocatori" stylesheets="@../css/toggleGiocatoriStyle.css" text="5 giocatori" toggleGroup="$numPlayers" userData="5" />
+                                        <ToggleButton mnemonicParsing="false"
+                                                      styleClass="toggle-player"
+                                                      stylesheets="@../css/playerToggleStyle.css"
+                                                      text="4 giocatori" toggleGroup="$numPlayers"
+                                                      userData="4" />
+                                        <ToggleButton mnemonicParsing="false"
+                                                      styleClass="toggle-player"
+                                                      stylesheets="@../css/playerToggleStyle.css"
+                                                      text="5 giocatori" toggleGroup="$numPlayers"
+                                                      userData="5" />
                                     </children>
                                 </HBox>
                             </children>
                         </VBox>
-                        <Button mnemonicParsing="false" onAction="#onConfermaClick" styleClass="bottone-mesos" stylesheets="@../css/style.css" text="seleziona" />
+                        <Button mnemonicParsing="false" onAction="#onConfirmClick"
+                                styleClass="mesos-button"
+                                stylesheets="@../css/style.css"
+                                text="seleziona" />
                     </children>
                 </VBox>
-                <TableView fx:id="lobbyPane" managed="false" prefHeight="534.0" prefWidth="528.0" visible="false" AnchorPane.leftAnchor="696.0" AnchorPane.topAnchor="273.0">
-                    <columns>
-                        <TableColumn fx:id="colId" prefWidth="132.0" text="ID partita" />
-                        <TableColumn fx:id="colGiocatori" prefWidth="132.0" text="#Giocatori" />
-                        <TableColumn fx:id="colProprietario" prefWidth="132.0" text="Host" />
-                        <TableColumn fx:id="colJoin" prefWidth="132.0" />
-                    </columns>
-                </TableView>
-                <ImageView fx:id="backButton" fitHeight="110" fitWidth="200" managed="false" onMouseClicked="#onBackClick" preserveRatio="true" visible="false" AnchorPane.leftAnchor="280" AnchorPane.topAnchor="850">
+
+                <StackPane fx:id="lobbyPaneWrapper" alignment="CENTER"
+                           managed="false" visible="false"
+                           AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                    <children>
+                        <TableView fx:id="lobbyPane"
+                                   minWidth="420.0" minHeight="220.0">
+                            <columns>
+                                <TableColumn fx:id="colId" prefWidth="132.0" text="ID partita" />
+                                <TableColumn fx:id="playersColumn" prefWidth="132.0" text="#Giocatori" />
+                                <TableColumn fx:id="ownerColumn" prefWidth="132.0" text="Host" />
+                                <TableColumn fx:id="colJoin" prefWidth="132.0" text="" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </StackPane>
+
+                <ImageView fx:id="backButton"
+                           fitHeight="90" fitWidth="350"
+                           managed="false" visible="false"
+                           onMouseClicked="#onBackClick"
+                           preserveRatio="true"
+                           AnchorPane.bottomAnchor="150.0"
+                           AnchorPane.leftAnchor="150.0">
                     <image>
                         <Image url="/images/back_button.png" />
                     </image>
                 </ImageView>
-                <HBox fx:id="errorBannerWrapper" alignment="CENTER" managed="false" visible="false"
+
+                <HBox fx:id="errorBannerWrapper" alignment="CENTER"
+                      managed="false" visible="false"
                       AnchorPane.topAnchor="60.0"
                       AnchorPane.leftAnchor="0.0"
                       AnchorPane.rightAnchor="0.0">
                     <children>
                         <HBox fx:id="errorBanner" alignment="CENTER_LEFT"
-                              spacing="14.0"
-                              maxWidth="750.0"
+                              spacing="14.0" maxWidth="750.0"
                               style="-fx-background-color: linear-gradient(to bottom, #5c1a00cc, #2a0800cc);
-                     -fx-background-radius: 40;
-                     -fx-border-color: #d35400;
-                     -fx-border-radius: 40;
-                     -fx-border-width: 2;
-                     -fx-padding: 16 32 16 24;
-                     -fx-effect: dropshadow(three-pass-box, rgba(211,84,0,0.6), 18, 0, 0, 0);">
+                                     -fx-background-radius: 40;
+                                     -fx-border-color: #d35400;
+                                     -fx-border-radius: 40;
+                                     -fx-border-width: 2;
+                                     -fx-padding: 16 32 16 24;
+                                     -fx-effect: dropshadow(three-pass-box, rgba(211,84,0,0.6), 18, 0, 0, 0);">
                             <children>
                                 <Label style="-fx-text-fill: #f39c12; -fx-font-size: 20px;" text="⚠" />
                                 <Label fx:id="errorLabel"
-                                       styleClass="campo-ip"
+                                       styleClass="ip-field"
                                        style="-fx-text-fill: #f5e6c8;
-                              -fx-font-family: 'ChristmasChalk';
-                              -fx-font-size: 17px;
-                              -fx-background-color: transparent;
-                              -fx-border-color: transparent;" />
+                                              -fx-font-family: 'ChristmasChalk';
+                                              -fx-font-size: 17px;
+                                              -fx-background-color: transparent;
+                                              -fx-border-color: transparent;" />
                             </children>
                         </HBox>
                     </children>
                 </HBox>
+
+                <Button fx:id="quitBtn" mnemonicParsing="false" onMouseClicked="#onExit"
+                        styleClass="quit-button"
+                        managed="false" visible="false"
+                        maxWidth="180" maxHeight="70"
+                        minWidth="180" minHeight="70"
+                        AnchorPane.rightAnchor="70.0"
+                        AnchorPane.topAnchor="70.0" />
+
             </children>
         </AnchorPane>
     </children>

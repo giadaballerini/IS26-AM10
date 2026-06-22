@@ -1,0 +1,176 @@
+@startuml server_connection_down
+title Unreachable-Client Detection — Health Check & disconnect() Cleanup
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+note over ClientHandlerRmi, MatchManager
+  This diagram covers what happens when the health-check thread on
+  either transport decides a CLIENT is no longer reachable (it does
+  not specifically detect a server-side network outage). Both paths
+  converge on the same MatchManager.disconnect(nickname) method,
+  which cleans up match/lobby/reconnection state and notifies any
+  affected players. There is no special "server network down" branch:
+  persistence of in-progress matches is kept current independently,
+  via saveNow() after every successful move/draw/skip and via the
+  JVM shutdown hook (see the disconnect() section below).
+end note
+
+== RMI — Health Check Detects Unreachable Client ==
+
+participant "HealthCheck\nThread\n(inside CHR)" as HealthCheckRmi
+participant "pingExecutor" as PE
+participant "VirtualViewRmi\n(stub)" as STUB
+participant "ClientHandlerRmi\n(CHR)" as CHR
+participant "ServerRmi\n(DisconnectionListener)" as DL
+
+note over HealthCheckRmi
+  The HealthCheck thread runs INSIDE
+  ClientHandlerRmi — it is not a
+  separate object. Shown separately
+  only for readability.
+end note
+
+HealthCheckRmi -> PE : pingExecutor.submit(\n  () -> clientStub.ping())
+
+PE -> STUB : ping()  [remote call]
+note right of STUB
+  Server network is down:
+  RMI blocks until PING_TIMEOUT (3000 ms)
+end note
+
+STUB --> PE : (hangs — no response)
+PE --> HealthCheckRmi : future.get(PING_TIMEOUT) → TimeoutException
+
+HealthCheckRmi -> HealthCheckRmi : ping.cancel(true)\nfailures++
+note right : repeated up to MAX_FAILURES = 2\n(~6 s total before triggering)
+
+note over HealthCheckRmi, CHR
+  failures >= MAX_FAILURES:
+  tryMarkDisconnected() is called directly
+  by the HealthCheck thread (same object as CHR).
+  Returns true → proceeds to notify listener.
+end note
+
+HealthCheckRmi -> CHR : tryMarkDisconnected()
+
+
+HealthCheckRmi -> DL : disconnectionListener\n  .handleDisconnection(nickname)
+note right of DL
+  ServerRmi.handleDisconnection(nickname)
+    → matchManager.disconnect(nickname)
+end note
+
+== Socket — Health Check Detects Unreachable Client ==
+
+participant "HealthCheck\nThread\n(inside CHS)" as HealthCheckSck
+participant "ClientHandlerSocket\n(CHS)" as CHS
+participant "MatchManager" as MMsck
+
+note over HealthCheckSck
+  The HealthCheck thread runs INSIDE
+  ClientHandlerSocket — not a separate object.
+end note
+
+note over HealthCheckSck, CHS
+  Every PING_INTERVAL (2000 ms), a PingMessage is sent via sendAsync.
+  lastMessageReceivedTime is updated on ANY incoming message (not just Pong).
+  After TIMEOUT_LIMIT (6000 ms) of total inactivity (no message of any kind):
+end note
+
+HealthCheckSck -> HealthCheckSck : inactivity =\n  now - lastMessageReceivedTime\n  > TIMEOUT_LIMIT (6000 ms)
+
+HealthCheckSck -> CHS : handleDisconnection(nickname)
+
+
+CHS -> MMsck : matchManager.disconnect(nickname)
+
+== MatchManager.disconnect() — Actual Cleanup Logic ==
+
+participant "ServerRmi / CHS\n(caller)" as CALLER
+participant "MatchManager" as MM
+participant "ClientHandler\n[other players]" as CH_others3
+participant "PersistenceManager" as PM
+
+CALLER -> MM : disconnect(nickname)
+
+note over MM
+  Method body synchronizes on `this` —
+  only one disconnect is processed at a
+  time across all threads. disconnect()
+  mirrors the four-branch logic of
+  MatchManager.quit(), but never throws and
+  always removes the client from `clients`
+  at the end.
+
+end note
+
+alt active match (clientToMatch has nickname, not in a lobby, controller exists)
+    MM -> MM : terminateMatch(matchId, nickname, reason)
+    note right of MM
+      terminateMatch():
+      - removes ALL players of matchId from clientToMatch
+      - controllers.remove(matchId) / gameManagers.remove(matchId)
+      - persistenceManager.unregister(matchId)
+        → deletes the match's save file (GameStateDAO.delete)
+    end note
+    MM -> CH_others3 : onQuitServer(reason)  [broadcast, disconnected player excluded]
+
+else pending reconnection (clientToMatch has nickname, controller NOT yet rebuilt)
+    MM -> MM : clientToMatch.remove(nickname)\nreconnectedPlayers[matchId].remove(nickname)\npendingRestorations.remove(matchId)\nreconnectedPlayers.remove(matchId)\npersistenceManager.unregister(matchId)
+    MM -> CH_others3 : onQuitServer(reason)  [other players already reconnected, excluded the one disconnecting]
+
+else in lobby (clientToMatch has nickname, lobby still open)
+    MM -> MM : remove all lobby members from clientToMatch\nlobbies.remove(matchId)
+    MM -> CH_others3 : onQuitServer(reason)  [other lobby members, excluded the one disconnecting]
+
+else not tracked anywhere (e.g. pre-login or post-game)
+    note right of MM
+      No match/lobby/reconnection state for this
+      nickname → reason stays null, nobody is notified.
+      Unlike quit(), this branch does NOT throw
+      InvalidTimingException: an untracked nickname
+      is simply a silent no-op.
+    end note
+end
+
+MM -> MM : clients.remove(nickname)
+
+note over MM, PM
+  Persistence safety net (unrelated to disconnect()):
+  - MatchManager.move()/drawCard()/skip() each call
+    persistenceManager.saveNow(matchId, gm) right after
+    a successful action, so the on-disk snapshot is never
+    more than one action stale.
+  - The shutdown hook registered in MatchManager's
+    constructor calls persistenceManager.shutdown(),
+    which saveNow()s every still-active match when the
+    JVM itself terminates.
+end note
+
+== On Server Restart ==
+
+participant "MatchManager\n(new instance)" as MM2
+participant "GameStateDAO" as DAO
+
+MM2 -> DAO : GameStateDAO.loadAll()
+note right of DAO
+  Reads all match_*.json files from saves/
+  Skips corrupted files (logged, not thrown)
+end note
+DAO --> MM2 : List<GameSnapshot>
+MM2 -> MM2 : pendingRestorations.put(matchId, snap)\nreconnectedPlayers.put(matchId, {})\nnextMatchId advanced past saved IDs
+note right of MM2
+  Match waits in pendingRestorations.
+  clientToMatch is NOT populated yet.
+  As each player reconnects via login():
+    → reconnectedPlayers[matchId].put(nickname, client)
+    → clientToMatch.put(nickname, matchId)
+    → client.onReconnection(matchId)
+  When reconnectedPlayers[matchId].size()
+    == snap.getNumPlayers()
+  → restoreGame(matchId, snap) is called.
+end note
+
+@enduml

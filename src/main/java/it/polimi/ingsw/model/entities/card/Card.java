@@ -7,8 +7,6 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.*;
@@ -16,13 +14,12 @@ import it.polimi.ingsw.model.entities.card.types.event.Feast;
 import it.polimi.ingsw.model.entities.card.types.event.Hunt;
 import it.polimi.ingsw.model.entities.card.types.event.Ritual;
 import it.polimi.ingsw.model.entities.card.types.event.StonePainting;
-import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.dto.CardDTO;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
+import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -71,7 +68,7 @@ import java.util.List;
 public abstract class Card {
 
     /** Unique identifier of this card. */
-    private int id;
+    private final int id;
 
     /**
      * The game phase that must be active for this card's instant effects to
@@ -86,10 +83,10 @@ public abstract class Card {
     protected List<CardEffectInstant> instantEffects;
 
     /** The age (1–3) this card belongs to. */
-    private int age;
+    private final int age;
 
     /** The category of this card (character type, building, or event variant). */
-    private CardTypeEnum type;
+    private final CardTypeEnum type;
 
     /**
      * Constructs a {@code Card} with the given properties.
@@ -139,10 +136,23 @@ public abstract class Card {
     }
 
     /**
+     * Returns whether this effect may fire given the card's trigger phase and
+     * the current game phase. The default implementation requires an exact
+     * match between the two phases.
+     *
+     * @param trigger   the phase associated with the card carrying this effect
+     * @param currPhase the current game phase
+     * @return {@code true} if the effect may fire
+     */
+    public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase) {
+        return trigger == currPhase;
+    }
+
+    /**
      * Applies all eligible instant effects of this card to the given player
      * for the current game phase, removing one-time effects after they fire.
      *
-     * <p>An effect fires only if {@link CardEffectInstant#canApply(GamePhaseEnum, GamePhaseEnum)}
+     * <p>An effect fires only if {@link Card#canApply(GamePhaseEnum, GamePhaseEnum)}
      * returns {@code true} for this card's trigger and the current phase.</p>
      *
      * @param p         the player to apply the effects to
@@ -152,7 +162,7 @@ public abstract class Card {
         Iterator<CardEffectInstant> it = instantEffects.iterator();
         while (it.hasNext()) {
             CardEffectInstant e = it.next();
-            if (e.canApply(trigger, currPhase)) {
+            if (canApply(trigger, currPhase)) {
                 e.apply(p, this);
                 if (e.isOneTime())
                     it.remove();
@@ -201,25 +211,6 @@ public abstract class Card {
         return this.type;
     }
 
-    /**
-     * Accepts a {@link GainFoodVisitor}, dispatching to the overload that
-     * matches this card's concrete type.
-     *
-     * @param visitor  the visitor to dispatch to
-     * @param p        the player receiving the food gain
-     * @param effect   the food gain effect being applied
-     */
-    public abstract void accept(GainFoodVisitor visitor, Player p, GainFood effect);
-
-    /**
-     * Accepts a {@link GainPPVisitor}, dispatching to the overload that
-     * matches this card's concrete type.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the PP gain
-     * @param effect  the PP gain effect being applied
-     */
-    public abstract void accept(GainPPVisitor visitor, Player p, GainPP effect);
 
     /**
      * Accepts a {@link PlayEventVisitor}, dispatching to the overload that
@@ -244,6 +235,13 @@ public abstract class Card {
      * @param visitor the visitor to dispatch to
      */
     public abstract void accept(CanDrawVisitor visitor);
+
+    /**
+     * Accepts a {@link VillageVisitor}, dispatching to the overload that
+     * matches this card's concrete type.
+     * @param visitor the visitor to dispatch to
+     */
+    public abstract void accept(VillageVisitor visitor);
 
     /**
      * Converts this card to a {@link CardDTO} for network transfer.

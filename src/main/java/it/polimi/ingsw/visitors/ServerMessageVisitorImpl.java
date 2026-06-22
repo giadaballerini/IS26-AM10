@@ -1,9 +1,9 @@
 package it.polimi.ingsw.visitors;
 
 import it.polimi.ingsw.client.VirtualModel;
+import it.polimi.ingsw.client.socket.ClientSocket;
 import it.polimi.ingsw.client.ui.UserInterface;
-import it.polimi.ingsw.exceptions.AlreadyExistingUsernameException;
-import it.polimi.ingsw.network.client.socket.ClientSocket;
+import it.polimi.ingsw.exceptions.InvalidUsernameException;
 import it.polimi.ingsw.network.dto.PlayerStatsDTO;
 import it.polimi.ingsw.network.messages.server.*;
 import it.polimi.ingsw.network.messages.service.PingMessage;
@@ -350,16 +350,30 @@ public class ServerMessageVisitorImpl implements ServerMessageVisitor {
     }
 
     /**
-     * Visits a {@link QuitAckMessage}: resets the model, notifies the UI of the
-     * quit, clears the match ID, and reinstalls a fresh visitor on the socket.
+     * Visits a {@link QuitAckMessage}.
+     *
+     * <p>Two distinct situations trigger this message:
+     * <ul>
+     *   <li><b>Self-initiated quit</b> — {@link it.polimi.ingsw.client.socket.ClientSocket#quit()}
+     *       already reset the local state synchronously before this ack
+     *       arrives; in that case {@link it.polimi.ingsw.client.Client#isInGame()}
+     *       is already {@code false} and the UI must not be notified twice.</li>
+     *   <li><b>Server-initiated quit</b> — e.g. the post-game "back to menu"
+     *       acknowledgement, where the client has not reset its state yet and
+     *       this is the only notification it will receive.</li>
+     * </ul>
+     * The visitor is always reinstalled, since it is cheap and keeps the
+     * socket ready for the next message regardless of which case applies.
      *
      * @param ackMessage the quit acknowledgement message containing the quit reason
      */
     @Override
     public void visit(QuitAckMessage ackMessage) {
-        this.model = ui.quit();
-        ui.onQuit(ackMessage.getReason());
-        clientSocket.setMatchId(0);
+        if (clientSocket.isInGame()) {
+            this.model = ui.quit();
+            ui.onQuit(ackMessage.getReason());
+            clientSocket.setMatchId(0);
+        }
         clientSocket.setVisitor(new ServerMessageVisitorImpl(model, ui, clientSocket));
     }
 
@@ -385,7 +399,7 @@ public class ServerMessageVisitorImpl implements ServerMessageVisitor {
      */
     @Override
     public void visit(LoginFailedMessage message) {
-        ui.printError(new AlreadyExistingUsernameException(message.getError()));
+        ui.printError(new InvalidUsernameException(message.getError()));
         clientSocket.onLoginFailed();
     }
 

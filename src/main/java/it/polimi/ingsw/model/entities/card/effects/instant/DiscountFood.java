@@ -59,13 +59,6 @@ public class DiscountFood extends CardEffectInstant {
         discountFoodType.apply(p, this);
     }
 
-    /**
-     * Prints the discount amount, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.println("\nAggiunto discount di " + foodAmount);
-    }
 
     /**
      * Returns the card category relevant to this discount rule.

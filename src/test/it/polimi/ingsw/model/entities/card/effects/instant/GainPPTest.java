@@ -1,6 +1,9 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
-import it.polimi.ingsw.enumerations.*;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.ColorPawnEnum;
+import it.polimi.ingsw.enumerations.GainPPEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.player.Player;
 import org.junit.jupiter.api.Test;
@@ -11,13 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class GainPPTest {
 
-    @Mock
-    GainPP mockEff;
 
     @Test
     void apply() {
@@ -28,15 +28,6 @@ class GainPPTest {
     assertEquals(1, p.getPP());
     }
 
-    @Test
-    void displayEffect() {
-        GainPP eff = new GainPP(null,1, GainPPEnum.PP_FLAT);
-
-        mockEff.displayEffect();
-        eff.displayEffect();
-
-        verify(mockEff).displayEffect();
-    }
 
     @Test
     void getPpAmount() {

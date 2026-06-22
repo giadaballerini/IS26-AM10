@@ -60,12 +60,14 @@ public class QTileData {
     @JsonProperty("slot4y")
     private double slot4Y;
 
-    /** @return the display description of this tile */
+    /**
+     * THe textual description of this tile.
+     * @return the display description of this tile */
     public String getDescription() { return description; }
 
     /**
-     * @return the unique identifier of this tile, also corresponding
-     *         to the number of available pawn slots on this tile
+     * The unique identifier of this tile.
+     * @return the unique identifier of this tile
      */
     public int getId() { return id; }
 
@@ -103,5 +105,11 @@ public class QTileData {
             case 4 -> slot4Y;
             default -> 0.0;
         };
+    }
+    /**
+     * Creates a new empty {@code QTileData} instance.
+     * Required by Jackson for JSON deserialization.
+     */
+    public QTileData() {
     }
 }

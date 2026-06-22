@@ -6,22 +6,19 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
+import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.List;
 
 /**
  * Abstract base class for event cards.
  *
- * <p>Event cards are not drawn into a player's hand; instead they are resolved
+ * <p>Event cards are not drawn into a player's hand; instead, they are resolved
  * collectively at the end of a round or age, affecting all players at once.
  * The four concrete event types are {@link Feast}, {@link Hunt},
  * {@link Ritual}, and {@link StonePainting}, each implementing
@@ -65,31 +62,6 @@ public abstract class Event extends Card {
      */
     public abstract void execEvent(List<Player> players, GamePhaseEnum phase);
 
-    /**
-     * Accepts a {@link GainFoodVisitor}, dispatching to
-     * {@link GainFoodVisitor#visit(Event, Player, GainFood)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the food gain
-     * @param e       the food gain effect being applied
-     */
-    @Override
-    public void accept(GainFoodVisitor visitor, Player p, GainFood e) {
-        visitor.visit(this, p, e);
-    }
-
-    /**
-     * Accepts a {@link GainPPVisitor}, dispatching to
-     * {@link GainPPVisitor#visit(Event, Player, GainPP)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the PP gain
-     * @param e       the PP gain effect being applied
-     */
-    @Override
-    public void accept(GainPPVisitor visitor, Player p, GainPP e) {
-        visitor.visit(this, p, e);
-    }
 
     /**
      * Accepts a {@link PlayEventVisitor}, dispatching to
@@ -121,4 +93,7 @@ public abstract class Event extends Card {
      */
     @Override
     public void accept(CanDrawVisitor visitor) { visitor.visit(this); }
+
+    @Override
+    public void accept(VillageVisitor visitor){visitor.visit(this);}
 }

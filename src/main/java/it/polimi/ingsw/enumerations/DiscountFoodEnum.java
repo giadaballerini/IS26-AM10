@@ -16,23 +16,17 @@ public enum DiscountFoodEnum implements DiscountFoodModifier {
      * Applies a discount based on a specific card category.
      * Adds a category-based discount to the player.
      */
-    DISCOUNT_CAT((p, e) -> {
-        p.addCategoryDiscount(e.getCat());
-    }) { public boolean isOneTime() { return true; } },
+    DISCOUNT_CAT((p, e) -> p.addCategoryDiscount(e.getCat())),
 
     /**
      * Applies a flat food discount to the player.
      */
-    DISCOUNT_FLAT((p, e) -> {
-        p.addFoodDiscount(e.getFoodAmount());
-    }) { public boolean isOneTime() { return true; } },
+    DISCOUNT_FLAT((p, e) -> p.addFoodDiscount(e.getFoodAmount())),
 
     /**
      * Applies a food discount for building cards.
      */
-    DISCOUNT_FOR_BUILDING((p, e) -> {
-        p.addTotBuildDiscount(e.getFoodAmount());
-    }) { public boolean isOneTime() { return true; } };
+    DISCOUNT_FOR_BUILDING((p, e) -> p.addTotBuildDiscount(e.getFoodAmount()));
 
 
     /** The strategy that defines how this discount is applied. */
@@ -63,5 +57,5 @@ public enum DiscountFoodEnum implements DiscountFoodModifier {
      *
      * @return {@code false} by default; overridden to {@code true} in all constants
      */
-    public boolean isOneTime() { return false; }
+    public boolean isOneTime() { return true; }
 }

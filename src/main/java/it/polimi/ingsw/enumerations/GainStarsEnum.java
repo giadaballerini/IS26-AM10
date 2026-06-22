@@ -15,9 +15,7 @@ public enum GainStarsEnum implements GainStarsModifier {
     /**
      * Grants a flat amount of stars to the player.
      */
-    GAIN_STARS((p, e) -> {
-        p.addStars(e.getStarsAmount());
-    });
+    GAIN_STARS((p, e) -> p.addStars(e.getStarsAmount()));
 
 
     /** The strategy used to apply this stars gain effect to a player. */

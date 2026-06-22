@@ -62,14 +62,6 @@ public class GainFood extends CardEffectInstant {
     }
 
     /**
-     * Prints the food amount granted, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.println("\nAggiunto " + foodAmount + " di cibo");
-    }
-
-    /**
      * Returns the base food amount used as a parameter by the gain rule.
      *
      * @return base food amount
@@ -87,14 +79,4 @@ public class GainFood extends CardEffectInstant {
      */
     @Override
     public boolean isOneTime() { return gainFoodType.isOneTime(); }
-
-    /**
-     * Returns {@code true}, since this effect always provides a food reward.
-     * Used to determine whether the queue food bonus applies when a player
-     * enters a tile carrying this effect.
-     *
-     * @return {@code true}
-     */
-    @Override
-    public boolean isFoodEffect() { return true; }
 }

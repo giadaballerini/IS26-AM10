@@ -63,19 +63,6 @@ public class GainPP extends CardEffectInstant {
     }
 
     /**
-     * No-op overload retained for compatibility.
-     */
-    public void apply() {}
-
-    /**
-     * Prints the PP amount granted, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.println("\nAggiunti " + ppAmount + "PP");
-    }
-
-    /**
      * Returns the base PP amount used as a parameter by the gain rule.
      *
      * @return base PP amount
@@ -99,5 +86,5 @@ public class GainPP extends CardEffectInstant {
      * @return {@code true} if the effect is one-time
      */
     @Override
-    public boolean isOneTime() { return gainPpType != null && gainPpType.isOneTime(); }
+    public boolean isOneTime() { return gainPpType.isOneTime(); }
 }

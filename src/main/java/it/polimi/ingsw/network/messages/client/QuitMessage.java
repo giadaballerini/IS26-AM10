@@ -19,4 +19,9 @@ public class QuitMessage implements ClientMessage {
     public void accept(ClientMessageVisitor visitor) {
         visitor.visit(this);
     }
+    /**
+     * Creates a new {@code QuitMessage} instance.
+     */
+    public QuitMessage() {
+    }
 }

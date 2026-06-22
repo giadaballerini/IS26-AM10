@@ -1,10 +1,7 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
 import it.polimi.ingsw.enumerations.CardTypeEnum;
-import it.polimi.ingsw.enumerations.ColorPawnEnum;
 import it.polimi.ingsw.enumerations.DiscountFoodEnum;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
-import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.player.Player;
 import org.junit.jupiter.api.Test;
@@ -12,15 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DiscountFoodTest {
@@ -30,9 +24,6 @@ class DiscountFoodTest {
 
     @Mock
     Builder builder;
-
-    @Mock
-    DiscountFood mockDiscountFood;
 
     @ParameterizedTest
     @EnumSource(DiscountFoodEnum.class)
@@ -44,19 +35,12 @@ class DiscountFoodTest {
 
         if(discountFoodType == DiscountFoodEnum.DISCOUNT_FOR_BUILDING)
             verify(mockPlayer).addTotBuildDiscount(anyInt());
+        else if(discountFoodType == DiscountFoodEnum.DISCOUNT_CAT)
+            verify(mockPlayer).addCategoryDiscount(CardTypeEnum.BUILDER);
         else
             verify(mockPlayer).addFoodDiscount(anyInt());
     }
 
-    @Test
-    void testShouldDisplayEffect() {
-        DiscountFood effect = new DiscountFood(null, 67, DiscountFoodEnum.DISCOUNT_FLAT);
-
-        mockDiscountFood.displayEffect();
-        effect.displayEffect();
-
-        verify(mockDiscountFood).displayEffect();
-    }
 
     @ParameterizedTest
     @EnumSource(value = CardTypeEnum.class, names = {
@@ -80,9 +64,6 @@ class DiscountFoodTest {
     void testShouldIsOneTime(DiscountFoodEnum discountFoodType) {
         DiscountFood effect = new DiscountFood(CardTypeEnum.BUILDER, 67, discountFoodType);
 
-        if(discountFoodType != DiscountFoodEnum.DISCOUNT_CAT)
-            assertTrue(effect.isOneTime());
-        else
-            assertFalse(effect.isOneTime());
+        assertTrue(effect.isOneTime());
     }
 }

@@ -69,12 +69,6 @@ public class LossIfBroke extends CardEffectInstant {
     public int getFoodCost() { return foodCost; }
 
     /**
-     * Prints the PP penalty amount, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() { System.out.println("\nDetratti " + ppCost + "PP"); }
-
-    /**
      * Returns whether this effect is consumed after firing once, as determined
      * by the penalty rule.
      *

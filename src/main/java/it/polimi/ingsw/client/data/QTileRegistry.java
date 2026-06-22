@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Static registry that holds all board tile data loaded from the client-side JSON resource file.
@@ -20,6 +22,11 @@ public class QTileRegistry {
 
     /** Map from tile ID to its corresponding {@link QTileData}, populated at class initialization. */
     private static final Map<Integer, QTileData> reg = new HashMap<>();
+
+    /**
+     * Logger used to report failures during the tile data loading in the static initializer block.
+     */
+    private static final Logger logger = Logger.getLogger(QTileRegistry.class.getName());
 
     static {
         loadTiles();
@@ -39,16 +46,15 @@ public class QTileRegistry {
             if (is == null) {
                 throw new RuntimeException("Risorsa clientQtiles.json non trovata");
             }
-            List<QTileData> tiles = mapper.readValue(is, new TypeReference<List<QTileData>>() {});
+            List<QTileData> tiles = mapper.readValue(is, new TypeReference<>() {
+            });
 
             for (QTileData tile : tiles) {
                 reg.put(tile.getId(), tile);
             }
-            System.out.println("[JACKSON] QTiles caricate con successo!");
 
         } catch (Exception e) {
-            System.out.println("[ERRORE CRITICO] Fallimento nel caricamento qtiles.json");
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Fallimento nel caricamento qtiles.json", e);
         }
     }
 
@@ -74,10 +80,10 @@ public class QTileRegistry {
     /**
      * Returns the display name for board tiles.
      *
-     * @return the string {@code "Queue Tile "}
+     * @return the string {@code "Tessera Ordine Turno "}
      */
     public static String getName() {
-        return "Queue Tile ";
+        return "Tessera Ordine Turno ";
     }
 
     /**
@@ -89,4 +95,10 @@ public class QTileRegistry {
     public static String getDescription(int id) {
         return getTile(id).getDescription();
     }
+    /**
+     * Private constructor to prevent instantiation of this static utility class.
+     */
+    private QTileRegistry() {
+    }
+
 }

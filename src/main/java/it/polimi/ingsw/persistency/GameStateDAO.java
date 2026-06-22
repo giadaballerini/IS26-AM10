@@ -25,6 +25,9 @@ import java.util.logging.Logger;
  */
 public class GameStateDAO {
 
+    /**
+     *  Logger for this class.
+     */
     private static final Logger LOG = Logger.getLogger(GameStateDAO.class.getName());
 
     /** Directory where save files are stored. */
@@ -85,32 +88,10 @@ public class GameStateDAO {
     }
 
     /**
-     * Loads the saved {@link GameSnapshot} for the given match ID.
-     *
-     * @param matchId the unique identifier of the match to load
-     * @return the deserialized snapshot, or {@code null} if no save file exists
-     *         or the file cannot be read
-     */
-    public static synchronized GameSnapshot load(int matchId) {
-        File file = fileFor(matchId, EXT);
-        if (!file.exists()) {
-            return null;
-        }
-        try {
-            GameSnapshot snapshot = MAPPER.readValue(file, GameSnapshot.class);
-            LOG.info("Snapshot caricato per match " + matchId);
-            return snapshot;
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "Impossibile leggere il salvataggio per match " + matchId, e);
-            return null;
-        }
-    }
-
-    /**
      * Loads all saved {@link GameSnapshot} instances found in the save directory.
      *
      * <p>Intended for use at server startup to resume interrupted matches.
-     * Files that cannot be deserialized (e.g. corrupted) are logged and skipped;
+     * Files that cannot be deserialized are logged and skipped;
      * they do not prevent other snapshots from being loaded.</p>
      *
      * @return a list of all successfully loaded snapshots; never {@code null},
@@ -144,7 +125,7 @@ public class GameStateDAO {
     }
 
     /**
-     * Deletes the save file for the given match ID, if it exists.
+     * Deletes the save file for the given match ID if it exists.
      *
      * <p>Any leftover temporary file for the same match is also removed.
      * Failures to delete are logged but do not throw an exception.</p>
@@ -170,5 +151,10 @@ public class GameStateDAO {
      */
     private static File fileFor(int matchId, String extension) {
         return new File(SAVE_DIR + File.separator + "match_" + matchId + extension);
+    }
+    /**
+     * Creates a new {@code GameStateDAO} instance.
+     */
+    public GameStateDAO() {
     }
 }

@@ -5,9 +5,6 @@ import it.polimi.ingsw.model.gamemanager.GameManager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,30 +14,19 @@ import java.util.logging.Logger;
  * <p>Keeps track of all running {@link GameManager} instances and provides
  * methods to save and delete their state on demand. On shutdown, a final
  * save is performed for every match still in progress so that games can be
- * resumed after a server restart.</p>
+ * resumed after a server restarts.</p>
  *
  * <p>Persistence is delegated to {@link GameStateDAO}, which handles the
  * actual reading and writing of JSON save files.</p>
  */
 public class PersistenceManager {
-
+    /**
+     * The logger used for logging events in the persistence manager.
+     */
     private static final Logger LOG = Logger.getLogger(PersistenceManager.class.getName());
 
     /** Active matches, keyed by match ID. */
     private final Map<Integer, GameManager> activeGames = new ConcurrentHashMap<>();
-
-    /** Scheduled periodic save tasks, keyed by match ID. */
-    private final Map<Integer, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
-
-    /**
-     * Single-threaded scheduler used to run periodic save tasks.
-     * The backing thread is a daemon so it does not prevent JVM shutdown.
-     */
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "persistence-scheduler");
-        t.setDaemon(true);
-        return t;
-    });
 
     /**
      * Registers a match so that its state can be saved by this manager.
@@ -106,7 +92,7 @@ public class PersistenceManager {
     }
 
     /**
-     * Saves all active matches and shuts down the scheduler.
+     * Saves all active matches on shutdown.
      *
      * <p>Should be called when the server is shutting down to ensure that no
      * in-progress match is lost. After this method returns, the manager should
@@ -117,6 +103,11 @@ public class PersistenceManager {
         for (Map.Entry<Integer, GameManager> entry : activeGames.entrySet()) {
             saveNow(entry.getKey(), entry.getValue());
         }
-        scheduler.shutdownNow();
+    }
+    /**
+     * Creates a new {@code PersistenceManager} instance with an empty set of
+     * active games and a single-threaded persistence scheduler.
+     */
+    public PersistenceManager() {
     }
 }

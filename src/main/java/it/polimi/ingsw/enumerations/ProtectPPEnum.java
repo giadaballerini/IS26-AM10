@@ -7,7 +7,7 @@ import it.polimi.ingsw.model.player.Player;
  * Represents the PP protection effect that can be applied to a player.
  *
  * <p>Implements {@link ProtectPPModifier} to activate a shield that prevents
- * the player from losing PP. This is a one-time effect.</p>
+ * the player from losing PP, ONLY from Ritual events. This is a one-time effect.</p>
  */
 public enum ProtectPPEnum implements ProtectPPModifier {
 

@@ -6,8 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ProtectPPEnumTest {
@@ -20,9 +21,17 @@ class ProtectPPEnumTest {
 
         ProtectPPEnum.PP_PROTECTION.apply(real);
 
-        // verifica tramite comportamento: applyRitualLoss non deve sottrarre PP
         real.applyRitualLoss(10);
         assertEquals(0, real.getPP());
+    }
+
+    @Test
+    void testWithoutProtection_applyRitualLoss_deductsPP() {
+        Player real = new Player("Player1", ColorPawnEnum.ORANGE);
+
+        real.applyRitualLoss(10);
+
+        assertEquals(-10, real.getPP(), "senza protezione la perdita PP deve essere effettiva");
     }
 
     @Test

@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.dto;
 
 import it.polimi.ingsw.enumerations.CardTypeEnum;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Set;
@@ -13,7 +14,10 @@ import java.util.Set;
  * can update the relevant UI indicators.
  */
 public class PlayerStatusDTO implements Serializable {
-
+    /**
+     * Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** The player these status flags belong to. */
@@ -29,16 +33,16 @@ public class PlayerStatusDTO implements Serializable {
     private final Set<CardTypeEnum> categoryDiscounts;
 
     /** Whether the player has the paint special flag active. */
-    private boolean paintFlag;
+    private final boolean paintFlag;
 
     /** Whether the player has the extra-action flag active. */
-    private boolean extraFlag;
+    private final boolean extraFlag;
 
     /** Whether the player is currently protected from negative card effects. */
-    private boolean hasProtection;
+    private final boolean hasProtection;
 
     /** Whether the player is currently receiving double income from shaman cards. */
-    private boolean hasDoubleShamanIncome;
+    private final boolean hasDoubleShamanIncome;
 
     /**
      * Creates a fully specified {@code PlayerStatusDTO}.
@@ -153,5 +157,20 @@ public class PlayerStatusDTO implements Serializable {
      */
     public String getNickname() {
         return nickname;
+    }
+
+    /**
+     * Compares this {@code PlayerStatusDTO} with another for equality.
+     * @param other the other {@code PlayerStatusDTO}
+     * @return {@code true} if the two objects are equal
+     */
+    public boolean equals(PlayerStatusDTO other) {
+        return hasProtection == other.hasProtection
+                && hasDoubleShamanIncome == other.hasDoubleShamanIncome
+                && extraFlag == other.extraFlag
+                && paintFlag == other.paintFlag
+                && huntBonus == other.huntBonus
+                && categoryDiscounts.equals(other.categoryDiscounts)
+                && nickname.equals(other.nickname);
     }
 }

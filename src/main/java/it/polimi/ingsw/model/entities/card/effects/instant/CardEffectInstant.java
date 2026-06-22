@@ -3,7 +3,6 @@ package it.polimi.ingsw.model.entities.card.effects.instant;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.player.Player;
 
@@ -55,25 +54,6 @@ public abstract class CardEffectInstant {
     public void apply(Player p, Card c) { apply(p); }
 
     /**
-     * Returns whether this effect may fire given the card's trigger phase and
-     * the current game phase. The default implementation requires an exact
-     * match between the two phases.
-     *
-     * @param trigger   the phase associated with the card carrying this effect
-     * @param currPhase the current game phase
-     * @return {@code true} if the effect may fire
-     */
-    public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase) {
-        return trigger == currPhase;
-    }
-
-    /**
-     * Prints a human-readable description of this effect, used for debugging
-     * or TUI display.
-     */
-    public abstract void displayEffect();
-
-    /**
      * Returns the prestige point amount associated with this effect.
      * The default implementation returns {@code 0}.
      *
@@ -98,15 +78,11 @@ public abstract class CardEffectInstant {
      * @return {@code true} if the effect is consumed on first use
      */
     @JsonIgnore
-    public boolean isOneTime() { return false; }
-
+    public abstract boolean isOneTime();
     /**
-     * Returns whether this effect provides a food reward, used to determine
-     * whether the queue food bonus applies when a player enters a tile.
-     * The default implementation returns {@code false}.
-     *
-     * @return {@code true} if this effect grants food
+     * Creates a new {@code CardEffectInstant} instance.
+     * Intended for use by subclasses only.
      */
-    @JsonIgnore
-    public boolean isFoodEffect() { return false; }
+    protected CardEffectInstant() {
+    }
 }

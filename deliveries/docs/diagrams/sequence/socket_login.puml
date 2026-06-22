@@ -1,0 +1,117 @@
+@startuml socket_login
+title Socket — Login & Message Flow
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+actor Client
+
+participant "Client\n(base class)" as CB
+participant "ClientSocket\n(doLogin)" as CS
+participant "ServerSocket" as SS
+participant "ClientHandlerSocket" as CHS
+participant "ClientMessageVisitorImpl" as CMV
+participant "ServerMessageVisitorImpl" as SMV
+participant "MatchManager" as MM
+
+note over CB, CS
+  Client.login() is defined in the abstract base class.
+  ClientSocket.doLogin() is the transport-specific implementation
+  called after validation passes.
+end note
+
+== Connection ==
+
+Client -> CS : connect(host, port)
+CS -> SS : TCP handshake
+SS -> CHS : new ClientHandlerSocket(socket, matchManager)
+note right of CHS
+  Constructor internally creates a first
+  ClientMessageVisitorImpl (visitor field).
+  It will be overwritten by setVisitor() below.
+end note
+SS -> SS : new ClientMessageVisitorImpl(matchManager, handler)
+SS -> CHS : handler.setVisitor(visitor)
+SS -> CHS : pool.submit(handler)
+
+== Stream Init (run()) ==
+
+CHS -> CHS : setup()\n→ ObjectOutputStream\n→ ObjectInputStream\n[enters readObject() loop]
+
+== Login — Success ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ no: proceed
+CB -> CS : doLogin(nickname)
+CS -> CS : vm.setNickname(nickname)\nloginFuture = new CompletableFuture<>()
+CS -> CHS : [TCP] LoginMessage(nickname)
+note over CS
+  doLogin() now blocks on loginFuture.get(),
+  waiting for the reader thread to complete it
+  via onLoginSuccess() or onLoginFailed().
+end note
+
+CHS -> CHS : readObject() → onClientMessage(msg)\nmsg.accept(visitor)
+CHS -> CMV : visit(LoginMessage)
+CMV -> MM : login(nickname, clientHandler)
+MM --> CMV : [no exception]
+CMV -> CHS : onLogin(nickname)
+CHS -> CHS : this.nickname = nickname\nthis.lastMessageReceivedTime = now\nstartHealthCheck()
+CMV -> CHS : onLoginSuccess(nickname)
+CHS -> CS : [TCP] LoginSuccessMessage(nickname)
+
+note over CS
+  Reader thread receives LoginSuccessMessage
+  and dispatches to ServerMessageVisitorImpl.
+end note
+CS -> SMV : visit(LoginSuccessMessage)
+SMV -> CS : clientSocket.onLoginSuccess()
+CS -> CS : loginFuture.complete(true)\nsocket.setSoTimeout(PING_TIMEOUT)
+SMV -> SMV : if (!clientSocket.isInGame())\n→ ui.onLogin(nickname)
+note over CS
+  loginFuture.get() unblocks → doLogin() returns true.
+end note
+CS --> CB : true
+CB --> Client : true
+
+== Login — Alt: Empty/Null Nickname ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ yes: ui.printError(new InvalidUsernameException("Il nickname non può essere vuoto."))\nreturn false (without sending LoginMessage)
+CB --> Client : false
+
+== Login — Alt: InvalidUsernameException ==
+
+Client -> CB : login(nickname)
+CB -> CB : check: nickname null/blank?\n→ no: proceed
+CB -> CS : doLogin(nickname)
+CS -> CS : vm.setNickname(nickname)\nloginFuture = new CompletableFuture<>()
+CS -> CHS : [TCP] LoginMessage(nickname)
+note over CS
+  doLogin() blocks on loginFuture.get().
+end note
+
+CHS -> CHS : readObject() → onClientMessage(msg)\nmsg.accept(visitor)
+CHS -> CMV : visit(LoginMessage)
+CMV -> MM : login(nickname, clientHandler)
+note right of MM
+  nickname already registered → InvalidUsernameException("Username già esistente nella lobby, inserire un nuovo username")
+  (null/blank check already done in Client.login(),
+  but MatchManager re-checks as server-side defence)
+end note
+MM --> CMV : throws InvalidUsernameException
+CMV -> CHS : onLoginFailed(e.getMessage())
+CHS -> CS : [TCP] LoginFailedMessage(errorMsg)
+
+CS -> SMV : visit(LoginFailedMessage)
+SMV -> SMV : ui.printError(new InvalidUsernameException(message.getError()))
+SMV -> CS : clientSocket.onLoginFailed()
+CS -> CS : loginFuture.complete(false)
+note over CS
+  loginFuture.get() unblocks → doLogin() returns false.
+end note
+CS --> CB : false
+CB --> Client : false
+
+@enduml

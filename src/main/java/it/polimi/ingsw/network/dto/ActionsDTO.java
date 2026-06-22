@@ -66,7 +66,7 @@ public class ActionsDTO implements Serializable {
      *
      * @return {@code true} if skipping is allowed
      */
-    public boolean isOptionalFlag() {
+    public boolean isSkippable() {
         return skippable;
     }
 }

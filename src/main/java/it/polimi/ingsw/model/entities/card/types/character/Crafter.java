@@ -6,11 +6,7 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.CrafterSymbolEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.visitors.VillageVisitor;
 
@@ -62,31 +58,6 @@ public class Crafter extends Character {
         return this.symbol;
     }
 
-    /**
-     * Accepts a {@link GainFoodVisitor}, dispatching to
-     * {@link GainFoodVisitor#visit(Crafter, Player, GainFood)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the food gain
-     * @param e       the food gain effect being applied
-     */
-    @Override
-    public void accept(GainFoodVisitor visitor, Player p, GainFood e) {
-        visitor.visit(this, p, e);
-    }
-
-    /**
-     * Accepts a {@link GainPPVisitor}, dispatching to
-     * {@link GainPPVisitor#visit(Crafter, Player, GainPP)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the PP gain
-     * @param e       the PP gain effect being applied
-     */
-    @Override
-    public void accept(GainPPVisitor visitor, Player p, GainPP e) {
-        visitor.visit(this, p, e);
-    }
 
     /**
      * Accepts a {@link VillageVisitor}, dispatching to

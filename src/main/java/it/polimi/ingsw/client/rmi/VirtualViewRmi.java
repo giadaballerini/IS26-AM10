@@ -5,13 +5,13 @@ import it.polimi.ingsw.network.dto.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Remote interface through which the server pushes game state updates to the client.
  * Each method corresponds to a specific game event or state change, and is invoked
  * by the server on the client's stub over RMI.
  */
+@SuppressWarnings("EmptyMethod")
 public interface VirtualViewRmi extends Remote {
 
     /**
@@ -38,14 +38,6 @@ public interface VirtualViewRmi extends Remote {
      * @throws RemoteException if a communication error occurs
      */
     void onPhaseUpdate(PhaseDTO phaseDTO) throws RemoteException;
-
-    /**
-     * Delivers the global leaderboard to the client following a ranking request.
-     *
-     * @param ranks a map from each player to their cumulative Points in the global ranking
-     * @throws RemoteException if a communication error occurs
-     */
-    void onRequestLeaderboard(Map<PlayerDTO, Integer> ranks) throws RemoteException;
 
     /**
      * Notifies the client that the game has ended and delivers the final results.
@@ -79,10 +71,9 @@ public interface VirtualViewRmi extends Remote {
      * Notifies the client that a player's stats have changed after an effect.
      *
      * @param stats  the updated stats of the player
-     * @param cardId the ID of the card that triggered the stats update
      * @throws RemoteException if a communication error occurs
      */
-    void onStatsUpdate(PlayerStatsDTO stats, int cardId) throws RemoteException;
+    void onStatsUpdate(PlayerStatsDTO stats) throws RemoteException;
 
     /**
      * Notifies the client that the game has advanced to a new age
@@ -144,14 +135,6 @@ public interface VirtualViewRmi extends Remote {
      * @throws RemoteException if a communication error occurs
      */
     void onEvent(EventDTO event) throws RemoteException;
-
-    /**
-     * Delivers an error message to the client to be displayed in the UI.
-     *
-     * @param e the error message to display
-     * @throws RemoteException if a communication error occurs
-     */
-    void printError(String e) throws RemoteException;
 
     /**
      * Checks that the RMI connection to the client is still alive.

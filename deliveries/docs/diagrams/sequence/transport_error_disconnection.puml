@@ -1,0 +1,81 @@
+@startuml transport_error_disconnection
+title Disconnection via Transport Error — RMI vs. Socket
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+note over GameNotifier, MatchManager
+  This diagram covers the path where a disconnection is detected
+  NOT by the health check thread, but during a normal outgoing callback
+  (sendAsync): e.g. a RemoteException while pushing an update to the client.
+end note
+
+== RMI — Transport Error During sendAsync ==
+
+participant "GameManager" as GM
+participant "GameNotifier" as GN
+participant "ClientHandlerRmi" as CHR
+participant "ClientHandler\n(messageSender executor)" as ME
+participant "VirtualViewRmi\n(stub)" as STUB
+participant "ServerRmi\n(DisconnectionListener)" as DL
+participant "MatchManager" as MM
+
+GM -> GN : notifyMoveUpdate(tileDTO, currPlayer)
+GN -> CHR : onMoveUpdate(tile, next)
+note right of CHR
+  delegates to:
+  sendAsync(() -> clientStub.onMoveUpdate(tile, next))
+end note
+CHR -> ME : messageSender.submit(lambda)
+ME -> STUB : clientStub.onMoveUpdate(tile, next)  [remote call]
+STUB --> ME : RemoteException
+ME -> CHR : handleTransportError(e)
+note right of CHR
+  if (tryMarkDisconnected()) {
+    disconnectionListener.handleDisconnection(nickname)
+  }
+end note
+
+CHR -> CHR : tryMarkDisconnected()
+
+
+CHR -> DL : disconnectionListener.handleDisconnection(nickname)
+DL -> MM : matchManager.disconnect(nickname)
+
+== Socket — Transport Error During sendAsync ==
+
+participant "GameManager" as GM2
+participant "GameNotifier" as GN2
+participant "ClientHandlerSocket" as CHS
+participant "ClientHandler\n(messageSender executor)" as ME2
+participant "ObjectOutputStream" as OOS
+participant "MatchManager" as MM2
+
+GM2 -> GN2 : notifyMoveUpdate(tileDTO, currPlayer)
+GN2 -> CHS : onMoveUpdate(tile, next)
+note right of CHS
+  delegates to:
+  sendAsync(() -> { out.writeObject(new MoveUpdateMessage(...)); out.reset(); out.flush(); })
+end note
+CHS -> ME2 : messageSender.submit(lambda)
+ME2 -> OOS : out.writeObject(MoveUpdateMessage)
+OOS --> ME2 : IOException
+ME2 -> CHS : handleTransportError(e)
+note right of CHS
+  handleTransportError() delegates to:
+  handleDisconnection(this.nickname)
+end note
+
+CHS -> CHS : handleDisconnection(nickname)
+
+
+CHS -> MM2 : matchManager.disconnect(nickname)
+
+note over CHS, MM2
+  The read loop (run()) also catches IOException | ClassNotFoundException
+  and calls handleDisconnection(nickname) directly —
+  tryMarkDisconnected() ensures idempotency in both paths.
+end note
+
+@enduml

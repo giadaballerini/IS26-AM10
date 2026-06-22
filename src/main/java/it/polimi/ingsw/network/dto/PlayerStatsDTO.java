@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -8,7 +9,10 @@ import java.io.Serializable;
  * <p>Sent by the server whenever a player's score or food count changes.
  */
 public class PlayerStatsDTO implements Serializable {
-
+    /**
+     * Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** The player these statistics belong to. */

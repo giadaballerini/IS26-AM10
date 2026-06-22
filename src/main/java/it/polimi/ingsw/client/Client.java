@@ -53,14 +53,10 @@ public abstract class Client implements ClientToServerActions {
     }
 
     /**
+     * Whether the client is currently participating in a match.
      * @return {@code true} if the client is currently participating in a match
      */
     public boolean isInGame() { return matchId != 0; }
-
-    /**
-     * @return the current {@link VirtualModel} holding the client-side game state
-     */
-    public VirtualModel getModel() { return vm; }
 
     /**
      * Sets the user interface for this client. Has no effect if a UI has already been set.
@@ -73,18 +69,27 @@ public abstract class Client implements ClientToServerActions {
     }
 
     /**
+     * The client's nickname.
      * @return the local player's nickname as stored in the {@link VirtualModel}
      */
     public String getNickname() { return vm.getNickname(); }
 
     /**
+     * Whether the client has received an up-to-date list of available lobbies from the server.
      * @return {@code true} if the client has received an up-to-date lobby list from the server
      */
     public boolean hasAvailableLobbies() { return lobbiesAvailable; }
 
-    /**
+     /**
      * Requests the UI to display the status screen for all players.
      * Shows an error if the client is not currently in a match.
+     * Scrolls the players panel by {@code delta} rows (positive = down, negative = up).
+      * @param delta the number of rows to scroll the panel
+     */
+    public void scrollPlayersPanel(int delta) { ui.scrollPlayersPanel(delta); }
+
+    /**
+     * Requests the UI to display the player statuses on the screen.
      */
     public void showStatus() {
         if (isInGame())
@@ -130,7 +135,7 @@ public abstract class Client implements ClientToServerActions {
     @Override
     public boolean login(String nickname) {
         if (nickname == null || nickname.isBlank()) {
-            ui.printError(new AlreadyExistingUsernameException("Il nickname non può essere vuoto."));
+            ui.printError(new InvalidUsernameException("Il nickname non può essere vuoto."));
             return false;
         }
         return doLogin(nickname);
@@ -193,12 +198,12 @@ public abstract class Client implements ClientToServerActions {
             ui.printError(new InvalidTimingException("Non è possibile muoversi prima che la partita sia iniziata."));
             return;
         }
-        if (vm.getCurrentPhase() != GamePhaseEnum.SETUP_PHASE) {
-            ui.printError(new InvalidPhaseException("FASE INVALIDA"));
-            return;
-        }
         if (!vm.getNickname().equals(vm.getCurrPlayer())) {
             ui.printError(new InvalidPlayerException("NON E' IL TUO TURNO"));
+            return;
+        }
+        if (vm.getCurrentPhase() != GamePhaseEnum.SETUP_PHASE) {
+            ui.printError(new InvalidPhaseException("FASE INVALIDA"));
             return;
         }
         List<TileDTO> board = vm.getBoard();
@@ -228,12 +233,12 @@ public abstract class Client implements ClientToServerActions {
             return;
         }
         GamePhaseEnum phase = vm.getCurrentPhase();
-        if (phase != GamePhaseEnum.DRAW_PHASE && phase != GamePhaseEnum.OPTIONAL_DRAW_PHASE) {
-            ui.printError(new InvalidPhaseException("FASE INVALIDA"));
-            return;
-        }
         if (!vm.getNickname().equals(vm.getCurrPlayer())) {
             ui.printError(new InvalidPlayerException("NON E' IL TUO TURNO"));
+            return;
+        }
+        if (phase != GamePhaseEnum.DRAW_PHASE && phase != GamePhaseEnum.OPTIONAL_DRAW_PHASE) {
+            ui.printError(new InvalidPhaseException("FASE INVALIDA"));
             return;
         }
         boolean inUpper = vm.getUpperList().stream().anyMatch(c -> c.getId() == card);
@@ -279,16 +284,16 @@ public abstract class Client implements ClientToServerActions {
             ui.printError(new InvalidTimingException("Non è consentito saltare la fase di pesca prima che la partita sia iniziata."));
             return;
         }
+        if (!vm.getNickname().equals(vm.getCurrPlayer())) {
+            ui.printError(new InvalidPlayerException("NON E' IL TUO TURNO"));
+            return;
+        }
         GamePhaseEnum phase = vm.getCurrentPhase();
         if (phase != GamePhaseEnum.DRAW_PHASE && phase != GamePhaseEnum.OPTIONAL_DRAW_PHASE) {
             ui.printError(new InvalidPhaseException("FASE INVALIDA"));
             return;
         }
-        if (!vm.getNickname().equals(vm.getCurrPlayer())) {
-            ui.printError(new InvalidPlayerException("NON E' IL TUO TURNO"));
-            return;
-        }
-        if (!vm.getToDoActions().isOptionalFlag()) {
+        if (!vm.getToDoActions().isSkippable()) {
             ui.printError(new InvalidSkipException("Non è possibile saltare la pesca adesso."));
             return;
         }

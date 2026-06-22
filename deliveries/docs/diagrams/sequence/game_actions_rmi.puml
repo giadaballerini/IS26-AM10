@@ -1,0 +1,111 @@
+@startuml all_actions
+title All Client Actions — RMI (success and errors)
+
+skinparam sequenceArrowThickness 2
+skinparam round corner 5
+skinparam backgroundColor #FAFAFA
+
+participant "ClientRmi" as CR
+participant "ServerRmi" as SR
+participant "MatchManager" as MM
+participant "Controller" as C
+participant "GameManager" as GM
+participant "ClientHandlerRmi\n[all players]" as CHR
+
+
+
+' ─────────────────────────────────────────────
+' RMI — getLobbies
+' ─────────────────────────────────────────────
+== RMI — getLobbies ==
+CR -> SR : getLobbies(nickname)
+SR -> MM : getLobbies(nickname)
+alt success
+    MM --> SR : Map<Integer, List<LobbyDTO>>
+    SR --> CR : lobbies
+    CR -> CR : ui.displayLobbies(lobbies)
+else InvalidTimingException
+    MM --> SR : throws InvalidTimingException
+    SR --> CR : InvalidTimingException (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+' ─────────────────────────────────────────────
+' RMI — move
+' ─────────────────────────────────────────────
+== RMI — move ==
+CR -> SR : move(nickname, tileId)
+SR -> MM : move(nickname, tileId)
+alt success
+    MM -> C : controller.visit(new MoveMessage(nickname, tileId))
+    C -> GM : onMoveRequested(nickname, tilePos)
+    GM -> GM : validate + apply move
+    GM -> CHR : onMoveUpdate(tile, currPlayer)  [broadcast]
+    CHR -> CR : clientStub.onMoveUpdate(tile, currPlayer)
+else InvalidMoveException / InvalidPlayerException\n  / InvalidPhaseException / InvalidTimingException / OccupiedTileException
+    MM --> SR : throws exception
+    SR --> CR : exception (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+' ─────────────────────────────────────────────
+' RMI — draw
+' ─────────────────────────────────────────────
+== RMI — draw ==
+CR -> SR : draw(id, nickname)
+SR -> MM : drawCard(id, nickname)
+alt success
+    MM -> C : controller.visit(new DrawMessage(id, nickname))
+    C -> GM : onDrawCardRequested(nickname, cardId)
+    GM -> GM : validate + apply draw
+    GM -> CHR : onDrawUpdate(card, nickname)  [broadcast]
+    CHR -> CR : clientStub.onDrawUpdate(card, nickname)
+else InvalidDrawException
+    MM --> SR : throws InvalidDrawException
+    SR --> CR : InvalidDrawException (rethrown)
+    CR -> CR : ui.printError(e)\nse ancora draws disponibili → ui.showDrawable()
+else InvalidTimingException / InvalidPlayerException\n  / InvalidPhaseException
+    MM --> SR : throws exception
+    SR --> CR : exception (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+' ─────────────────────────────────────────────
+' RMI — skip
+' ─────────────────────────────────────────────
+== RMI — skip ==
+CR -> SR : skip(nickname)
+SR -> MM : skip(nickname)
+alt success
+    MM -> C : controller.visit(new SkipMessage(nickname))
+    C -> GM : onSkipRequested(nickname)
+    GM -> GM : validate + apply skip
+    GM -> CHR : notifySkip(nickname)  [broadcast]
+    CHR -> CR : clientStub.notifySkip(nickname)
+else InvalidSkipException / InvalidTimingException\n  / InvalidPlayerException
+    MM --> SR : throws exception
+    SR --> CR : exception (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+' ─────────────────────────────────────────────
+' RMI — requestRanking
+' ─────────────────────────────────────────────
+== RMI — requestRanking ==
+CR -> SR : requestRanking(nickname)
+SR -> MM : requestRanking(nickname)
+alt success
+    MM --> SR : Map<String, Integer>
+    SR --> CR : ranking
+    CR -> CR : ui.showRanking(ranking)
+else RemoteException
+    SR --> CR : RemoteException
+    CR -> CR : ui.printError(e)
+else InvalidTimingException
+    MM --> SR : throws InvalidTimingException
+    SR --> CR : InvalidTimingException (rethrown)
+    CR -> CR : ui.printError(e)
+end
+
+
+@enduml

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,10 @@ import java.util.List;
  * effects and the message may be suppressed.
  */
 public class EventDTO implements Serializable {
-
+    /**
+     *  Required by the {@link Serializable} interface.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Post-event statistics snapshot for every player in the game. */

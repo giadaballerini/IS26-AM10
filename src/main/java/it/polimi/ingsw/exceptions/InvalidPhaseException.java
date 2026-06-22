@@ -1,10 +1,9 @@
 package it.polimi.ingsw.exceptions;
 
 /**
- * Exception thrown when an action is performed during an invalid game phase,
- * or before joining a game.
+ * Exception thrown when an action is performed during an invalid game phase.
  */
-public class InvalidPhaseException extends RuntimeException {
+public class InvalidPhaseException extends GameException {
 
     /**
      * Creates a new {@code InvalidPhaseException} with the given detail message.

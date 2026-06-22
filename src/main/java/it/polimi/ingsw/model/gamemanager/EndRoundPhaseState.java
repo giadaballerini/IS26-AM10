@@ -59,4 +59,9 @@ class EndRoundPhaseState implements GamePhaseState {
      */
     @Override
     public GamePhaseEnum getPhase() { return GamePhaseEnum.END_ROUND; }
+    /**
+     * Creates a new {@code EndRoundPhaseState} instance.
+     */
+    EndRoundPhaseState() {
+    }
 }

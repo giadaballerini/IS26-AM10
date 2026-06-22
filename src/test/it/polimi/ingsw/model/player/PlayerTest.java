@@ -9,7 +9,8 @@ import it.polimi.ingsw.model.entities.card.effects.interactive.DrawCard;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.entities.card.types.character.Crafter;
-import it.polimi.ingsw.model.gamemanager.GameManager;
+import it.polimi.ingsw.model.entities.card.types.character.Hunter;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -211,17 +212,18 @@ class PlayerTest {
         p.activateHuntBonus();
         p.applyHuntBonus();
         assertEquals(0, p.getNFood());
+        assertEquals(0, p.getPP());
     }
 
     @Test
     void testShouldApplyHuntBonus_WithHunters() {
         Player p = new Player("Player", ColorPawnEnum.PURPLE);
-        Builder hunter = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.HUNTER);
+        Hunter hunter = new Hunter(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.HUNTER);
         p.addCard(hunter);
         p.activateHuntBonus();
         p.applyHuntBonus();
-        assertEquals(2, p.getNFood());
-        assertEquals(3, p.getPP());
+        assertEquals(1, p.getNFood());
+        assertEquals(1, p.getPP());
     }
 
     @Test
@@ -305,6 +307,23 @@ class PlayerTest {
     }
 
     @Test
+    @DisplayName("applyQueueFoodBonus — bonus attivo ma tile senza food effect: nessun food aggiunto")
+    void testShouldNotApplyQueueFoodBonus_WhenTileHasNoFoodEffect() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.activateExtraFoodOnQueue();
+        p.applyQueueFoodBonus(false);
+        assertEquals(0, p.getNFood());
+    }
+
+    @Test
+    @DisplayName("applyQueueFoodBonus — bonus non attivo e tile con food effect: nessun food aggiunto")
+    void testShouldNotApplyQueueFoodBonus_WhenBonusNotActivated() {
+        Player p = new Player("Player", ColorPawnEnum.PURPLE);
+        p.applyQueueFoodBonus(true);
+        assertEquals(0, p.getNFood());
+    }
+
+    @Test
     void testShouldCheckBuildsEffectsWithEffect() {
         CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
         List<CardEffectInteractive> effs = new ArrayList<>();
@@ -315,5 +334,64 @@ class PlayerTest {
         List<Action> actions = p.checkBuildsEffects(GamePhaseEnum.DRAW_PHASE);
         assertFalse(actions.isEmpty());
         assertEquals(1, actions.size());
+    }
+    private Player jsonPlayer(java.util.Set<CardTypeEnum> categoryDiscounts) {
+        return new Player(
+                "Alice", ColorPawnEnum.BLUE,
+                0, 0, 0, 0, 0,
+                new Village(), new java.util.LinkedList<>(), new java.util.LinkedList<>(),
+                false, false, false,
+                categoryDiscounts,
+                false, false);
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("@JsonCreator — categoryDiscounts null → nessuna NPE e discount = 0")
+    void jsonCreator_nullCategoryDiscounts_noNPE() {
+        Player p = jsonPlayer(null);
+        assertDoesNotThrow(() -> assertEquals(0, p.calculateFeastDiscount()));
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("@JsonCreator — categoryDiscounts vuoto → discount = 0")
+    void jsonCreator_emptyCategoryDiscounts_discountIsZero() {
+        Player p = jsonPlayer(java.util.EnumSet.noneOf(CardTypeEnum.class));
+        assertEquals(0, p.calculateFeastDiscount());
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("@JsonCreator — categoryDiscounts non vuoto → copiato correttamente")
+    void jsonCreator_nonEmptyCategoryDiscounts_copiedCorrectly() {
+        Player p = jsonPlayer(java.util.EnumSet.of(CardTypeEnum.BUILDER, CardTypeEnum.HUNTER));
+        assertDoesNotThrow(() -> p.addCategoryDiscount(CardTypeEnum.PAINTER));
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("@JsonCreator — categoryDiscounts: isolamento dall'insieme originale")
+    void jsonCreator_categoryDiscounts_isolatedFromOriginal() {
+        java.util.Set<CardTypeEnum> original = new java.util.HashSet<>();
+        original.add(CardTypeEnum.BUILDER);
+        Player p = jsonPlayer(original);
+
+        original.add(CardTypeEnum.HUNTER);
+        assertEquals(0, p.calculateFeastDiscount());
+    }
+
+    @Test
+    @org.junit.jupiter.api.DisplayName("@JsonCreator — skippableDraws non vuota: hasSkippableDraws true")
+    void jsonCreator_nonEmptySkippableDraws_hasSkippableDrawsTrue() {
+        Player owner = new Player("Alice", ColorPawnEnum.BLUE);
+        java.util.List<Action> draws = new java.util.LinkedList<>();
+        draws.add(new Action(owner, DrawCardEnum.UP_DRAW));
+
+        Player p = new Player(
+                "Alice", ColorPawnEnum.BLUE,
+                0, 0, 0, 0, 0,
+                new Village(), new java.util.LinkedList<>(), draws,
+                false, false, false,
+                java.util.EnumSet.noneOf(CardTypeEnum.class),
+                false, false);
+
+        assertTrue(p.hasSkippableDraws());
     }
 }

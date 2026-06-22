@@ -17,4 +17,9 @@ public class AskLobbiesMessage implements ClientMessage {
     public void accept(ClientMessageVisitor visitor) {
         visitor.visit(this);
     }
+    /**
+     * Creates a new {@code AskLobbiesMessage} instance.
+     */
+    public AskLobbiesMessage() {
+    }
 }

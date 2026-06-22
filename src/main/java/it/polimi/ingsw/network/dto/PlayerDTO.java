@@ -15,7 +15,9 @@ import java.util.List;
  * copies of the card lists to prevent accidental mutation.
  */
 public class PlayerDTO implements Serializable {
-
+    /**
+     * Required by the {@link Serializable} interface.
+     */
     @Serial
     private static final long serialVersionUID = 1L;
 

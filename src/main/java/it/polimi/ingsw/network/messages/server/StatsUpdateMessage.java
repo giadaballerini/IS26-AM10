@@ -11,18 +11,14 @@ public class StatsUpdateMessage implements ServerMessage {
     /** Updated statistics for the affected player. */
     private final PlayerStatsDTO stats;
 
-    /** ID of the card whose effect triggered the statistics change. */
-    private final int cardId;
 
     /**
      * Creates a {@code StatsUpdateMessage} for the given stats and card.
      *
      * @param stats  updated player statistics
-     * @param cardId ID of the triggering card
      */
-    public StatsUpdateMessage(PlayerStatsDTO stats, int cardId) {
+    public StatsUpdateMessage(PlayerStatsDTO stats) {
         this.stats = stats;
-        this.cardId = cardId;
     }
 
     /**
@@ -34,14 +30,6 @@ public class StatsUpdateMessage implements ServerMessage {
         return stats;
     }
 
-    /**
-     * Returns the ID of the card whose effect triggered this update.
-     *
-     * @return triggering card ID
-     */
-    public int getCardId() {
-        return cardId;
-    }
 
     /**
      * {@inheritDoc}

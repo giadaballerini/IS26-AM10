@@ -3,7 +3,7 @@ package it.polimi.ingsw.exceptions;
 /**
  * Exception thrown when an invalid skip is requested during the game.
  */
-public class InvalidSkipException extends RuntimeException {
+public class InvalidSkipException extends GameException {
 
     /**
      * Creates a new {@code InvalidSkipException} with the given detail message.

@@ -60,4 +60,9 @@ class EndTurnPhaseState implements GamePhaseState {
      */
     @Override
     public GamePhaseEnum getPhase() { return GamePhaseEnum.END_TURN; }
+    /**
+     * Creates a new {@code EndTurnPhaseState} instance.
+     */
+    EndTurnPhaseState() {
+    }
 }

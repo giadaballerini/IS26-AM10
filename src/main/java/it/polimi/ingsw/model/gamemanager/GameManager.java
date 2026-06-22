@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.interfaces.Snapshotable;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.dto.EventDTO;
 import it.polimi.ingsw.network.dto.PlayerStatsDTO;
+import it.polimi.ingsw.network.dto.PlayerStatusDTO;
 import it.polimi.ingsw.observer.ModelObserver;
 import it.polimi.ingsw.persistency.GameSnapshot;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
@@ -44,18 +45,38 @@ import static it.polimi.ingsw.enumerations.GamePhaseEnum.*;
  * <p>Implements {@link Snapshotable} to support game persistence.</p>
  */
 public class GameManager implements ApplicableActions, Snapshotable {
+    /**
+     * The logger used for logging events in the game.
+     */
     protected static final Logger LOG = Logger.getLogger(GameManager.class.getName());
-
-    protected GamePhaseState currPhaseState;
+    /**
+     * The current game phase.
+     */
+    private GamePhaseState currPhaseState;
+    /**
+     * Callback invoked when the game reaches {@link EndGamePhaseState}.
+     */
     private final Runnable onGameEndedCallback;
+    /**
+     * Callback invoked when {@link #initGame()} completes.
+     */
     private Runnable onGameStartedCallback;
-    protected GameState state;
-    protected GameNotifier notifier;
-    protected   RankingCalculator rankingCalculator;
+    /**
+     * The game state, encapsulating the board, deck, players, and current turn.
+     */
+    private GameState state;
+    /**
+     * Handles game-wide notifications and updates.
+     */
+    private final GameNotifier notifier;
+    /**
+     * Handles ranking calculations and updates.
+     */
+    private final RankingCalculator rankingCalculator;
 
 
     /**
-     * Constructs a new {@code GameManager} and initialises all collaborators.
+     * Constructs a new {@code GameManager} and initializes all collaborators.
      *
      * @param listeners          list of {@link ModelObserver} instances that will receive
      *                           game-event notifications
@@ -73,12 +94,11 @@ public class GameManager implements ApplicableActions, Snapshotable {
     }
 
     /**
-     * Initialises the game state, broadcasts the initial board to all observers,
+     * Initializes the game state, broadcasts the initial board to all observers,
      * and fires the game-started callback if one has been registered.
      */
     public void initGame() {
         state.initialize();
-
         notifier.showBoard(state.toDTO(currPhaseState));
         notifier.notifyCurrPlayerUpdate(state.getCurrPlayer().getNickname());
 
@@ -140,7 +160,7 @@ public class GameManager implements ApplicableActions, Snapshotable {
 
     /**
      * Checks whether the current player's building cards trigger any effects for
-     * the current phase, and if so queues them as skippable draw actions.
+     * the current phase, and if so, queues them as skippable draw actions.
      */
     void checkEffects(){
         Player currPlayer = state.getCurrPlayer();
@@ -192,7 +212,7 @@ public class GameManager implements ApplicableActions, Snapshotable {
         if (!checkCorrectPhase(SETUP_PHASE))
             throw new InvalidPhaseException("FASE INVALIDA");
         if (!(state.checkCorrectPlayer(nick))) {
-            throw new InvalidPlayerException("GIOCATORE INVALIDO");
+            throw new InvalidPlayerException("NON È IL TUO TURNO");
         }
 
         Tile t = state.getTileById(tilePos);
@@ -226,11 +246,11 @@ public class GameManager implements ApplicableActions, Snapshotable {
      * @throws InvalidDrawException   if the card does not exist or cannot be drawn
      */
     public void onDrawCardRequested(String nick,int cardID) throws InvalidPhaseException, InvalidPlayerException, InvalidDrawException{
+        if (!(state.checkCorrectPlayer(nick))) {
+            throw new InvalidPlayerException("NON È IL TUO TURNO");
+        }
         if (!checkCorrectPhase(DRAW_PHASE) && !checkCorrectPhase(OPTIONAL_DRAW_PHASE))
             throw new InvalidPhaseException("FASE INVALIDA");
-        if (!(state.checkCorrectPlayer(nick))) {
-            throw new InvalidPlayerException("GIOCATORE INVALIDO");
-        }
         Card card = state.getCardById(cardID);
 
         if(card==null)
@@ -251,11 +271,13 @@ public class GameManager implements ApplicableActions, Snapshotable {
      */
     void drawCard(Card card) throws InvalidDrawException,InvalidPlayerException,InvalidPhaseException{
         Player currPlayer = state.getCurrPlayer();
+        PlayerStatusDTO before = currPlayer.toStatusDTO();
         state.applyDraw(card, currPhaseState.getPhase());
         checkEffects();
         notifier.notifyDrawUpdate(currPlayer,card);
-        notifier.notifyStatsUpdate(currPlayer,card);
-        notifier.notifyStatusUpdate(currPlayer);
+        notifier.notifyStatsUpdate(currPlayer);
+        if(!before.equals(currPlayer.toStatusDTO()))
+            notifier.notifyStatusUpdate(currPlayer);
         if(!state.getToDoActions().isEmpty())
             checkCanDraw();
         else
@@ -271,12 +293,12 @@ public class GameManager implements ApplicableActions, Snapshotable {
      * @throws InvalidSkipException   if the current draw action cannot be skipped
      */
     public void onSkipRequested(String nick) throws InvalidPhaseException, InvalidPlayerException, InvalidSkipException{
+        if (!(state.checkCorrectPlayer(nick))) {
+            throw new InvalidPlayerException("NON È IL TUO TURNO");
+        }
         if (!checkCorrectPhase(DRAW_PHASE) && !checkCorrectPhase(OPTIONAL_DRAW_PHASE))
             throw new InvalidPhaseException("FASE INVALIDA");
-        else if (!(state.checkCorrectPlayer(nick))) {
-            throw new InvalidPlayerException("GIOCATORE INVALIDO");
-        }
-        else if (!state.getSkippableDraw())
+        if (!state.getSkippableDraw())
             throw new InvalidSkipException("NON È POSSIBILE SALTARE IL TURNO ADESSO");
         skipDraw();
     }
@@ -406,22 +428,28 @@ public class GameManager implements ApplicableActions, Snapshotable {
         state.setSkippableDraw(value);
     }
 
-    /** @return the number of occupied slots in the player queue */
+    /**
+     * The number of occupied tile slots in the player queue.
+     * @return the number of occupied slots in the player queue */
     public int getQueueSize() {
         return state.getQueueSize();
     }
 
-    /** @return the total number of players in the match */
+    /**
+     * The number of players in the match.
+     * @return the total number of players in the match */
     public int getNumPlayers() {
         return state.getNumPlayers();
     }
 
-    /** @return the current turn number (1-based) */
+    /**
+     * The current number turn number of the match
+     * @return the current turn number (1-based) */
     public int getCurrTurn() {
         return state.getCurrTurn();
     }
 
-    /** Increments the turn counter by one. */
+    /**Increments the turn counter by one. */
     public void incrementTurn() {
         state.incrementTurn();
     }
@@ -458,5 +486,62 @@ public class GameManager implements ApplicableActions, Snapshotable {
      */
     public void showBoard() {
         notifier.showBoard(state.toDTO(currPhaseState));
+    }
+
+    /**
+     * Sets the game state to the specified value.
+     * @param state the new {@link GameState} value
+     */
+    protected void setState(GameState state) {
+        this.state = state;
+    }
+
+    /**
+     * Sets the current game phase state to the specified value.
+     * @param currPhaseState the new {@link GamePhaseState} value
+     */
+    protected void setCurrPhaseState(GamePhaseState currPhaseState) {
+        this.currPhaseState = currPhaseState;
+    }
+
+    /**
+     * Returns the current game phase enum value.
+     *
+     * @return the phase of the active {@link GamePhaseState}
+     */
+    protected GamePhaseEnum getCurrPhase() {
+        return currPhaseState.getPhase();
+    }
+
+    /**
+     * Broadcasts the current phase to all registered observers.
+     */
+    protected void notifyPhaseUpdate() {
+        notifier.notifyPhaseUpdate(currPhaseState);
+    }
+
+    /**
+     * Broadcasts the current player's nickname to all registered observers.
+     */
+    protected void notifyCurrPlayerUpdate() {
+        notifier.notifyCurrPlayerUpdate(state.getCurrPlayer().getNickname());
+    }
+
+    /**
+     * Returns the list of tiles on the game board.
+     *
+     * @return the board tile list
+     */
+    protected List<Tile> getBoard() {
+        return state.getBoard();
+    }
+
+    /**
+     * Returns the list of tiles in the queue.
+     *
+     * @return the queue tile list
+     */
+    protected List<Tile> getQueue() {
+        return state.getQueue();
     }
 }

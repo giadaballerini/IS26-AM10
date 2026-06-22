@@ -16,4 +16,9 @@ public class PongMessage implements ClientMessage {
     public void accept(ClientMessageVisitor visitor) {
         visitor.visit(this);
     }
+    /**
+     * Creates a new {@code PongMessage} instance.
+     */
+    public PongMessage() {
+    }
 }

@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.dto.TileDTO;
+import it.polimi.ingsw.visitors.DrawCountVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +177,7 @@ public class Tile {
      * @param p the player to apply the bonus to; must not be {@code null}
      */
     public void applyQueueBonus(Player p) {
-        boolean hasFoodEffect = instantEffects.stream().anyMatch(CardEffectInstant::isFoodEffect);
+        boolean hasFoodEffect = instantEffects.stream().anyMatch(e -> e.getFoodAmount() > 0);
         p.applyQueueFoodBonus(hasFoodEffect);
     }
 
@@ -187,8 +188,10 @@ public class Tile {
      * @return a DTO representation of this tile; never {@code null}
      */
     public TileDTO toDTO() {
-        int upDraws = interactiveEffects.stream().mapToInt(CardEffectInteractive::getUpDraws).sum();
-        int downDraws = interactiveEffects.stream().mapToInt(CardEffectInteractive::getDownDraws).sum();
+        DrawCountVisitor visitor = new DrawCountVisitor();
+        interactiveEffects.forEach(e -> e.accept(visitor));
+        int upDraws = visitor.getUpDraws();
+        int downDraws = visitor.getDownDraws();
         int food = instantEffects.stream().mapToInt(CardEffectInstant::getFoodAmount).sum();
 
         if (isOccupied()) {

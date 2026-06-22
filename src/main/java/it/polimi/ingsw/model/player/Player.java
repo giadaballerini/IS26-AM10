@@ -11,6 +11,7 @@ import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Character;
+import it.polimi.ingsw.model.entities.card.types.character.Crafter;
 import it.polimi.ingsw.network.dto.PlayerDTO;
 import it.polimi.ingsw.network.dto.PlayerStatsDTO;
 import it.polimi.ingsw.network.dto.PlayerStatusDTO;
@@ -48,13 +49,13 @@ public class Player {
     protected Village myVillage;
 
     /** Buildings owned by this player. */
-    private List<Building> myBuilds;
+    private final List<Building> myBuilds;
 
     /**
      * Draw actions that this player may choose to skip rather than being
      * forced to resolve them.
      */
-    private List<Action> skippableDraws;
+    private final List<Action> skippableDraws;
 
     /** The player's unique nickname. */
     private final String nickname;
@@ -69,12 +70,12 @@ public class Player {
      * Card categories for which this player has a discount when calculating
      * feast costs (one food discount per card of each category owned).
      */
-    private EnumSet<CardTypeEnum> categoryDiscounts;
+    private final EnumSet<CardTypeEnum> categoryDiscounts;
 
     /** Whether the paint bonus is active (extra food per Painter on queue). */
     private boolean paintBonus;
 
-    /** Whether this player gains an extra food when entering a tile with a food effect. */
+    /** Whether this player gains extra food when entering a tile with a food effect. */
     private boolean extraFoodOnQueue;
 
     /** Whether this player is protected from prestige point losses during rituals. */
@@ -299,6 +300,18 @@ public class Player {
     }
 
     /**
+     * Returns the number of crafter cards in this player's village that share
+     * the same symbol as the given card, or {@code 0} if the card is not a
+     * {@link Crafter}.
+     *
+     * @param c the card whose symbol to match
+     * @return count of matching crafter symbols, or {@code 0} if not a crafter
+     */
+    public int getNumSymbolsForCrafter(Card c) {
+        return myVillage.getNumSymbolsForCrafter(c);
+    }
+
+    /**
      * Adds the given number of stars to the player's total.
      *
      * @param starsAmount the number of stars to add
@@ -485,6 +498,25 @@ public class Player {
         return discount;
     }
 
+    /**
+     * Returns whether adding the given character type completed a new set
+     * of all character types in this player's village.
+     *
+     * @param justAdded the type of the card that was just added
+     * @return {@code true} if the new set is complete, {@code false} otherwise
+     */
+    public boolean completesNewCharacterSet(CardTypeEnum justAdded) {
+        int newMin = Integer.MAX_VALUE;
+        int oldMin = Integer.MAX_VALUE;
+        for (CardTypeEnum type : CardTypeEnum.values()) {
+            if (!type.isCharacter()) continue;
+            int n = getNumType(type);
+            newMin = Math.min(newMin, n);
+            oldMin = Math.min(oldMin, type.equals(justAdded) ? n - 1 : n);
+        }
+        return newMin > oldMin;
+    }
+    
     /**
      * Adds a list of skippable draw actions to the player's pending queue.
      *

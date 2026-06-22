@@ -1,7 +1,7 @@
 package it.polimi.ingsw.enumerations;
 
 /**
- * Represents the type of a card in the game.
+ * Represents the type of card in the game.
  *
  * <p>Cards are divided into three categories: buildings, characters, and events.
  * The {@link #isCharacter()} and {@link #isEvent()} methods can be used to

@@ -136,7 +136,7 @@
     "instantEffects" : [{
       "type" : "GAIN_PP",
       "category" : null,
-      "ppAmount": null,
+      "ppAmount": 0,
       "gainPpType" : "DOUBLE_PP_SHAMAN"
     }],
     "interactiveEffects" : []
@@ -151,7 +151,7 @@
     "instantEffects" : [{
       "type" : "GAIN_PP",
       "category" : null,
-      "ppAmount": null,
+      "ppAmount": 0,
       "gainPpType" : "DOUBLE_BUILDER"
     }],
     "interactiveEffects" : []

@@ -37,6 +37,21 @@ import static it.polimi.ingsw.enumerations.GamePhaseEnum.SETUP_PHASE;
  */
 public class GameState {
 
+    /**
+     * The minimum number of players supported by a match.
+     *
+     * <p>This lower bound is enforced by {@link #GameState(List, int)} and
+     * mirrors the range of player counts that {@link GameInitializer} is able
+     * to set up (decks, boards, queues, and display rows are only defined for
+     * {@value #MIN_PLAYERS}–{@value #MAX_PLAYERS} players).</p>
+     */
+    public static final int MIN_PLAYERS = 2;
+
+    /**
+     * The maximum number of players supported by a match.
+     */
+    public static final int MAX_PLAYERS = 5;
+
     /** The main draw pile of tribe cards. */
     private List<Card> deck;
 
@@ -56,7 +71,7 @@ public class GameState {
     private List<Card> lowerList;
 
     /** All players participating in this match. */
-    private List<Player> players;
+    private final List<Player> players;
 
     /** The player currently taking their turn. */
     private Player currPlayer;
@@ -74,7 +89,7 @@ public class GameState {
     private boolean skippableDraw;
 
     /** Draw actions that have been triggered but not yet resolved. */
-    private List<Action> toDoActions;
+    private final List<Action> toDoActions;
 
     /** The total number of players in this match. */
     private final int numPlayers;
@@ -86,8 +101,14 @@ public class GameState {
      *
      * @param players    the list of players participating in the match
      * @param numPlayers the total number of players
+     * @throws IllegalArgumentException if {@code numPlayers} is not between
+     *         {@value #MIN_PLAYERS} and {@value #MAX_PLAYERS} (inclusive)
      */
     public GameState(List<Player> players, int numPlayers) {
+        if (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS)
+            throw new IllegalArgumentException(
+                    "Numero di giocatori non valido: " + numPlayers
+                            + " (deve essere compreso tra " + MIN_PLAYERS + " e " + MAX_PLAYERS + ")");
         this.players = players;
         this.numPlayers = numPlayers;
         this.currAge = 1;
@@ -101,6 +122,54 @@ public class GameState {
         this.upperList = new ArrayList<>();
         this.board = new ArrayList<>();
         this.queue = new LinkedList<>();
+    }
+
+    /**
+     * Reconstructs a {@code GameState} from a previously saved
+     * {@link GameSnapshot}, restoring every piece of mutable game data
+     * (decks, display rows, board, queue, age/turn counters, pending actions,
+     * and the current player) exactly as it was at the time of the snapshot.
+     *
+     * <p>Unlike {@link #GameState(List, int)}, {@code numPlayers} is not
+     * re-validated against {@link #MIN_PLAYERS}/{@link #MAX_PLAYERS} here:
+     * the snapshot is assumed to originate from a match that was already
+     * validated when it was first created.</p>
+     *
+     * <p>Tile-to-player object references broken by JSON deserialization are
+     * intentionally left unrestored here; callers are responsible for invoking
+     * the appropriate reconnection logic after construction (see
+     * {@link RestoredGameManager}).</p>
+     *
+     * @param snapshot the snapshot to restore the state from
+     * @param players  the players participating in the restored match
+     */
+    public GameState(GameSnapshot snapshot, List<Player> players) {
+        this.players = players;
+        this.numPlayers = snapshot.getNumPlayers();
+        this.deck = new ArrayList<>(snapshot.getDeck());
+        this.buildings = new ArrayList<>(snapshot.getBuildings());
+        this.upperList = new ArrayList<>(snapshot.getUpperList());
+        this.lowerList = new ArrayList<>(snapshot.getLowerList());
+        this.board = new ArrayList<>(snapshot.getBoard());
+        this.queue = new ArrayList<>(snapshot.getQueue());
+        this.currAge = snapshot.getCurrAge();
+        this.currTurn = snapshot.getCurrTurn();
+        this.skippableDraw = snapshot.isSkippableDraw();
+
+        this.currPlayer = players.stream()
+                .filter(p -> p.getNickname().equals(snapshot.getCurrentPlayerNickname()))
+                .findFirst()
+                .orElse(null);
+
+        this.toDoActions = new ArrayList<>();
+        if (snapshot.getToDoActions() != null) {
+            for (GameSnapshot.PendingAction pa : snapshot.getToDoActions()) {
+                players.stream()
+                        .filter(p -> p.getNickname().equals(pa.getOwnerNickname()))
+                        .findFirst()
+                        .ifPresent(owner -> toDoActions.add(new Action(owner, pa.getType())));
+            }
+        }
     }
 
     /**
@@ -197,14 +266,6 @@ public class GameState {
         currPlayer = p;
     }
 
-    /**
-     * Replaces the current deck with the given list.
-     *
-     * @param deck the new deck; must not be {@code null}
-     */
-    public void setDeck(List<Card> deck) {
-        this.deck = deck;
-    }
 
     /**
      * Returns the tile queue.
@@ -213,15 +274,6 @@ public class GameState {
      */
     public List<Tile> getQueue() {
         return queue;
-    }
-
-    /**
-     * Replaces the tile queue with the given list.
-     *
-     * @param queue the new queue; must not be {@code null}
-     */
-    public void setQueue(List<Tile> queue) {
-        this.queue = queue;
     }
 
     /**
@@ -236,7 +288,7 @@ public class GameState {
     /**
      * Returns the building card supply.
      *
-     * @return the buildings list; never {@code null}
+     * @return the building list; never {@code null}
      */
     public List<Card> getBuildings() {
         return buildings;
@@ -256,7 +308,7 @@ public class GameState {
      *
      * @param board the new board; must not be {@code null}
      */
-    public void setBoard(ArrayList<Tile> board) {
+    void restoreBoard(List<Tile> board) {
         this.board = board;
     }
 
@@ -270,30 +322,12 @@ public class GameState {
     }
 
     /**
-     * Replaces the upper card display row with the given list.
-     *
-     * @param upperList the new upper list; must not be {@code null}
-     */
-    public void setUpperList(List<Card> upperList) {
-        this.upperList = upperList;
-    }
-
-    /**
      * Returns the lower card display row.
      *
      * @return the lower list; never {@code null}
      */
     public List<Card> getLowerList() {
         return lowerList;
-    }
-
-    /**
-     * Replaces the lower card display row with the given list.
-     *
-     * @param lowerList the new lower list; must not be {@code null}
-     */
-    public void setLowerList(List<Card> lowerList) {
-        this.lowerList = lowerList;
     }
 
     /**
@@ -305,14 +339,6 @@ public class GameState {
         return players;
     }
 
-    /**
-     * Replaces the player list with the given list.
-     *
-     * @param players the new player list; must not be {@code null}
-     */
-    public void setPlayers(List<Player> players) {
-        this.players = players;
-    }
 
     /**
      * Returns the player currently taking their turn.
@@ -330,42 +356,6 @@ public class GameState {
      */
     public int getCurrAge() {
         return currAge;
-    }
-
-    /**
-     * Sets the current age.
-     *
-     * @param currAge the age to set (1–3)
-     */
-    public void setCurrAge(int currAge) {
-        this.currAge = currAge;
-    }
-
-    /**
-     * Sets the current turn number.
-     *
-     * @param currTurn the turn to set (1–10)
-     */
-    public void setCurrTurn(int currTurn) {
-        this.currTurn = currTurn;
-    }
-
-    /**
-     * Replaces the pending action list with the given list.
-     *
-     * @param toDoActions the new action list; must not be {@code null}
-     */
-    public void setToDoActions(List<Action> toDoActions) {
-        this.toDoActions = toDoActions;
-    }
-
-    /**
-     * Replaces the building card supply with the given list.
-     *
-     * @param buildings the new buildings list; must not be {@code null}
-     */
-    public void setBuildings(List<Card> buildings) {
-        this.buildings = buildings;
     }
 
     /**
@@ -762,7 +752,7 @@ public class GameState {
     }
 
     /**
-     * Builds a {@link CanDrawVisitor} pre-loaded with the draw actions available
+     * Builds a {@link CanDrawVisitor} preloaded with the draw actions available
      * to the current player, checking upper and lower rows in order and stopping
      * early if a mandatory draw is found.
      *
@@ -856,6 +846,7 @@ public class GameState {
                 board.stream().map(Tile::toDTO).toList(),
                 queue.stream().map(Tile::toDTO).toList(),
                 players.stream().map(Player::toStatsDTO).toList(),
+                players.stream().map(Player::toStatusDTO).toList(),
                 currPlayer.getNickname(),
                 toActionsDTO(),
                 currPhaseState.getPhase(),

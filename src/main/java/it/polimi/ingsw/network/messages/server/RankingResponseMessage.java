@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.messages.server;
 
 import it.polimi.ingsw.visitors.ServerMessageVisitor;
 
+import java.io.Serial;
 import java.util.Map;
 
 /**
@@ -11,7 +12,10 @@ import java.util.Map;
  * accumulated across all matches played with the same number of players.
  */
 public class RankingResponseMessage implements ServerMessage {
-
+    /**
+     * Default serial version UID.
+     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /** Map from player nickname to their total cumulative score in the global leaderboard. */

@@ -3,7 +3,7 @@ package it.polimi.ingsw.exceptions;
 /**
  * Exception thrown when an already occupied tile is selected to move into.
  */
-public class OccupiedTileException extends RuntimeException {
+public class OccupiedTileException extends GameException{
 
     /**
      * Creates a new {@code OccupiedTileException} with the given detail message.

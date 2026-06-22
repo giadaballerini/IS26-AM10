@@ -1,6 +1,9 @@
 package it.polimi.ingsw.model.entities.card.effects.instant;
 
-import it.polimi.ingsw.enumerations.*;
+import it.polimi.ingsw.enumerations.CardTypeEnum;
+import it.polimi.ingsw.enumerations.ColorPawnEnum;
+import it.polimi.ingsw.enumerations.GainFoodEnum;
+import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.player.Player;
@@ -11,8 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class GainFoodTest {
@@ -29,14 +32,6 @@ class GainFoodTest {
         assertEquals(2, p.getNFood());
     }
 
-    @Test
-    void displayEffect() {
-        GainFood eff = new GainFood(1, GainFoodEnum.FOOD_FLAT);
-
-        mockEff.displayEffect();
-        eff.displayEffect();
-
-    }
 
     @Test
     void getFoodAmount() {

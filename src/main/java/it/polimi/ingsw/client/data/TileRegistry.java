@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Static registry that holds all board tile data loaded from the client-side JSON resource file.
@@ -23,6 +25,11 @@ public class TileRegistry {
      * Uses a {@link LinkedHashMap} to preserve the insertion order of tiles as defined in the JSON file.
      */
     private static final Map<Integer, TileData> reg = new LinkedHashMap<>();
+
+    /**
+     * Logger used to report failures during the tile data loading in the static initializer block.
+     */
+    private static final Logger LOG = Logger.getLogger(TileRegistry.class.getName());
 
     static {
         loadTiles();
@@ -42,16 +49,16 @@ public class TileRegistry {
             if (is == null) {
                 throw new RuntimeException("Risorsa clientTiles.json non trovata");
             }
-            List<TileData> tiles = mapper.readValue(is, new TypeReference<List<TileData>>() {});
+            List<TileData> tiles = mapper.readValue(is, new TypeReference<>() {
+            });
 
             for (TileData tile : tiles) {
                 reg.put(tile.getId(), tile);
             }
-            System.out.println("[JACKSON] Tiles caricate con successo!");
+
 
         } catch (Exception e) {
-            System.out.println("[ERRORE CRITICO] Fallimento nel caricamento tiles.json");
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Fallimento nel caricamento tiles.json", e);
         }
     }
 
@@ -78,10 +85,10 @@ public class TileRegistry {
     /**
      * Returns the display name for board tiles.
      *
-     * @return the string {@code "Tile "}
+     * @return the string {@code "Tessera Offerta "}
      */
     public static String getName() {
-        return "Tile ";
+        return "Tessera Offerta ";
     }
 
     /**
@@ -92,5 +99,10 @@ public class TileRegistry {
      */
     public static String getDescription(int id) {
         return getTile(id).getDescription();
+    }
+    /**
+     * Private constructor to prevent instantiation of this static utility class.
+     */
+    private TileRegistry() {
     }
 }

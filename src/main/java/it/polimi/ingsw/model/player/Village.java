@@ -14,6 +14,7 @@ import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a player's village: the collection of character cards they have
@@ -90,6 +91,22 @@ public class Village {
         }
         return counter.getCount();
     }
+
+    /**
+     * Returns the number of crafter cards in this village that share the same
+     * symbol as the given card, or {@code 0} if the card is not a {@link Crafter}.
+     *
+     * @param card the card whose symbol to match
+     * @return count of matching crafter symbols, or {@code 0} if not a crafter
+     */
+    public int getNumSymbolsForCrafter(Card card) {
+        SymbolRetriever retriever = new SymbolRetriever();
+        card.accept(retriever);
+        return retriever.getSymbol()
+                .map(this::getNumSymbolsForCrafter)
+                .orElse(0);
+    }
+
 
     /**
      * Returns the total prestige points contributed by all builder cards in
@@ -182,5 +199,46 @@ public class Village {
          * @return the total
          */
         private int getTotal() { return total; }
+        /**
+         * Creates a new {@code BuilderPointsSum} visitor with an initial total of zero.
+         */
+        private BuilderPointsSum() {
+        }
     }
+
+    /**
+     * Visitor that extracts the {@link CrafterSymbolEnum} carried by a card,
+     * if the card is a {@link Crafter}.
+     */
+    private static class SymbolRetriever implements VillageVisitor {
+
+        /** The extracted symbol, or {@code null} if the visited card was not a crafter. */
+        private CrafterSymbolEnum symbol;
+
+        /**
+         * Records the symbol carried by the visited crafter.
+         *
+         * @param crafter the crafter card being visited
+         */
+        @Override
+        public void visit(Crafter crafter) {
+            symbol = crafter.getSymbol();
+        }
+
+        /**
+         * Returns the extracted symbol, if any.
+         *
+         * @return the symbol, or {@link Optional#empty()} if the visited card
+         *         was not a crafter
+         */
+        public Optional<CrafterSymbolEnum> getSymbol() {
+            return Optional.ofNullable(symbol);
+        }
+        /**
+         * Creates a new {@code SymbolRetriever} visitor with no symbol recorded yet.
+         */
+        private SymbolRetriever() {
+        }
+    }
+
 }

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.model.gamemanager.ApplicableActions;
 import it.polimi.ingsw.model.gamemanager.GameManager;
 import it.polimi.ingsw.network.messages.client.DrawMessage;
@@ -40,36 +41,44 @@ public class Controller implements GameMessageVisitor {
     /**
      * Handles a move request from a client.
      *
-     * <p>Forwards the player and the target tile position to the game manager
-     * by calling {@link ApplicableActions#onMoveRequested}.</p>
-     *
      * @param moveMessage the message containing the player and the tile position to move to
+     * @throws InvalidMoveException   if the move is not valid
+     * @throws InvalidPlayerException if it is not this player's turn
+     * @throws InvalidPhaseException  if a move is not allowed in the current phase
+     * @throws OccupiedTileException  if the target tile is already occupied
      */
-    public void visit(MoveMessage moveMessage) {
+    @Override
+    public void visit(MoveMessage moveMessage)
+            throws InvalidMoveException, InvalidPlayerException,
+            InvalidPhaseException, OccupiedTileException {
         gameManager.onMoveRequested(moveMessage.getPlayer(), moveMessage.getTilePos());
     }
 
     /**
      * Handles a card draw request from a client.
      *
-     * <p>Forwards the player nickname and card ID to the game manager
-     * by calling {@link ApplicableActions#onDrawCardRequested}.</p>
-     *
      * @param drawMessage the message containing the player's nickname and the card to draw
+     * @throws InvalidDrawException   if the card cannot be drawn
+     * @throws InvalidPlayerException if it is not this player's turn
+     * @throws InvalidPhaseException  if drawing is not allowed in the current phase
      */
-    public void visit(DrawMessage drawMessage) {
+    @Override
+    public void visit(DrawMessage drawMessage)
+            throws InvalidDrawException, InvalidPlayerException, InvalidPhaseException {
         gameManager.onDrawCardRequested(drawMessage.getNickname(), drawMessage.getCardId());
     }
 
     /**
      * Handles a turn skip request from a client.
      *
-     * <p>Forwards the player nickname to the game manager
-     * by calling {@link ApplicableActions#onSkipRequested}.</p>
-     *
      * @param skipMessage the message containing the nickname of the player skipping their turn
+     * @throws InvalidSkipException   if skipping is not allowed
+     * @throws InvalidPlayerException if it is not this player's turn
+     * @throws InvalidPhaseException  if skipping is not allowed in the current phase
      */
-    public void visit(SkipMessage skipMessage) {
+    @Override
+    public void visit(SkipMessage skipMessage)
+            throws InvalidSkipException, InvalidPlayerException, InvalidPhaseException {
         gameManager.onSkipRequested(skipMessage.getNickname());
     }
 

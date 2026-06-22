@@ -1,34 +1,20 @@
 package it.polimi.ingsw.enumerations;
 
-import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
 import it.polimi.ingsw.model.entities.card.effects.instant.DiscountFood;
-import it.polimi.ingsw.model.entities.card.types.character.Builder;
 import it.polimi.ingsw.model.player.Player;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class DiscountFoodEnumTest {
-
-    @ParameterizedTest
-    @EnumSource(value =  DiscountFoodEnum.class, names = {"DISCOUNT_FLAT"})
-    void testShouldIsOneTime_forFlat(DiscountFoodEnum cardType){
-        assertTrue(cardType.isOneTime());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value =  DiscountFoodEnum.class, names = {"DISCOUNT_CAT"})
-    void testShouldIsOneTime_forCat(DiscountFoodEnum cardType){
-        assertFalse(cardType.isOneTime());
-    }
-
-    @ExtendWith(MockitoExtension.class)
 
     @Mock
     Player mockPlayer;
@@ -36,59 +22,37 @@ class DiscountFoodEnumTest {
     @Mock
     DiscountFood mockEffect;
 
+
+    @ParameterizedTest
+    @EnumSource(DiscountFoodEnum.class)
+    void testIsOneTime_allTrue(DiscountFoodEnum type) {
+        assertTrue(type.isOneTime());
+    }
+
+
     @Test
-    void apply_flat() {
-
-        DiscountFoodEnum discountType = DiscountFoodEnum.DISCOUNT_FLAT;
-
+    void apply_flat_addsFoodDiscount() {
         when(mockEffect.getFoodAmount()).thenReturn(10);
-
-        discountType.apply(mockPlayer, mockEffect);
-
+        DiscountFoodEnum.DISCOUNT_FLAT.apply(mockPlayer, mockEffect);
         verify(mockPlayer).addFoodDiscount(10);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = CardTypeEnum.class, names = {
-            "GATHERER", "HUNTER", "PAINTER", "BUILDER", "SHAMAN", "CRAFTER"
-    })
-    void testDiscountCat_EvenCase(CardTypeEnum cardType) {
-
-        when(mockEffect.getCat()).thenReturn(cardType);
-        when(mockPlayer.getNumType(cardType)).thenReturn(2);
-        when(mockEffect.getFoodAmount()).thenReturn(3);
-
-        DiscountFoodEnum.DISCOUNT_CAT.apply(mockPlayer, mockEffect);
-
-        verify(mockPlayer).addFoodDiscount(3);
-        assertFalse(DiscountFoodEnum.DISCOUNT_CAT.isOneTime());
-    }
-
 
     @ParameterizedTest
     @EnumSource(value = CardTypeEnum.class, names = {
             "GATHERER", "HUNTER", "PAINTER", "BUILDER", "SHAMAN", "CRAFTER"
     })
-    void testDiscountCat_OddCase(CardTypeEnum cardType) {
-
+    void apply_discountCat_delegatesToAddCategoryDiscount(CardTypeEnum cardType) {
         when(mockEffect.getCat()).thenReturn(cardType);
-        when(mockPlayer.getNumType(cardType)).thenReturn(3);
-
         DiscountFoodEnum.DISCOUNT_CAT.apply(mockPlayer, mockEffect);
-
-        verify(mockPlayer).addFoodDiscount(0);
+        verify(mockPlayer).addCategoryDiscount(cardType);
     }
+
 
     @Test
-    void testShouldDiscountForBuilding(){
-        DiscountFoodEnum discountType = DiscountFoodEnum.DISCOUNT_FOR_BUILDING;
-
+    void apply_discountForBuilding_addsTotBuildDiscount() {
         when(mockEffect.getFoodAmount()).thenReturn(67);
-
-        discountType.apply(mockPlayer, mockEffect);
-
+        DiscountFoodEnum.DISCOUNT_FOR_BUILDING.apply(mockPlayer, mockEffect);
         verify(mockPlayer).addTotBuildDiscount(67);
-
     }
-
 }

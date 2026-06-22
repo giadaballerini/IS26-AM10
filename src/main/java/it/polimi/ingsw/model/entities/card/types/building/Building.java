@@ -7,15 +7,12 @@ import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
 import it.polimi.ingsw.visitors.DrawCardVisitor;
 import it.polimi.ingsw.visitors.PlayEventVisitor;
+import it.polimi.ingsw.visitors.VillageVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,31 +80,6 @@ public class Building extends Card {
         return foodCost;
     }
 
-    /**
-     * Accepts a {@link GainFoodVisitor}, dispatching to
-     * {@link GainFoodVisitor#visit(it.polimi.ingsw.model.entities.card.types.building.Building, Player, GainFood)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the food gain
-     * @param e       the food gain effect being applied
-     */
-    @Override
-    public void accept(GainFoodVisitor visitor, Player p, GainFood e) {
-        visitor.visit(this, p, e);
-    }
-
-    /**
-     * Accepts a {@link GainPPVisitor}, dispatching to
-     * {@link GainPPVisitor#visit(it.polimi.ingsw.model.entities.card.types.building.Building, Player, GainPP)}.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the PP gain
-     * @param e       the PP gain effect being applied
-     */
-    @Override
-    public void accept(GainPPVisitor visitor, Player p, GainPP e) {
-        visitor.visit(this, p, e);
-    }
 
     /**
      * Buildings do not participate in event resolution; this method is a no-op.
@@ -135,6 +107,13 @@ public class Building extends Card {
     @Override
     public void accept(DrawCardVisitor visitor) { visitor.visit(this); }
 
+    /**
+     * Accepts a {@link VillageVisitor} delegating to
+     * {@link VillageVisitor#visit(Building)}.
+     *
+     * @param visitor the visitor to dispatch to
+     */
+    public void accept(VillageVisitor visitor) {visitor.visit(this);}
     /**
      * Applies all interactive effects of this building to the given player,
      * collecting the resulting pending actions.

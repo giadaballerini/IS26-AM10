@@ -42,13 +42,7 @@ public class ProtectPP extends CardEffectInstant {
         protectPpType.apply(p);
     }
 
-    /**
-     * Prints a confirmation message, used for debugging or TUI display.
-     */
-    @Override
-    public void displayEffect() {
-        System.out.println("\nRicevuta protezione.");
-    }
+
 
     /**
      * Returns whether this effect is consumed after firing once, as determined

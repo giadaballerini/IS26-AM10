@@ -14,20 +14,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @ExtendWith(MockitoExtension.class)
 class GainStarsTest {
 
-    @Mock
-    GainStars mockEff;
     @Test
     void shouldApply() {
         GainStars eff = new GainStars(1, GainStarsEnum.GAIN_STARS);
         Player p = new Player("Player", ColorPawnEnum.ORANGE);
-        int starsBefore = p.getNStars();
         List<CardEffectInstant> effects = new ArrayList<>();
         effects.add(eff);
         Shaman s = new Shaman(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), effects, 1, CardTypeEnum.SHAMAN);
@@ -35,15 +32,6 @@ class GainStarsTest {
         assertEquals(1, p.getNStars());
     }
 
-    @Test
-    void displayEffect() {
-        GainStars eff = new GainStars(1, GainStarsEnum.GAIN_STARS);
-
-        mockEff.displayEffect();
-        eff.displayEffect();
-
-        verify(mockEff).displayEffect();
-    }
 
     @Test
     void getStarsAmount() {

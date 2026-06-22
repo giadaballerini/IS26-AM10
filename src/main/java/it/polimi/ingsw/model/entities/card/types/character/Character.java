@@ -6,11 +6,7 @@ import it.polimi.ingsw.enumerations.CardTypeEnum;
 import it.polimi.ingsw.enumerations.GamePhaseEnum;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainFood;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
-import it.polimi.ingsw.model.interfaces.GainFoodVisitor;
-import it.polimi.ingsw.model.interfaces.GainPPVisitor;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Village;
 import it.polimi.ingsw.visitors.CanDrawVisitor;
@@ -97,25 +93,6 @@ public abstract class Character extends Card {
     @Override
     public void accept(PlayEventVisitor visitor) {}
 
-    /**
-     * Accepts a {@link GainFoodVisitor}, dispatching to the overload that
-     * matches this character's concrete type.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the food gain
-     * @param e       the food gain effect being applied
-     */
-    public abstract void accept(GainFoodVisitor visitor, Player p, GainFood e);
-
-    /**
-     * Accepts a {@link GainPPVisitor}, dispatching to the overload that
-     * matches this character's concrete type.
-     *
-     * @param visitor the visitor to dispatch to
-     * @param p       the player receiving the PP gain
-     * @param e       the PP gain effect being applied
-     */
-    public abstract void accept(GainPPVisitor visitor, Player p, GainPP e);
 
     /**
      * Accepts a {@link VillageVisitor}, dispatching to the overload that

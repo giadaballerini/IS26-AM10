@@ -64,28 +64,6 @@ public class VirtualModel {
     private int deckSize;
 
     /**
-     * Creates a new virtual model for the player with the given nickname.
-     *
-     * @param nickname the local player's nickname
-     */
-    public VirtualModel(String nickname) {
-        this.queue = new ArrayList<>();
-        this.board = new ArrayList<>();
-        this.upperList = new ArrayList<>();
-        this.lowerList = new ArrayList<>();
-        this.numPlayers = 0;
-        this.currPhaseState = null;
-        this.currAge = 1;
-        this.players = new ArrayList<>();
-        this.currPlayer = "";
-        this.currTurn = 0;
-        this.nickname = nickname;
-        this.playerStatuses = new ArrayList<>();
-        this.playerStats = new ArrayList<>();
-        this.toDoActions = new ActionsDTO(0, 0, false);
-    }
-
-    /**
      * Creates a new virtual model without a preset nickname.
      * The nickname must be set later via {@link #setNickname(String)}.
      */
@@ -105,67 +83,93 @@ public class VirtualModel {
         this.toDoActions = new ActionsDTO(0, 0, false);
     }
 
-    /** @return a defensive copy of the queue tiles */
+    /**
+     * Returns a defensive copy of the queue tiles.
+     *  @return a defensive copy of the queue tiles */
     public List<TileDTO> getQueue() {
         return new ArrayList<>(queue);
     }
 
-    /** @return a defensive copy of the board tiles */
+    /**
+     * Returns a defensive copy of the board tiles.
+     * @return defensive copies of the board tiles */
     public List<TileDTO> getBoard() {
         return new ArrayList<>(board);
     }
 
-    /** @return a defensive copy of the cards in the upper draw row */
+    /**
+     * Returns a defensive copy of the cards in the upper row.
+     * @return a defensive copy of the cards in the upper row */
     public List<CardDTO> getUpperList() {
         return new ArrayList<>(upperList);
     }
 
-    /** @return a defensive copy of the cards in the lower draw row */
+    /**
+     * Returns a defensive copy of the cards in the lower row.
+     * @return a defensive copy of the cards in the lower row */
     public List<CardDTO> getLowerList() {
         return new ArrayList<>(lowerList);
     }
 
-    /** @return the number of players in the current match */
+    /**
+     * Returns the number of players in the current match.
+     * @return the number of players in the current match */
     public int getNumPlayers() {
         return numPlayers;
     }
 
-    /** @return the current game phase */
+    /**
+     * Returns the current game phase.
+     * @return the current game phase */
     public GamePhaseEnum getCurrentPhase() {
         return currPhaseState;
     }
 
-    /** @return the current game age (1–3) */
+    /**
+     * Returns the current game phase as a string.
+     * @return the current game age (1–3) */
     public int getCurrAge() {
         return currAge;
     }
 
-    /** @return a defensive copy of the list of all players in the match */
+    /**
+     * Returns a defensive copy of the list of all players in the match.
+     * @return a defensive copy of the list of all players in the match */
     public List<PlayerDTO> getPlayers() {
         return new ArrayList<>(players);
     }
 
-    /** @return the nickname of the player whose turn it currently is */
+    /**
+     * Returns the nickname of the player whose turn it currently is.
+     * @return the nickname of the player whose turn it currently is */
     public String getCurrPlayer() {
         return currPlayer;
     }
 
-    /** @return a copy of the draw actions still available to the current player */
+    /**
+     * Returns a copy of the draw actions still available to the current player.
+     * @return a copy of the draw actions still available to the current player */
     public ActionsDTO getToDoActions() {
         return new ActionsDTO(toDoActions);
     }
 
-    /** @return the current turn number */
+    /**
+     * Returns the current turn of the match.
+     * @return the current turn number */
     public int getCurrTurn() {
         return currTurn;
     }
 
-    /** @return a defensive copy of the current stats of every player */
+    /**
+     * Returns a defensive copy of the current stats of every player.
+     * @return a defensive copy of the current stats of every player */
     public List<PlayerStatsDTO> getPlayerStats() {
         return new ArrayList<>(playerStats);
     }
 
-    /** @return a defensive copy of the current status flags of every player */
+    /**
+     * Returns a defensive copy of the current status flags of every player.
+     * @return a defensive copy of the current status flags of every player */
     public List<PlayerStatusDTO> getPlayerStatuses() {
         return new ArrayList<>(playerStatuses);
     }
@@ -179,13 +183,14 @@ public class VirtualModel {
      */
     public synchronized void update(BoardDTO b) {
         this.numPlayers = b.getNumPlayers();
-        this.queue = new ArrayList<>(b.getqueueTiles());
-        this.board = new ArrayList<>(b.getboardTiles());
+        this.queue = new ArrayList<>(b.getQueueTiles());
+        this.board = new ArrayList<>(b.getBoardTiles());
         this.upperList = new ArrayList<>(b.getUpperList());
         this.lowerList = new ArrayList<>(b.getLowerList());
         this.deckSize = b.getDeckSize();
         this.players = new ArrayList<>(b.getPlayers());
         this.playerStats = new ArrayList<>(b.getPlayerStats());
+        this.playerStatuses = new ArrayList<>(b.getPlayerStatuses());
         this.currPhaseState = b.getCurrentPhase();
         this.currPlayer = b.getCurrentPlayerNickname();
         this.toDoActions = b.getTodoActions();
@@ -378,21 +383,15 @@ public class VirtualModel {
     }
 
     /**
-     * Called when a round event resolves. Currently a no-op at the model level;
-     * event effects are applied via {@link #updateAllStats(List)} and
-     * {@link #onStatsUpdate(PlayerStatsDTO)}.
-     *
-     * @param e the event data for the round
-     */
-    public synchronized void onEvent(EventDTO e) {
-    }
-
-    /** @return the local player's nickname */
+     * Returns the local player's nickname.
+     * @return the local player's nickname */
     public String getNickname() {
         return this.nickname;
     }
 
-    /** @return the number of cards remaining in the deck */
+    /**
+     * Returns the number of cards remaining in the deck.
+     * @return the number of cards remaining in the deck */
     public int getDeckSize() {
         return this.deckSize;
     }

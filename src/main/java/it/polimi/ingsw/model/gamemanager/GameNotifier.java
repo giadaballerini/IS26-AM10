@@ -19,7 +19,7 @@ import java.util.Map;
 public class GameNotifier {
 
     /** The observers to which all notifications are broadcast. */
-    final List<ModelObserver> listeners;
+    private final List<ModelObserver> listeners;
 
     /**
      * Constructs a {@code GameNotifier} with the given list of observers.
@@ -112,12 +112,11 @@ public class GameNotifier {
      * triggered by a specific card.
      *
      * @param currPlayer the player whose statistics have changed
-     * @param card       the card that triggered the update
      */
-    void notifyStatsUpdate(Player currPlayer, Card card) {
+    void notifyStatsUpdate(Player currPlayer) {
         PlayerStatsDTO statsDto = currPlayer.toStatsDTO();
         for (ModelObserver c : listeners) {
-            c.onStatsUpdate(statsDto, card.getId());
+            c.onStatsUpdate(statsDto);
         }
     }
 

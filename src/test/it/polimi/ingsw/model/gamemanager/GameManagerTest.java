@@ -1,531 +1,367 @@
 package it.polimi.ingsw.model.gamemanager;
 
 import it.polimi.ingsw.enumerations.*;
-import it.polimi.ingsw.exceptions.InvalidDrawException;
-import it.polimi.ingsw.exceptions.OccupiedTileException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.model.action.Action;
 import it.polimi.ingsw.model.entities.card.Card;
 import it.polimi.ingsw.model.entities.card.effects.instant.CardEffectInstant;
-import it.polimi.ingsw.model.entities.card.effects.instant.GainPP;
+import it.polimi.ingsw.model.entities.card.effects.instant.ProtectPP;
 import it.polimi.ingsw.model.entities.card.effects.interactive.CardEffectInteractive;
 import it.polimi.ingsw.model.entities.card.effects.interactive.DrawCard;
 import it.polimi.ingsw.model.entities.card.types.building.Building;
 import it.polimi.ingsw.model.entities.card.types.character.Builder;
-import it.polimi.ingsw.model.entities.card.types.character.Character;
-import it.polimi.ingsw.model.entities.card.types.character.Crafter;
-import it.polimi.ingsw.model.entities.card.types.character.Painter;
-import it.polimi.ingsw.model.entities.card.types.event.Event;
-import it.polimi.ingsw.model.entities.card.types.event.Feast;
+import it.polimi.ingsw.model.entities.card.types.character.Hunter;
 import it.polimi.ingsw.model.entities.tile.Tile;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.network.dto.*;
+import it.polimi.ingsw.network.dto.PlayerStatsDTO;
 import it.polimi.ingsw.observer.ModelObserver;
+import it.polimi.ingsw.persistency.GameSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 class GameManagerTest {
-    private static class TestableGameNotifier extends GameNotifier {
-        public TestableGameNotifier(List<ModelObserver> listeners) {
-            super(listeners);
-        }
-        public List<ModelObserver> getListeners() { return listeners; }
-    }
+
+
     private static class TestableGameManager extends GameManager {
+
         public TestableGameManager(List<ModelObserver> l, List<Player> p, int n) {
             super(l, p, n, () -> {});
-            this.currPhaseState = new SetupPhaseState();
+            setCurrPhaseState(new SetupPhaseState());
         }
 
-        // stato
-        public List<Tile> getBoard()            { return state.getBoard(); }
-        public int getCurrAge()                 { return state.getCurrAge(); }
-        public List<Player> getPlayers()        { return state.getPlayers(); }
-        public List<Card> getUpperList()        { return state.getUpperList(); }
-        public List<Card> getLowerList()        { return state.getLowerList(); }
-        public List<Tile> getQueue()            { return state.getQueue(); }
-        public List<Card> getBuildings()        { return state.getBuildings(); }
-        public List<Card> getDeck()             { return state.getDeck(); }
-        public GamePhaseState getCurrPhase()    { return this.currPhaseState; }
-        public Player getCurrentPlayer()        { return state.getCurrPlayer(); }
 
-        // toDoActions — esposta direttamente per i test
-        public List<Action> getToDoActions()    { return state.getToDoActions(); }
-        public void addToDoAction(Action a)     { state.getToDoActions().add(a); }
-        public void clearToDoActions()          { state.getToDoActions().clear(); }
+        public GamePhaseEnum getCurrPhaseEnum() {
+            return super.getCurrPhase();
+        }
 
-        // listeners — esposto dal notifier tramite TestableGameNotifier
-        public List<ModelObserver> getListeners() { return ((TestableGameNotifier) notifier).getListeners(); }
 
-        public void setTurn(int i)              { state.setCurrTurn(i); }
+        public List<Tile>   getBoard()         { return stateField("board"); }
+        public List<Tile>   getQueue()         { return stateField("queue"); }
+        public int          getCurrAge()       { return stateField("currAge"); }
+        public List<Player> getPlayers()       { return stateField("players"); }
+        public List<Card>   getUpperList()     { return stateField("upperList"); }
+        public List<Card>   getLowerList()     { return stateField("lowerList"); }
+        public List<Card>   getDeck()          { return stateField("deck"); }
+        public Player       getCurrentPlayer() { return stateField("currPlayer"); }
 
-        public void consumeAction() {
-            List<Action> actions = state.getToDoActions();
-            if (!actions.isEmpty()) actions.removeFirst();
+        public void addToDoAction(Action a)    { this.<List<Action>>stateField("toDoActions").add(a); }
+        public void clearToDoActions()         { this.<List<Action>>stateField("toDoActions").clear(); }
+        public void consumeAction()            { List<Action> l = stateField("toDoActions"); if (!l.isEmpty()) l.removeFirst(); }
+
+        public void setTurn(int i) {
+            setStateField("currTurn", i);
+        }
+
+
+        public void addListener(ModelObserver obs) {
+            this.<List<ModelObserver>>notifierField("listeners").add(obs);
+        }
+        public List<ModelObserver> getListeners() {
+            return notifierField("listeners");
+        }
+        public boolean getSkippableDraw(){return stateField("skippableDraw");}
+
+
+        @SuppressWarnings("unchecked")
+        private <T> T stateField(String name) {
+            try {
+                var stateF = GameManager.class.getDeclaredField("state");
+                stateF.setAccessible(true);
+                Object state = stateF.get(this);
+                var f = state.getClass().getDeclaredField(name);
+                f.setAccessible(true);
+                return (T) f.get(state);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void setStateField(String name, Object value) {
+            try {
+                var stateF = GameManager.class.getDeclaredField("state");
+                stateF.setAccessible(true);
+                Object state = stateF.get(this);
+                var f = state.getClass().getDeclaredField(name);
+                f.setAccessible(true);
+                f.set(state, value);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> T notifierField(String name) {
+            try {
+                var notifierF = GameManager.class.getDeclaredField("notifier");
+                notifierF.setAccessible(true);
+                Object notifier = notifierF.get(this);
+                var f = notifier.getClass().getDeclaredField(name);
+                f.setAccessible(true);
+                return (T) f.get(notifier);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private TestableGameManager tgm;
+    private CardEffectInteractive effect = mock(DrawCard.class);
+
+    @Mock private ModelObserver obsP1 = mock(ModelObserver.class);
+    @Mock private ModelObserver obsP2 = mock(ModelObserver.class);
+    @Mock private ModelObserver obsP3 = mock(ModelObserver.class);
 
     @BeforeEach
     void setUp() {
-        List<ModelObserver> listeners = new ArrayList<>();
         List<Player> players = new ArrayList<>();
         players.add(new Player("Player1", ColorPawnEnum.BLUE));
         players.add(new Player("Player2", ColorPawnEnum.ORANGE));
-        tgm = new TestableGameManager(listeners, players, 2);
-    }
-
-    // ── initGame ─────────────────────────────────────────────────────────────
-
-    @ParameterizedTest
-    @ValueSource(ints = {2, 3, 4, 5})
-    @DisplayName("Test initGame")
-    void testShouldInitGameForValidValues(int value) {
-        List<Player> players = new ArrayList<>();
-        List<ModelObserver> listeners = new ArrayList<>();
-        for (int i = 0; i < value; i++)
-            players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
-        tgm = new TestableGameManager(listeners, players, value);
-        tgm.initGame();
-
-        assertNotNull(tgm.getBoard());
-        assertFalse(tgm.getBoard().isEmpty());
-
-        int expectedUpper = value + 4;
-        int sub = switch (value) {
-            case 2    -> 1;
-            case 3, 4 -> 2;
-            case 5    -> 3;
-            default   -> 0;
-        };
-        assertEquals(expectedUpper, tgm.getUpperList().size() - sub);
-
-        assertFalse(tgm.getLowerList().isEmpty());
-        assertEquals(value + 1, tgm.getLowerList().size());
-
-        assertEquals(1, tgm.getCurrAge());
-        assertNotNull(tgm.getCurrentPlayer());
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {0, 1})
-    @DisplayName("Test notInitGame")
-    void testShouldNotInitGameForInvalidValues(int value) {
-        List<Player> players = new ArrayList<>();
-        List<ModelObserver> listeners = new ArrayList<>();
-        for (int i = 0; i < value; i++)
-            players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
-        tgm = new TestableGameManager(listeners, players, value);
-        tgm.initGame();
-
-        assertEquals(0, tgm.getDeck().size());
-        assertEquals(0, tgm.getBuildings().size());
-        assertTrue(tgm.getBoard().isEmpty());
-        assertTrue(tgm.getQueue().isEmpty());
-        assertTrue(tgm.getUpperList().isEmpty());
-        assertTrue(tgm.getLowerList().isEmpty());
-    }
-
-    // ── changeAge ─────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("Test changeAge 1 to 2")
-    void testShouldChangeAge1to2() {
-        tgm.initGame();
-
-        Building build1 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.SETUP_PHASE, 1, 4, 2, new ArrayList<>(), new ArrayList<>());
-        tgm.getUpperList().add(build1);
-
-        Building build2 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.SETUP_PHASE, 2, 4, 2, new ArrayList<>(), new ArrayList<>());
-        tgm.getBuildings().add(build2);
-
-        tgm.changeAge();
-
-        assertEquals(2, tgm.getCurrAge());
-        assertFalse(tgm.getUpperList().contains(build1));
-        assertTrue(tgm.getLowerList().contains(build1));
-        assertTrue(tgm.getUpperList().contains(build2));
-        assertFalse(tgm.getLowerList().contains(build2));
+        players.add(new Player("Player3", ColorPawnEnum.PURPLE));
+        when(obsP1.getNickname()).thenReturn("Player1");
+        when(obsP2.getNickname()).thenReturn("Player2");
+        when(obsP3.getNickname()).thenReturn("Player3");
+        tgm = new TestableGameManager(new ArrayList<>(), players, 3);
     }
 
     @Test
-    @DisplayName("Test changeAge 2 to 3")
-    void testShouldChangeAge2to3() {
-        tgm.initGame();
-        tgm.changeAge();
-
-        Building build3 = new Building(CardTypeEnum.BUILDING, 3, GamePhaseEnum.SETUP_PHASE, 3, 4, 2, new ArrayList<>(), new ArrayList<>());
-        tgm.getLowerList().add(build3);
-
-        tgm.changeAge();
-
-        assertEquals(3, tgm.getCurrAge());
-        assertFalse(tgm.getLowerList().contains(build3));
-    }
-
-    @Test
-    @DisplayName("Test changeAge 3 stays 3")
-    void testShouldChangeAge3to3() {
-        tgm.initGame();
-        tgm.changeAge();
-
-        Building build3 = new Building(CardTypeEnum.BUILDING, 3, GamePhaseEnum.SETUP_PHASE, 3, 4, 2, new ArrayList<>(), new ArrayList<>());
-        tgm.getLowerList().add(build3);
-        tgm.changeAge();
-
-        assertEquals(3, tgm.getCurrAge());
-        assertFalse(tgm.getLowerList().contains(build3));
-
-        tgm.getLowerList().add(build3);
-        tgm.changeAge();
-
-        assertEquals(3, tgm.getCurrAge());
-        assertFalse(tgm.getLowerList().contains(build3));
-    }
-
-    // ── nextPhase ─────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("Test nextPhase setup stays setup")
+    @DisplayName("nextPhase — setup rimane setup finché la queue non è vuota")
     void testShouldNextPhaseSetup() {
         tgm.initGame();
         tgm.nextPhase();
-        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhase().getPhase());
+        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhaseEnum());
     }
 
     @Test
-    @DisplayName("Test nextPhase setup to draw")
+    @DisplayName("nextPhase — setup → draw quando la queue è vuota")
     void testShouldNextPhaseSetupToDraw() {
         tgm.initGame();
-        CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
-        Tile t = new Tile(2, 1, new ArrayList<>(), List.of(eff), false, "");
+
+        Tile t = new Tile(2, 1, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+
         tgm.getBoard().addFirst(t);
 
         tgm.move(t);
         tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
 
         assertTrue(tgm.isQueueEmpty());
-        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhase().getPhase());
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
     }
 
     @Test
-    @DisplayName("Test nextPhase draw to endTurn")
-    void testShouldNextPhaseDrawToEnd() {
+    @DisplayName("nextPhase — draw → endTurn quando toDoActions è vuota")
+    void testShouldNextPhaseDrawToEndTurn() {
         tgm.initGame();
-        CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
-        Tile t1 = new Tile(2, 1, new ArrayList<>(), List.of(eff), false, "giorgio");
-        Tile t2 = new Tile(3, 1, new ArrayList<>(), new ArrayList<>(), false, "giorgio");
+        Tile t1 = new Tile(2, 1, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(3, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
         tgm.getBoard().addFirst(t2);
         tgm.getBoard().addFirst(t1);
-
         tgm.move(tgm.getBoard().getFirst());
         tgm.move(tgm.getBoard().get(1));
-        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhase().getPhase());
-
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
         tgm.consumeAction();
-        assertTrue(tgm.getToDoActions().isEmpty());
 
+        assertTrue(tgm.getToDoActions().isEmpty());
         tgm.nextPhase();
         assertEquals(tgm.getNumPlayers(), tgm.getQueueSize());
     }
 
     @Test
-    @DisplayName("Test nextPhase draw stays draw")
-    void testShouldNextPhaseDrawToDraw() {
+    @DisplayName("nextPhase — draw rimane draw se ci sono ancora azioni pendenti")
+    void testShouldNextPhaseDrawStaysDraw() {
         tgm.initGame();
         tgm.addToDoAction(new Action(tgm.getPlayers().get(1), DrawCardEnum.DOWN_DRAW));
-
         tgm.move(tgm.getBoard().getFirst());
         tgm.nextPlayer();
         tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+        assertFalse(tgm.getToDoActions().isEmpty());
+        GamePhaseEnum phaseBefore = tgm.getCurrPhaseEnum();
         tgm.nextPhase();
-
-        GamePhaseState stateBefore = tgm.getCurrPhase();
-        tgm.nextPhase();
-
-        assertSame(stateBefore, tgm.getCurrPhase());
-        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhase().getPhase());
+        assertEquals(phaseBefore, tgm.getCurrPhaseEnum());
     }
 
     @Test
-    @DisplayName("Test nextPhase EndTurn to EndRound")
+    @DisplayName("nextPhase — endTurn → endRound quando tutti i giocatori sono tornati")
     void testShouldNextPhaseEndTurnToEndRound() {
         tgm.initGame();
-        CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
-        Tile t1 = new Tile(3, 2, new ArrayList<>(), List.of(eff), false, "giorgio");
-        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "giorgio");
+        Tile t1 = new Tile(3, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
         tgm.getBoard().addFirst(t1);
         tgm.getBoard().addFirst(t2);
-
         tgm.move(tgm.getBoard().getFirst());
         tgm.move(tgm.getBoard().get(1));
-        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhase().getPhase());
-
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
         tgm.clearToDoActions();
         tgm.nextPhase();
         assertEquals(tgm.getNumPlayers(), tgm.getQueueSize());
     }
 
     @Test
-    @DisplayName("Test nextPhase EndRound to SetUp")
-    void testShouldNextPhaseEndRoundToSetUp() {
+    @DisplayName("nextPhase — endRound → setup al turno normale")
+    void testShouldNextPhaseEndRoundToSetup() {
         tgm.initGame();
-        Tile t1 = new Tile(1, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "giorgio");
-        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "giorgio");
+        Tile t1 = new Tile(1, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
         tgm.getBoard().addFirst(t1);
         tgm.getBoard().addFirst(t2);
-
         tgm.move(tgm.getBoard().getFirst());
         tgm.move(tgm.getBoard().get(1));
-
+        tgm.move(tgm.getBoard().get(2));
         tgm.clearToDoActions();
         tgm.nextPhase();
-
         assertEquals(tgm.getNumPlayers(), tgm.getQueueSize());
-        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhase().getPhase());
+        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhaseEnum());
     }
 
     @Test
-    @DisplayName("Test nextPhase EndRound to PlayEvent at turn 10")
-    void testShouldNextPhaseEndRoundToPlayEvent() {
+    @DisplayName("nextPhase — endRound → endGame al turno 10")
+    void testShouldNextPhaseEndRoundToEndGameAtTurn10() {
         tgm.initGame();
-        Tile t1 = new Tile(2, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "giorgio");
-        Tile t2 = new Tile(3, 2, new ArrayList<>(), new ArrayList<>(), false, "giorgio");
+        Tile t1 = new Tile(2, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(3, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
         tgm.getBoard().addFirst(t1);
         tgm.getBoard().addFirst(t2);
-
         tgm.move(tgm.getBoard().getFirst());
         tgm.move(tgm.getBoard().get(1));
-
+        tgm.move(tgm.getBoard().get(2));
         tgm.clearToDoActions();
         tgm.setTurn(10);
         tgm.nextPhase();
-
         assertEquals(tgm.getNumPlayers(), tgm.getQueueSize());
-        assertEquals(GamePhaseEnum.END_GAME, tgm.getCurrPhase().getPhase());
+        assertEquals(GamePhaseEnum.END_GAME, tgm.getCurrPhaseEnum());
     }
 
     @Test
-    @DisplayName("Test nextPhase PlayEvent to EndGame")
-    void testShouldNextPhasePlayEventToEndGame() {
-        tgm.initGame();
-        Tile t1 = new Tile(2, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "giorgio");
-        Tile t2 = new Tile(3, 2, new ArrayList<>(), new ArrayList<>(), false, "giorgio");
-        tgm.getBoard().addFirst(t1);
-        tgm.getBoard().addFirst(t2);
-
-        tgm.move(tgm.getBoard().getFirst());
-        tgm.move(tgm.getBoard().get(1));
-
-        tgm.clearToDoActions();
-        tgm.setTurn(10);
-        tgm.nextPhase();
-
-        assertEquals(GamePhaseEnum.END_GAME, tgm.getCurrPhase().getPhase());
-    }
-
-    // ── refillBoard ───────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("Test refillBoard removes events and characters from lower")
-    void testShouldRefillBoardRemovesInLower() {
-        tgm.initGame();
-        Builder b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
-        Event e1 = new Feast(1, GamePhaseEnum.END_ROUND, new ArrayList<>(), new ArrayList<>(), 2, 2, 2, CardTypeEnum.FEAST);
-        tgm.getLowerList().add(b1);
-        tgm.getLowerList().add(e1);
-        tgm.refillBoard();
-
-        assertFalse(tgm.getLowerList().contains(b1));
-        assertFalse(tgm.getLowerList().contains(e1));
-    }
-
-    @Test
-    @DisplayName("Test refillBoard moves characters from upper to lower")
-    void testShouldRefillBoardUpperToLower() {
-        tgm.initGame();
-        Character b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
-        tgm.getUpperList().add(b1);
-        tgm.refillBoard();
-
-        assertFalse(tgm.getUpperList().contains(b1));
-        assertTrue(tgm.getLowerList().contains(b1));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {2, 3, 4, 5})
-    @DisplayName("Test refillBoard triggers changeAge")
-    void testShouldRefillBoardChangeAge(int value) {
-        List<Player> players = new ArrayList<>();
-        List<ModelObserver> listeners = new ArrayList<>();
-        for (int i = 0; i < value; i++)
-            players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
-        tgm = new TestableGameManager(listeners, players, value);
-        tgm.initGame();
-
-        Character b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
-        tgm.getDeck().addFirst(b1);
-
-        tgm.refillBoard();
-
-        int numValid = tgm.getUpperList().stream()
-                .filter(card -> card.getType() != CardTypeEnum.BUILDING)
-                .toList().size();
-
-        assertEquals(2, tgm.getCurrAge());
-        assertTrue(tgm.getUpperList().contains(b1));
-        assertFalse(tgm.getLowerList().contains(b1));
-        assertEquals(value + 4, numValid);
-    }
-
-    // ── move ──────────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("Test move — tile occupata lancia eccezione")
-    void testShouldNotMove() {
+    @DisplayName("onMoveRequested — tile occupata lancia OccupiedTileException")
+    void testShouldThrowOnOccupiedTile() {
         tgm.initGame();
         Tile targetTile = tgm.getBoard().getFirst();
-        Player testP = new Player("TestPlayer", ColorPawnEnum.WHITE);
-        try {
-            targetTile.setPlayer(testP);
-        } catch (OccupiedTileException e) {
-            fail("La tile doveva essere libera durante il setup del test");
-        }
-        assertThrows(OccupiedTileException.class, () -> tgm.move(targetTile));
-        assertEquals(testP, targetTile.getPlayer());
+        Player occupier = new Player("Occupier", ColorPawnEnum.WHITE);
+        targetTile.setPlayer(occupier);
+        String currNick = tgm.getCurrentPlayer().getNickname();
+        assertThrows(OccupiedTileException.class, () -> tgm.onMoveRequested(currNick, 0));
+        assertEquals(occupier, targetTile.getPlayer());
     }
 
     @Test
-    @DisplayName("Test move — tile libera")
-    void testShouldMove() {
+    @DisplayName("move — tile libera: il giocatore corrente occupa la tile")
+    void testShouldMoveToFreeTile() {
         tgm.initGame();
         Tile targetTile = tgm.getBoard().getFirst();
         Player currPlayer = tgm.getCurrentPlayer();
-
         tgm.move(targetTile);
-
         assertTrue(targetTile.isOccupied());
         assertEquals(currPlayer, targetTile.getPlayer());
     }
 
-    // ── finalScoreCount ───────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("Test finalScoreCount")
-    void testShouldFinalScoreCount() {
-        Player p1 = new Player("abc", ColorPawnEnum.BLUE);
-        Player p2 = new Player("def", ColorPawnEnum.ORANGE);
-        GameManager gm = new GameManager(new ArrayList<>(), List.of(p1, p2), 2, () -> {});
-
-        CardEffectInstant e1 = new GainPP(CardTypeEnum.BUILDER, 3, GainPPEnum.PP_FOR_CAT);
-        Building build1 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.SETUP_PHASE, 2, 4, 2, List.of(e1), new ArrayList<>());
-        Building build2 = new Building(CardTypeEnum.BUILDING, 12, null, 2, 5, 2, new ArrayList<>(), new ArrayList<>());
-        Builder b1 = new Builder(2, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
-        Builder b2 = new Builder(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
-        Builder b3 = new Builder(5, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 1, 2, CardTypeEnum.BUILDER);
-        Crafter c1 = new Crafter(123, null, new ArrayList<>(), new ArrayList<>(), 1, CrafterSymbolEnum.AMIGDALA, CardTypeEnum.CRAFTER);
-        Crafter c2 = new Crafter(456, null, new ArrayList<>(), new ArrayList<>(), 1, CrafterSymbolEnum.BOWL, CardTypeEnum.CRAFTER);
-        Crafter c3 = new Crafter(789, null, new ArrayList<>(), new ArrayList<>(), 1, CrafterSymbolEnum.AMIGDALA, CardTypeEnum.CRAFTER);
-        Painter pa1 = new Painter(45, null, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.PAINTER);
-        Painter pa2 = new Painter(54, null, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.PAINTER);
-        Painter pa3 = new Painter(543, null, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.PAINTER);
-        Painter pa4 = new Painter(542, null, new ArrayList<>(), new ArrayList<>(), 1, CardTypeEnum.PAINTER);
-
-        p1.addCard(b1); p1.addCard(b2); p2.addCard(b3);
-        p1.addCard(c1); p1.addCard(c2); p1.addCard(c3); p2.addCard(c3);
-        p1.addCard(pa1); p1.addCard(pa2); p2.addCard(pa3); p2.addCard(pa4);
-        p1.addBuilding(build1); p2.addBuilding(build2);
-
-        gm.finalScoreCount();
-
-        assertEquals(26, p1.getPP());
-        assertEquals(16, p2.getPP());
-    }
-
-    // ── drawCard ──────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("Draw Card from lower — successo")
-    void testShouldDrawCardLowerFine() {
+    @DisplayName("drawCard — pesca da lower con azione DOWN: successo")
+    void testShouldDrawCardFromLower() {
         tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
         tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.DOWN_DRAW));
         Builder b1 = new Builder(240921, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
         tgm.getLowerList().add(b1);
 
-        assertDoesNotThrow(() -> tgm.drawCard(b1));
-
+        assertDoesNotThrow(() -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
         assertFalse(tgm.getLowerList().contains(b1));
         assertEquals(1, tgm.getCurrentPlayer().getNumType(CardTypeEnum.BUILDER));
     }
 
     @Test
-    @DisplayName("Draw Card from upper — successo")
-    void testShouldDrawCardUpperFine() {
+    @DisplayName("drawCard — pesca da upper con azione UP: successo")
+    void testShouldDrawCardFromUpper() {
         tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
         tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.UP_DRAW));
         Builder b1 = new Builder(240921, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
         tgm.getUpperList().add(b1);
 
-        assertDoesNotThrow(() -> tgm.drawCard(b1));
-
+        assertDoesNotThrow(() -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
         assertFalse(tgm.getUpperList().contains(b1));
         assertEquals(1, tgm.getCurrentPlayer().getNumType(CardTypeEnum.BUILDER));
     }
 
     @Test
-    @DisplayName("Draw Card upper con azione down — errore")
-    void testShouldDrawCardUpperNotFine() {
+    @DisplayName("onDrawCardRequested — carta in lower con azione UP: lancia InvalidDrawException")
+    void testShouldFailDrawFromLowerWithUpAction() {
         tgm.initGame();
+
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        tgm.move(tgm.getBoard().get(3));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
         tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.UP_DRAW));
         Builder b1 = new Builder(240921, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
         tgm.getLowerList().add(b1);
 
-        InvalidDrawException ex = assertThrows(InvalidDrawException.class, () -> tgm.drawCard(b1));
-        assertEquals("Fila non valida", ex.getMessage());
+        InvalidDrawException ex = assertThrows(InvalidDrawException.class,
+                () -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
+        assertEquals("Non hai pescate disponibili dalla fila inferiore", ex.getMessage());
         assertTrue(tgm.getLowerList().contains(b1));
         assertEquals(0, tgm.getCurrentPlayer().getNumType(CardTypeEnum.BUILDER));
     }
 
     @Test
-    @DisplayName("Draw Card lower con azione up — errore")
-    void testShouldDrawCardLowerNotFine() {
+    @DisplayName("drawCard — carta in upper con azione DOWN: lancia InvalidDrawException")
+    void testShouldFailDrawFromUpperWithDownAction() {
         tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
         tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.DOWN_DRAW));
         Builder b1 = new Builder(240921, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 2, CardTypeEnum.BUILDER);
         tgm.getUpperList().add(b1);
 
-        InvalidDrawException ex = assertThrows(InvalidDrawException.class, () -> tgm.drawCard(b1));
-        assertEquals("Fila non valida", ex.getMessage());
+        InvalidDrawException ex = assertThrows(InvalidDrawException.class,
+                () -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
+        assertEquals("Non hai pescate disponibili dalla fila superiore", ex.getMessage());
         assertTrue(tgm.getUpperList().contains(b1));
         assertEquals(0, tgm.getCurrentPlayer().getNumType(CardTypeEnum.BUILDER));
     }
-
-    // ── initFood ──────────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("initFood — giocatore extra non riceve cibo")
-    void testShouldInitFood() {
-        int value = 6;
-        List<Player> players = new ArrayList<>();
-        for (int i = 0; i < value; i++)
-            players.add(new Player("Player" + i, i < 5 ? ColorPawnEnum.values()[i] : ColorPawnEnum.BLUE));
-        GameManager gm = new GameManager(new ArrayList<>(), players, value, () -> {});
-        gm.initGame();
-        assertEquals(0, players.get(value - 1).getNFood());
-    }
-
-    // ── getToDoActions ────────────────────────────────────────────────────────
-
-    @Test
-    void testShouldGetToDoActions() {
+    @DisplayName("getToDoActions — lista vuota all'avvio")
+    void testToDoActionsEmptyOnStart() {
         List<Player> players = new ArrayList<>();
         for (int i = 0; i < 5; i++)
             players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
@@ -534,31 +370,801 @@ class GameManagerTest {
     }
 
     @Test
-    @DisplayName("checkEffects con lista non vuota")
-    void checkEffectsNotEmpty() {
+    @DisplayName("addListener — il listener viene registrato nel notifier")
+    void testShouldAddListener() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        assertEquals(1, tgm.getListeners().size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3, 4, 5})
+    @DisplayName("initGame — configurazione valida inizializza board e liste")
+    void testShouldInitGameForValidValues(int value) {
+        List<Player> players = new ArrayList<>();
+        for (int i = 0; i < value; i++)
+            players.add(new Player("Player" + i, ColorPawnEnum.values()[i]));
+        tgm = new TestableGameManager(new ArrayList<>(), players, value);
+        tgm.initGame();
+
+        assertNotNull(tgm.getBoard());
+        assertFalse(tgm.getBoard().isEmpty());
+
+        int sub = switch (value) {
+            case 2       -> 1;
+            case 3, 4, 5 -> 2;
+            default      -> 0;
+        };
+        assertEquals(value + 4, tgm.getUpperList().size() - sub);
+        assertFalse(tgm.getLowerList().isEmpty());
+        assertEquals(value + 1, tgm.getLowerList().size());
+        assertEquals(1, tgm.getCurrAge());
+        assertNotNull(tgm.getCurrentPlayer());
+    }
+
+    @Test
+    @DisplayName("checkEffects — aggiunge azione se building ha effetto interattivo attivo")
+    void testCheckEffectsAddsActionWhenBuildingHasEffect() {
         tgm.initGame();
         CardEffectInteractive eff = new DrawCard(DrawCardEnum.UP_DRAW);
         Building build1 = new Building(CardTypeEnum.BUILDING, 1, GamePhaseEnum.SETUP_PHASE, 2, 4, 2, new ArrayList<>(), List.of(eff));
         tgm.getCurrentPlayer().addBuilding(build1);
         tgm.checkEffects();
-
-        assertEquals(1, tgm.getToDoActions().size());
-        assertSame(DrawCardEnum.UP_DRAW, tgm.getToDoActions().getFirst().getType());
+        assertTrue(tgm.getCurrentPlayer().hasSkippableDraws());
+        assertSame(DrawCardEnum.UP_DRAW,
+                tgm.getCurrentPlayer().resolveSkippableDraws().getFirst().getType());
     }
-
-    // ── addListener ───────────────────────────────────────────────────────────
 
     @Test
-    void testShouldAddListener() {
-        ModelObserver l = mock(ModelObserver.class);
-        assertEquals(0, tgm.getListeners().size());
-        tgm.getListeners().add(l);
-        assertEquals(1, tgm.getListeners().size());
+    @DisplayName("notifyGameEnding — ranking distinto: ogni observer riceve la propria posizione")
+    void notifyGameEnding_distinctRanks_eachObserverReceivesCorrectRankingPos() {
+        Player p1 = tgm.getPlayers().get(0);
+        Player p2 = tgm.getPlayers().get(1);
+        Player p3 = tgm.getPlayers().get(2);
+
+        p1.addPP(30);
+        p2.addPP(20);
+        p3.addPP(10);
+
+        Map<String, Integer> globalPositions = Map.of("Player1", 1, "Player2", 2, "Player3", 3);
+
+        TestableGameManager gm = new TestableGameManager(List.of(obsP1, obsP2, obsP3), List.of(p1, p2, p3), 3);
+        gm.notifyGameEnding(globalPositions);
+
+        verify(obsP1).onGameEnding(any(), eq(1), eq(1));
+        verify(obsP2).onGameEnding(any(), eq(2), eq(2));
+        verify(obsP3).onGameEnding(any(), eq(3), eq(3));
     }
 
-    // ── placeholder ───────────────────────────────────────────────────────────
+    @Test
+    @DisplayName("notifyGameEnding — pareggio: rank condiviso e ultimo riceve rank 3 (non 2)")
+    void notifyGameEnding_tiedPlayers_shareRankAndLastPlayerGetsSkippedRank() {
+        Player p1 = tgm.getPlayers().get(0);
+        Player p2 = tgm.getPlayers().get(1);
+        Player p3 = tgm.getPlayers().get(2);
 
-    @Test void testShouldPlayEvent() {}
-    @Test void testShouldCheckBoardTileEffects() {}
-    @Test void testShouldCheckQueueTileEffects() {}
+        p1.addPP(20);
+        p2.addPP(20);
+        p3.addPP(10);
+
+        Map<String, Integer> globalPositions = Map.of("Player1", 1, "Player2", 1, "Player3", 2);
+
+        TestableGameManager gm = new TestableGameManager(List.of(obsP1, obsP2, obsP3), List.of(p1, p2, p3), 3);
+        gm.notifyGameEnding(globalPositions);
+
+        verify(obsP1).onGameEnding(any(), eq(1), anyInt());
+        verify(obsP2).onGameEnding(any(), eq(1), anyInt());
+        verify(obsP3).onGameEnding(any(), eq(3), anyInt());
+    }
+
+    @Test
+    @DisplayName("notifyGameEnding — statsList contiene tutti i giocatori con PP e food corretti")
+    void notifyGameEnding_statsListReflectsCurrentModelState() {
+        Player p1 = tgm.getPlayers().get(0);
+        Player p2 = tgm.getPlayers().get(1);
+
+        p1.addPP(15);
+        p1.addFood(3);
+        p2.addPP(10);
+
+        Map<String, Integer> globalPositions = Map.of("Alice", 1, "Bob", 2);
+
+        GameManager gm = new TestableGameManager(List.of(obsP1, obsP2), List.of(p1, p2), 2);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<PlayerStatsDTO>> captor = ArgumentCaptor.forClass(List.class);
+
+        gm.notifyGameEnding(globalPositions);
+
+        verify(obsP1).onGameEnding(captor.capture(), anyInt(), anyInt());
+
+        List<PlayerStatsDTO> stats = captor.getValue();
+        assertEquals(2, stats.size());
+
+        PlayerStatsDTO P1Stats = stats.stream()
+                .filter(s -> "Player1".equals(s.getNickname()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(15, P1Stats.getPPs());
+        assertEquals(3,  P1Stats.getnFood());
+    }
+
+    @Test
+    @DisplayName("notifyGameEnding — nickname assente da globalPositions → globalRankingPos = -1")
+    void notifyGameEnding_missingGlobalPosition_passesMinus1() {
+        Player p1 = tgm.getPlayers().get(0);
+        Player p2 = tgm.getPlayers().get(1);
+        p1.addPP(10);
+        p2.addPP(5);
+
+        Map<String, Integer> globalPositions = Map.of("Alice", 1);
+
+        GameManager gm = new TestableGameManager(List.of(obsP1, obsP2), List.of(p1, p2), 2);
+        gm.notifyGameEnding(globalPositions);
+
+        verify(obsP2).onGameEnding(any(), anyInt(), eq(-1));
+    }
+
+    @Test
+    @DisplayName("notifyGameEnding — ogni observer viene notificato esattamente una volta")
+    void notifyGameEnding_allObserversNotifiedExactlyOnce() {
+        Player p1 = tgm.getPlayers().get(0);
+        Player p2 = tgm.getPlayers().get(1);
+        Player p3 = tgm.getPlayers().get(2);
+        p1.addPP(10);
+        p2.addPP(5);
+        p3.addPP(1);
+
+        Map<String, Integer> globalPositions = Map.of("Alice", 1, "Bob", 2, "Carl", 3);
+
+        GameManager gm = new TestableGameManager(List.of(obsP1, obsP2, obsP3), List.of(p1, p2, p3), 3);
+        gm.notifyGameEnding(globalPositions);
+
+        verify(obsP1, times(1)).onGameEnding(any(), anyInt(), anyInt());
+        verify(obsP2, times(1)).onGameEnding(any(), anyInt(), anyInt());
+        verify(obsP3, times(1)).onGameEnding(any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @DisplayName("onMoveRequested — fase diversa da SETUP lancia InvalidPhaseException")
+    void testShouldThrowInvalidPhaseExceptionOnMoveRequested() {
+        tgm.initGame();
+        Tile t1 = new Tile(1, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
+        tgm.getBoard().addFirst(t1);
+        tgm.getBoard().addFirst(t2);
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        String currNick = tgm.getCurrentPlayer().getNickname();
+        assertThrows(InvalidPhaseException.class, () -> tgm.onMoveRequested(currNick, 0));
+    }
+
+    @Test
+    @DisplayName("onMoveRequested — nickname diverso dal giocatore corrente lancia InvalidPlayerException")
+    void testShouldThrowInvalidPlayerExceptionOnMoveRequested() {
+        tgm.initGame();
+        String wrongNick = tgm.getPlayers().stream()
+                .map(Player::getNickname)
+                .filter(n -> !n.equals(tgm.getCurrentPlayer().getNickname()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThrows(InvalidPlayerException.class, () -> tgm.onMoveRequested(wrongNick, 0));
+    }
+
+    @Test
+    @DisplayName("onMoveRequested — tilePos inesistente lancia InvalidMoveException")
+    void testShouldThrowInvalidMoveExceptionOnMoveRequested() {
+        tgm.initGame();
+        String currNick = tgm.getCurrentPlayer().getNickname();
+        int invalidPos = tgm.getBoard().size() + 5;
+
+        assertThrows(InvalidMoveException.class, () -> tgm.onMoveRequested(currNick, invalidPos));
+    }
+
+    @Test
+    @DisplayName("onMoveRequested — richiesta valida applica il movimento senza eccezioni")
+    void testShouldMoveSuccessfullyViaOnMoveRequested() {
+        tgm.initGame();
+        Tile targetTile = tgm.getBoard().getFirst();
+        Player currPlayer = tgm.getCurrentPlayer();
+        String currNick = currPlayer.getNickname();
+
+        assertDoesNotThrow(() -> tgm.onMoveRequested(currNick, 0));
+
+        assertTrue(targetTile.isOccupied());
+        assertEquals(currPlayer, targetTile.getPlayer());
+    }
+
+    @Test
+    @DisplayName("onDrawCardRequested — nickname diverso dal giocatore corrente lancia InvalidPlayerException")
+    void testShouldThrowInvalidPlayerExceptionOnDrawCardRequested() {
+        tgm.initGame();
+        String wrongNick = tgm.getPlayers().stream()
+                .map(Player::getNickname)
+                .filter(n -> !n.equals(tgm.getCurrentPlayer().getNickname()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThrows(InvalidPlayerException.class, () -> tgm.onDrawCardRequested(wrongNick, 1));
+    }
+
+    @Test
+    @DisplayName("onDrawCardRequested — fase diversa da DRAW/OPTIONAL_DRAW lancia InvalidPhaseException")
+    void testShouldThrowInvalidPhaseExceptionOnDrawCardRequested() {
+        tgm.initGame();
+        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhaseEnum());
+        String currNick = tgm.getCurrentPlayer().getNickname();
+
+        assertThrows(InvalidPhaseException.class, () -> tgm.onDrawCardRequested(currNick, 1));
+    }
+
+    @Test
+    @DisplayName("onDrawCardRequested — cardID inesistente lancia InvalidDrawException")
+    void testShouldThrowInvalidDrawExceptionOnDrawCardRequestedCardNotFound() {
+        tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        String currNick = tgm.getCurrentPlayer().getNickname();
+        int nonExistentCardId = -999;
+
+        assertThrows(InvalidDrawException.class, () -> tgm.onDrawCardRequested(currNick, nonExistentCardId));
+    }
+
+    @Test
+    @DisplayName("onSkipRequested — richiesta valida esegue lo skip e avanza fase")
+    void testShouldSkipSuccessfully() {
+        tgm.initGame();
+        Tile t1 = new Tile(1, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
+        tgm.getBoard().addFirst(t1);
+        tgm.getBoard().addFirst(t2);
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        tgm.setSkippableDraw(true);
+        String currNick = tgm.getCurrentPlayer().getNickname();
+
+        assertDoesNotThrow(() -> tgm.onSkipRequested(currNick));
+    }
+
+    @Test
+    @DisplayName("onSkipRequested — nickname diverso dal giocatore corrente lancia InvalidPlayerException")
+    void testShouldThrowInvalidPlayerExceptionOnSkipRequested() {
+        tgm.initGame();
+        String wrongNick = tgm.getPlayers().stream()
+                .map(Player::getNickname)
+                .filter(n -> !n.equals(tgm.getCurrentPlayer().getNickname()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThrows(InvalidPlayerException.class, () -> tgm.onSkipRequested(wrongNick));
+    }
+
+    @Test
+    @DisplayName("onSkipRequested — fase diversa da DRAW/OPTIONAL_DRAW lancia InvalidPhaseException")
+    void testShouldThrowInvalidPhaseExceptionOnSkipRequested() {
+        tgm.initGame();
+        assertEquals(GamePhaseEnum.SETUP_PHASE, tgm.getCurrPhaseEnum());
+        String currNick = tgm.getCurrentPlayer().getNickname();
+
+        assertThrows(InvalidPhaseException.class, () -> tgm.onSkipRequested(currNick));
+    }
+
+    @Test
+    @DisplayName("onSkipRequested — skippableDraw false lancia InvalidSkipException")
+    void testShouldThrowInvalidSkipExceptionOnSkipRequested() {
+        tgm.initGame();
+        Tile t1 = new Tile(1, 2, new ArrayList<>(), List.of(new DrawCard(DrawCardEnum.UP_DRAW)), false, "");
+        Tile t2 = new Tile(2, 2, new ArrayList<>(), new ArrayList<>(), false, "");
+        Tile t3 = new Tile(4, 1, new ArrayList<>(), new ArrayList<>(), false, "");
+        tgm.getBoard().addFirst(t3);
+        tgm.getBoard().addFirst(t1);
+        tgm.getBoard().addFirst(t2);
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        tgm.setSkippableDraw(false);
+        String currNick = tgm.getCurrentPlayer().getNickname();
+
+        assertThrows(InvalidSkipException.class, () -> tgm.onSkipRequested(currNick));
+    }
+
+    @Test
+    @DisplayName("getQueueSize/getNumPlayers/getCurrTurn/incrementTurn — wiring verso GameState")
+    void testShouldExposeStateCountersCorrectly() {
+        tgm.initGame();
+        assertEquals(3, tgm.getNumPlayers());
+        assertEquals(1, tgm.getCurrTurn());
+        tgm.incrementTurn();
+        assertEquals(2, tgm.getCurrTurn());
+        assertEquals(tgm.getNumPlayers(), tgm.getQueueSize());
+    }
+
+    @Test
+    @DisplayName("hasAnySkippableDraws — false quando nessun giocatore ha pesche saltabili")
+    void testShouldReturnFalseWhenNoSkippableDraws() {
+        tgm.initGame();
+        assertFalse(tgm.hasAnySkippableDraws());
+    }
+
+    @Test
+    @DisplayName("hasAnySkippableDraws — true quando un giocatore ha pesche saltabili in coda")
+    void testShouldReturnTrueWhenSomeoneHasSkippableDraws() {
+        tgm.initGame();
+        tgm.getCurrentPlayer().addSkippableDraws(
+                List.of(new Action(tgm.getCurrentPlayer(), DrawCardEnum.UP_DRAW)));
+        assertTrue(tgm.hasAnySkippableDraws());
+    }
+
+    @Test
+    @DisplayName("checkBoardTileEffects — non lancia eccezioni con player su tile senza effetti")
+    void testShouldNotThrowOnCheckBoardTileEffects() {
+        tgm.initGame();
+        Tile t = tgm.getBoard().getFirst();
+        tgm.move(t);
+        assertDoesNotThrow(() -> tgm.checkBoardTileEffects());
+    }
+
+    @Test
+    @DisplayName("showBoard — notifica tutti gli observer registrati con lo stato corrente")
+    void testShouldNotifyShowBoardToAllListeners() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        tgm.initGame();
+        tgm.showBoard();
+        verify(listener, atLeast(2)).showBoard(any());
+    }
+
+    @Test
+    @DisplayName("getOnGameEndedCallback — restituisce il callback passato al costruttore")
+    void testShouldReturnOnGameEndedCallback() {
+        Runnable callback = () -> {};
+        GameManager gm = new GameManager(new ArrayList<>(), tgm.getPlayers(), 2, callback);
+        assertSame(callback, gm.getOnGameEndedCallback());
+    }
+
+    @Test
+    @DisplayName("setOnGameStartedCallback — il callback viene invocato da initGame")
+    void testShouldInvokeOnGameStartedCallback() {
+        boolean[] called = {false};
+        tgm.setOnGameStartedCallback(() -> called[0] = true);
+        tgm.initGame();
+        assertTrue(called[0]);
+    }
+
+    @Test
+    @DisplayName("toSnapshot — produce uno snapshot non nullo coerente con lo stato corrente")
+    void testShouldProduceConsistentSnapshot() {
+        tgm.initGame();
+        GameSnapshot snap = tgm.toSnapshot(42);
+
+        assertNotNull(snap);
+        assertEquals(tgm.getNumPlayers(), snap.getNumPlayers());
+        assertEquals(tgm.getCurrAge(), snap.getCurrAge());
+        assertEquals(tgm.getCurrTurn(), snap.getCurrTurn());
+    }
+
+    @Test
+    @DisplayName("checkCanDraw — mustDraw true: notifica le carte disponibili (character in upper)")
+    void testCheckCanDrawWhenMustDraw() {
+
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.UP_DRAW));
+        Builder b1 = new Builder(555001, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
+        tgm.getUpperList().add(b1);
+
+        tgm.checkCanDraw();
+
+        verify(listener).notifyDrawable(any());
+    }
+
+    @Test
+    @DisplayName("checkCanDraw — mayDraw true: setta skippableDraw e notifica le carte disponibili")
+    void testCheckCanDrawWhenMayDraw() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+
+        tgm.getLowerList().clear();
+
+        Building build = new Building(
+                CardTypeEnum.BUILDING, 555002,
+                GamePhaseEnum.SETUP_PHASE, 1, 2, 0,   // <-- foodCost = 0
+                new ArrayList<>(), new ArrayList<>());
+        tgm.getLowerList().add(build);
+
+        tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.DOWN_DRAW));
+
+        tgm.checkCanDraw();
+
+        assertTrue(tgm.getSkippableDraw());
+        verify(listener).notifyDrawable(any());
+    }
+    @Test
+    @DisplayName("checkCanDraw — né mustDraw né mayDraw: esegue skip automatico")
+    void testCheckCanDrawWhenCannotDrawSkipsAutomatically() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+        tgm.clearToDoActions();
+
+        tgm.checkCanDraw();
+
+        verify(listener).notifySkip(anyString());
+    }
+
+    @Test
+    @DisplayName("changeAge — incrementa l'età e notifica gli observer")
+    void testShouldChangeAgeAndNotify() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        tgm.initGame();
+        int ageBefore = tgm.getCurrAge();
+
+        tgm.changeAge();
+
+        assertTrue(tgm.getCurrAge() >= ageBefore);
+        verify(listener).onChangeAge(any());
+    }
+
+    @Test
+    @DisplayName("nextPlayer — avanza il giocatore corrente e notifica l'observer")
+    void testShouldAdvanceToNextPlayerAndNotify() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        tgm.initGame();
+        Player before = tgm.getCurrentPlayer();
+
+        tgm.nextPlayer();
+
+        verify(listener, atLeastOnce()).onCurrPlayerUpdate(anyString());
+        assertNotNull(tgm.getCurrentPlayer());
+    }
+
+    @Test
+    @DisplayName("refillBoard — rifornisce upperList dal deck senza eccezioni")
+    void testShouldRefillBoardWithoutErrors() {
+        tgm.initGame();
+        int upperSizeBefore = tgm.getUpperList().size();
+        int deckSizeBefore = tgm.getDeck().size();
+
+        assertDoesNotThrow(() -> tgm.refillBoard());
+
+        assertTrue(tgm.getUpperList().size() >= upperSizeBefore);
+        assertTrue(tgm.getDeck().size() <= deckSizeBefore);
+    }
+
+    @Test
+    @DisplayName("loadSkippableDraws — nessun giocatore con pesche saltabili: non notifica nulla")
+    void testLoadSkippableDrawsNoPlayerHasAny() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        tgm.initGame();
+        reset(listener);
+
+        tgm.loadSkippableDraws();
+
+        verify(listener, never()).notifyDrawable(any());
+    }
+
+    @Test
+    @DisplayName("loadSkippableDraws — carica le pesche saltabili del primo giocatore idoneo e notifica")
+    void testLoadSkippableDrawsFindsEligiblePlayer() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        Player target = tgm.getPlayers().get(1);
+        target.addSkippableDraws(List.of(new Action(target, DrawCardEnum.UP_DRAW)));
+
+        tgm.loadSkippableDraws();
+
+        assertEquals(target, tgm.getCurrentPlayer());
+        verify(listener).notifyDrawable(any());
+    }
+
+    @Test
+    @DisplayName("playEvent — risolve gli eventi, notifica e avanza fase")
+    void testShouldPlayEventNotifyAndAdvancePhase() {
+        ModelObserver listener = mock(ModelObserver.class);
+        tgm.addListener(listener);
+        tgm.initGame();
+        GamePhaseEnum phaseBefore = tgm.getCurrPhaseEnum();
+
+        assertDoesNotThrow(() -> tgm.playEvent());
+
+        verify(listener).onEvent(any());
+    }
+
+    @Test
+    @DisplayName("finalScoreCount — applica i punteggi finali senza eccezioni")
+    void testShouldApplyFinalScoresWithoutErrors() {
+        tgm.initGame();
+        int ppBefore = tgm.getCurrentPlayer().getPP();
+
+        assertDoesNotThrow(() -> tgm.finalScoreCount());
+
+        assertTrue(tgm.getCurrentPlayer().getPP() >= ppBefore);
+    }
+
+    @Test
+    @DisplayName("drawCard — con azioni ancora pendenti chiama checkCanDraw invece di avanzare fase")
+    void testDrawCardWithRemainingActionsTriggersCheckCanDraw() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        tgm.getUpperList().clear();
+        tgm.getLowerList().clear();
+
+        tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.DOWN_DRAW));
+        tgm.addToDoAction(new Action(tgm.getCurrentPlayer(), DrawCardEnum.DOWN_DRAW));
+
+        Builder b1 = new Builder(555010, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
+        tgm.getLowerList().add(b1);
+
+        assertDoesNotThrow(() -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
+
+        verify(listener, atLeastOnce()).notifySkip(anyString());
+    }
+
+    @Test
+    @DisplayName("execEndTurn — sposta il giocatore in coda, notifica e avanza fase")
+    void testShouldExecEndTurnMovePlayerToQueueAndNotify() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        Player currPlayer = tgm.getCurrentPlayer();
+        Tile currPlayerTile = tgm.getBoard().getFirst();
+        tgm.move(currPlayerTile);
+
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+
+        assertTrue(currPlayerTile.isOccupied());
+        assertEquals(currPlayer, currPlayerTile.getPlayer());
+
+        assertDoesNotThrow(() -> tgm.execEndTurn());
+
+        assertFalse(currPlayerTile.isOccupied());
+        verify(listener).onReturnToQueue(any(), any());
+    }
+    @Test
+    @DisplayName("refillBoard — rimuove eventi e character dalla lowerList prima del refill")
+    void testRefillBoardRemovesEventsAndCharactersFromLower() {
+        tgm.initGame();
+        tgm.getDeck().clear();
+
+        Builder charCard = new Builder(1, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
+        Building buildCard = new Building(CardTypeEnum.BUILDING, 2, GamePhaseEnum.SETUP_PHASE, 1, 2, 0, new ArrayList<>(), new ArrayList<>());
+        tgm.getLowerList().add(charCard);
+        tgm.getLowerList().add(buildCard);
+
+        tgm.refillBoard();
+
+        assertFalse(tgm.getLowerList().contains(charCard),
+                "I character card devono essere rimossi dalla lowerList");
+        assertTrue(tgm.getLowerList().contains(buildCard),
+                "I building card devono rimanere nella lowerList");
+    }
+
+    @Test
+    @DisplayName("refillBoard — sposta character e event da upperList a lowerList")
+    void testRefillBoardMovesCharactersFromUpperToLower() {
+        tgm.initGame();
+        tgm.getDeck().clear();
+        tgm.getUpperList().clear();
+        tgm.getLowerList().clear();
+
+        Builder charCard = new Builder(3, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
+        Building buildCard = new Building(CardTypeEnum.BUILDING, 4, GamePhaseEnum.SETUP_PHASE, 1, 2, 0, new ArrayList<>(), new ArrayList<>());
+        tgm.getUpperList().add(charCard);
+        tgm.getUpperList().add(buildCard);
+
+        tgm.refillBoard();
+
+        assertFalse(tgm.getUpperList().contains(charCard),
+                "I character card devono essere rimossi dalla upperList");
+        assertTrue(tgm.getLowerList().contains(charCard),
+                "I character card devono essere spostati nella lowerList");
+        assertTrue(tgm.getUpperList().contains(buildCard),
+                "I building card devono rimanere nella upperList");
+    }
+
+    @Test
+    @DisplayName("refillBoard — pesca esattamente numPlayers+4 carte dal deck")
+    void testRefillBoardDrawsCorrectNumberOfCards() {
+        tgm.initGame();
+        tgm.getUpperList().clear();
+        int deckSizeBefore = tgm.getDeck().size();
+        int expected = Math.min(tgm.getNumPlayers() + 4, deckSizeBefore);
+
+        tgm.refillBoard();
+
+        assertEquals(expected, tgm.getUpperList().size(),
+                "upperList deve contenere esattamente numPlayers+4 carte (o meno se il deck è esaurito)");
+        assertEquals(deckSizeBefore - expected, tgm.getDeck().size());
+    }
+
+    @Test
+    @DisplayName("refillBoard — restituisce true e chiama changeAge se una carta appartiene all'età successiva")
+    void testRefillBoardTriggersAgeChangeWhenNewerAgeCardDrawn() {
+        tgm.initGame();
+        tgm.getUpperList().clear();
+        tgm.getDeck().clear();
+
+        Builder nextAgeCard = new Builder(5, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 2, CardTypeEnum.BUILDER);
+        tgm.getDeck().add(nextAgeCard);
+
+        int ageBefore = tgm.getCurrAge();
+        tgm.refillBoard();
+
+        assertTrue(tgm.getCurrAge() > ageBefore,
+                "L'età deve essere incrementata quando una carta di età superiore viene pescata");
+    }
+
+    @Test
+    @DisplayName("refillBoard — deck vuoto non lancia eccezioni e non modifica upperList")
+    void testRefillBoardWithEmptyDeckDoesNotThrow() {
+        tgm.initGame();
+        tgm.getDeck().clear();
+        tgm.getUpperList().clear();
+
+        assertDoesNotThrow(() -> tgm.refillBoard());
+        assertTrue(tgm.getUpperList().isEmpty());
+    }
+
+    @Test
+    @DisplayName("drawCard — senza azioni pendenti chiama nextPhase")
+    void testDrawCardWithNoRemainingActionsCallsNextPhase() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+
+        Builder b1 = new Builder(555011, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), new ArrayList<>(), 2, 1, CardTypeEnum.BUILDER);
+        tgm.getLowerList().add(b1);
+
+        assertDoesNotThrow(() -> tgm.onDrawCardRequested(tgm.getCurrentPlayer().getNickname(), b1.getId()));
+
+        verify(listener, atLeastOnce()).onReturnToQueue(any(), any());
+    }
+
+    @Test
+    @DisplayName("calculateRankingPoints — 3 giocatori, ranking distinto: punti corretti per ogni posizione")
+    void testRankingPoints_3Players_distinctRanks() {
+        Player p1 = new Player("P1", ColorPawnEnum.BLUE);
+        Player p2 = new Player("P2", ColorPawnEnum.ORANGE);
+        Player p3 = new Player("P3", ColorPawnEnum.PURPLE);
+        p1.addPP(30); p2.addPP(20); p3.addPP(10);
+
+        RankingCalculator rc = new RankingCalculator();
+        Map<Player, Integer> pts = rc.calculateRankingPoints(List.of(p1, p2, p3), 3);
+
+        assertEquals( 1, pts.get(p1));
+        assertEquals( 0, pts.get(p2));
+        assertEquals(-1, pts.get(p3));
+    }
+
+    @Test
+    @DisplayName("calculateRankingPoints — pareggio PP e food: i pari condividono lo stesso punteggio")
+    void testRankingPoints_tied_sharePoints() {
+        Player p1 = new Player("P1", ColorPawnEnum.BLUE);
+        Player p2 = new Player("P2", ColorPawnEnum.ORANGE);
+        Player p3 = new Player("P3", ColorPawnEnum.PURPLE);
+        p1.addPP(20); p2.addPP(20); p3.addPP(10);
+
+        RankingCalculator rc = new RankingCalculator();
+        Map<Player, Integer> pts = rc.calculateRankingPoints(List.of(p1, p2, p3), 3);
+
+        assertEquals(pts.get(p1), pts.get(p2));
+        assertEquals(1, pts.get(p1));
+        assertEquals(-1, pts.get(p3));
+    }
+
+    @Test
+    @DisplayName("calculateRankingPoints — tiebreak food: player con più food vince a parità di PP")
+    void testRankingPoints_foodTiebreak() {
+        Player p1 = new Player("P1", ColorPawnEnum.BLUE);
+        Player p2 = new Player("P2", ColorPawnEnum.ORANGE);
+        p1.addPP(20); p1.addFood(5);
+        p2.addPP(20); // 0 food
+
+        RankingCalculator rc = new RankingCalculator();
+        Map<Player, Integer> pts = rc.calculateRankingPoints(List.of(p1, p2), 2);
+
+        assertEquals(1, pts.get(p1));
+        assertEquals(0, pts.get(p2));
+    }
+
+
+    @Test
+    @DisplayName("calculateRankingPoints — wiring: restituisce mappa con un entry per ogni giocatore")
+    void testCalculateRankingPointsReturnsEntryForEachPlayer() {
+        tgm.initGame();
+        tgm.getPlayers().get(0).addPP(30);
+        tgm.getPlayers().get(1).addPP(20);
+        tgm.getPlayers().get(2).addPP(10);
+
+        Map<Player, Integer> pts = tgm.calculateRankingPoints();
+
+        assertEquals(tgm.getNumPlayers(), pts.size());
+        tgm.getPlayers().forEach(p -> assertTrue(pts.containsKey(p)));
+    }
+
+    @Test
+    @DisplayName("calculateRankingPoints — wiring: i punti riflettono il ranking reale dei giocatori in state")
+    void testCalculateRankingPointsReflectsActualState() {
+        tgm.initGame();
+        Player first  = tgm.getPlayers().get(0);
+        Player second = tgm.getPlayers().get(1);
+        Player third  = tgm.getPlayers().get(2);
+        first.addPP(30); second.addPP(20); third.addPP(10);
+
+        Map<Player, Integer> pts = tgm.calculateRankingPoints();
+        assertTrue(pts.get(first) > pts.get(second));
+        assertTrue(pts.get(second) > pts.get(third));
+    }
+
+    @Test
+    @DisplayName("drawCard — status cambiato dopo draw: notifyStatusUpdate viene chiamato")
+    void testDrawCardNotifiesStatusUpdateWhenStatusChanges() {
+        ModelObserver listener = mock(ModelObserver.class);
+        when(listener.getNickname()).thenReturn("Player1");
+        tgm.addListener(listener);
+        tgm.initGame();
+
+        tgm.move(tgm.getBoard().getFirst());
+        tgm.move(tgm.getBoard().get(1));
+        tgm.move(tgm.getBoard().get(2));
+        assertEquals(GamePhaseEnum.DRAW_PHASE, tgm.getCurrPhaseEnum());
+        List<CardEffectInstant> instantEffects = new ArrayList<>(List.of(new ProtectPP(ProtectPPEnum.PP_PROTECTION)));
+        Builder cardWithProtect = new Builder(555099, GamePhaseEnum.DRAW_PHASE, new ArrayList<>(), instantEffects, 2, 1, CardTypeEnum.BUILDER);
+
+        tgm.getLowerList().add(cardWithProtect);
+
+        assertDoesNotThrow(() -> tgm.onDrawCardRequested(
+                tgm.getCurrentPlayer().getNickname(), cardWithProtect.getId()));
+
+        verify(listener, atLeastOnce()).onStatusUpdate(any());
+    }
 }

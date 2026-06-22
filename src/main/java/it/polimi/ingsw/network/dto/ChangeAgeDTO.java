@@ -14,11 +14,14 @@ import java.util.List;
  */
 public class ChangeAgeDTO implements Serializable {
 
+    /**
+     *  Required by the {@link Serializable} interface.
+     */
     @Serial
     private static final long serialVersionUID = 1L;
 
     /** The new age the game has advanced to. */
-    private int age;
+    private final int age;
 
     /** Cards now available in the upper row for the new age. */
     private final List<CardDTO> upperList;

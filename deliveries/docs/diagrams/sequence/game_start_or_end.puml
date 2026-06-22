@@ -1,0 +1,174 @@
+@startuml game_start_or_end
+title Game Start & Game End — Lobby Fill-Up and Match Conclusion
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 5
+skinparam backgroundColor #FAFAFA
+
+participant "MatchManager" as MM
+participant "Lobby" as L
+participant "GameManager" as GM
+participant "Controller" as C
+participant "PersistenceManager" as PM
+participant "ClientHandler\n[all players]" as CH_all
+participant "GamePhaseState\n(EndGamePhaseState)" as EGS
+participant "RankingDAO" as RDAO
+
+note over MM, GM
+  Unlike move/draw/skip/quit, game start and game end are NOT triggered
+  directly by an incoming client message: they are side effects fired
+  internally by MatchManager once a lobby fills up, and by GameManager's
+  own phase state machine once it reaches END_GAME. Both flows are
+  transport-agnostic at this level — the final broadcast fans out through
+  whichever ModelObserver implementation (ClientHandlerRmi or
+  ClientHandlerSocket) each player is using.
+end note
+
+== Game Start — Lobby Becomes Full ==
+
+note over MM
+  Triggered from MatchManager.joinGame(nickname, id) (RMI ServerRmi.joinGame
+  or Socket ClientMessageVisitorImpl.visit(JoinGameMessage)) right after
+  lobby.addPlayer(nickname) succeeds.
+end note
+
+MM -> L : lobby.checkFullLobby()
+L --> MM : true
+MM -> MM : scheduler.schedule(() -> startGame(lobby), 0s)
+note right of MM
+  Scheduled (not called inline) on a single-threaded
+  ScheduledExecutorService to avoid races if the lobby
+  fills up from two concurrent joinGame() calls; the
+  scheduled task re-checks checkFullLobby() before
+  actually starting.
+end note
+
+MM -> L : lobby.getNicknames() / buildPlayers()
+L --> MM : List<String> nicknames\nList<Player> players
+MM -> GM : new GameManager(observers, players, capacity,\n  () -> onGameEnded(lobby.getId()))
+MM -> C : new Controller(gm, capacity)
+MM -> MM : controllers.put(matchId, controller)\ngameManagers.put(matchId, gm)\nlobbies.remove(matchId)
+
+loop for each observer in the now-full lobby
+    MM -> CH_all : obs.injectGameVisitor(controller)
+end
+note right of CH_all
+  injectGameVisitor() sets the gameVisitor field used by
+  ClientMessageVisitorImpl (socket) purely as an in-game
+  guard, and stores the Controller reference each
+  ClientHandlerXxx exposes to the message-routing visitor.
+end note
+
+MM -> PM : persistenceManager.register(matchId, gm)
+MM -> GM : gm.setOnGameStartedCallback(\n  () -> persistenceManager.saveNow(matchId, gm))
+MM -> GM : new Thread(gm::initGame).start()
+note over MM
+  startGame() returns immediately after launching the
+  thread; initGame() itself runs asynchronously.
+end note
+
+GM -> GM : state.initialize()
+GM -> CH_all : notifier.showBoard(state.toDTO(currPhaseState))  [broadcast]
+GM -> CH_all : notifier.notifyCurrPlayerUpdate(state.getCurrPlayer().getNickname())  [broadcast]
+GM -> GM : onGameStartedCallback.run()\n→ persistenceManager.saveNow(matchId, gm)
+note right of CH_all
+  Each ClientHandlerRmi/ClientHandlerSocket forwards this
+  through sendAsync(): RMI calls clientStub.showBoard(board)
+  / clientStub.onCurrPlayerUpdate(nickname); Socket writes
+  ShowBoardMessage / CurrPlayerUpdateMessage over TCP.
+end note
+
+== Game End — Reaching END_GAME Phase ==
+
+note over GM, EGS
+  Triggered from inside GameManager.nextPhase() after the
+  last move/draw/skip of the match: when the new phase
+  resolves to END_GAME, GameManager fires the state's
+  onEntry() hook.
+end note
+
+GM -> GM : nextPhase()\n→ currPhaseState = currPhaseState.nextPhase(this)
+GM -> CH_all : notifier.notifyPhaseUpdate(currPhaseState)  [broadcast, phase == END_GAME]
+GM -> EGS : currPhaseState.onEntry(this)
+EGS -> GM : finalScoreCount()
+EGS -> GM : getOnGameEndedCallback().run()\n→ MatchManager.onGameEnded(matchId)
+
+GM -> MM : onGameEnded(matchId)
+note right of MM
+  Runs on the gm::initGame / gm::resume game thread,
+  NOT on the RMI/Socket thread that triggered the
+  last action — onGameEnded() itself synchronizes
+  internally on MatchManager where it touches shared maps.
+end note
+
+MM -> GM : gm.calculateRankingPoints()
+GM --> MM : Map<Player, Integer> rankingPoints
+MM -> MM : numPlayers = controllers.get(matchId).getNumPlayers()\ncontrollers.remove(matchId)\ngameManagers.remove(matchId)\nclientToMatch.entrySet().removeIf(matchId)\npersistenceManager.unregister(matchId)
+note right of MM
+  unregister(matchId) deletes the match's save file:
+  a normally-ended game has nothing left to resume.
+end note
+
+note right of MM
+  The two database calls are NOT interleaved per player:
+  MatchManager.onGameEnded() runs two SEPARATE sequential
+  loops over rankingPoints. All insertMatch() calls complete
+  first, and only then does the second loop run
+  reportPlayerPlace() for every player. This guarantees each
+  player's own freshly-inserted score is already visible in
+  the DB when ranking positions are computed.
+end note
+
+loop for each player in rankingPoints
+    MM -> RDAO : RankingDAO.insertMatch(matchId, nickname, score, numPlayers, today)
+    note right of MM
+      Individually try/caught: a DB error for one
+      player is logged, but does not abort the loop
+      for the others.
+    end note
+end
+
+loop for each player in rankingPoints
+    MM -> RDAO : RankingDAO.reportPlayerPlace(nickname, numPlayers)
+    RDAO --> MM : globalPos
+    MM -> MM : globalPositions.put(nickname, globalPos)
+    note right of MM
+      Individually try/caught: a DB error for one
+      player is logged and that player's globalPos
+      falls back to -1, but does not abort the loop
+      for the others.
+    end note
+end
+
+MM -> MM : postMatch.put(nickname, numPlayers)  [for every player]
+note right of MM
+  Moves every player into the post-game state, which is
+  what later allows MatchManager.requestRanking(nickname)
+  and MatchManager.quit(nickname) [post-game branch] to
+  recognise them. Executed inside a synchronized block
+  before resetGameVisitor() is called.
+end note
+
+loop for each player
+    MM -> CH_all : handler.resetGameVisitor()
+end
+note right of CH_all
+  resetGameVisitor() sets gameVisitor back to null on
+  each handler, so any further move/draw/skip message
+  from that client is rejected as InvalidTimingException.
+  Called after postMatch.put(), outside the synchronized block.
+end note
+
+MM -> GM : gm.notifyGameEnding(globalPositions)
+GM -> GM : finalRanking = rankingCalculator.calculateFinalRanking(...)\nstatsList = players.map(toStatsDTO)\nrankingPositions built from finalRanking
+GM -> CH_all : notifier.notifyGameEnding(statsList, globalPositions, rankingPositions)  [broadcast]
+note right of CH_all
+  Per-listener: each player receives THEIR OWN
+  rankingPos/globalPos via onGameEnding(statsList,
+  rankingPos, globalPos) — RMI: clientStub.onGameEnding(...);
+  Socket: GameEndingUpdateMessage.
+  On the client side this also flips gameEnded = true,
+  which is what unlocks Client.requestRanking().
+end note
+
+@enduml

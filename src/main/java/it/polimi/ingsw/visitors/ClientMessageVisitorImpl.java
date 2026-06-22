@@ -1,14 +1,18 @@
 package it.polimi.ingsw.visitors;
 
 import it.polimi.ingsw.client.socket.VirtualView;
+import it.polimi.ingsw.exceptions.GameException;
+import it.polimi.ingsw.exceptions.InvalidLobbyException;
 import it.polimi.ingsw.exceptions.InvalidTimingException;
+import it.polimi.ingsw.exceptions.InvalidUsernameException;
 import it.polimi.ingsw.network.dto.LobbyDTO;
 import it.polimi.ingsw.network.messages.client.*;
 import it.polimi.ingsw.network.messages.service.PongMessage;
-import it.polimi.ingsw.network.server.MatchManager;
+import it.polimi.ingsw.server.MatchManager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Concrete implementation of {@link ClientMessageVisitor}.
@@ -19,6 +23,11 @@ import java.util.Map;
  * </p>
  */
 public class ClientMessageVisitorImpl implements ClientMessageVisitor {
+
+    /**
+     *  Logger for this class.
+     */
+    private static final Logger LOG = java.util.logging.Logger.getLogger(ClientMessageVisitorImpl.class.getName());
 
     /** Manages match lifecycle: login, game creation, joining, and ranking. */
     private final MatchManager matchManager;
@@ -53,9 +62,10 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
     }
 
     /**
-     * Handles a move message by delegating to the in-game visitor.
-     * Throws {@link InvalidTimingException} if the command is issued
-     * at an invalid point in the game flow.
+     * Handles a move message by delegating to {@link MatchManager#move(String, int)},
+     * which dispatches the move to the game controller and persists the
+     * resulting state. Throws {@link InvalidTimingException} if the command
+     * is issued at an invalid point in the game flow.
      *
      * @param moveMessage the move message sent by the client
      */
@@ -64,16 +74,17 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             if (gameVisitor == null)
                 throw new InvalidTimingException("Non puoi usare questo comando al momento");
-            gameVisitor.visit(moveMessage);
-        } catch (Exception e) {
+            matchManager.move(moveMessage.getPlayer(), moveMessage.getTilePos());
+        } catch (GameException | InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
 
     /**
-     * Handles a draw message by delegating to the in-game visitor.
-     * Throws {@link InvalidTimingException} if the command is issued
-     * at an invalid point in the game flow.
+     * Handles a draw message by delegating to {@link MatchManager#drawCard(int, String)},
+     * which dispatches the draw to the game controller and persists the
+     * resulting state. Throws {@link InvalidTimingException} if the command
+     * is issued at an invalid point in the game flow.
      *
      * @param drawMessage the draw message sent by the client
      */
@@ -82,16 +93,17 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             if (gameVisitor == null)
                 throw new InvalidTimingException("Non puoi usare questo comando al momento");
-            gameVisitor.visit(drawMessage);
-        } catch (Exception e) {
+            matchManager.drawCard(drawMessage.getCardId(), drawMessage.getNickname());
+        } catch (GameException | InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
 
     /**
-     * Handles a skip message by delegating to the in-game visitor.
-     *Throws {@link InvalidTimingException} if the command is issued
-     * at an invalid point in the game flow.
+     * Handles a skip message by delegating to {@link MatchManager#skip(String)},
+     * which dispatches the skip to the game controller and persists the
+     * resulting state. Throws {@link InvalidTimingException} if the command
+     * is issued at an invalid point in the game flow.
      *
      * @param skipMessage the skip message sent by the client
      */
@@ -100,12 +112,11 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             if (gameVisitor == null)
                 throw new InvalidTimingException("Non puoi usare questo comando al momento");
-            gameVisitor.visit(skipMessage);
-        } catch (Exception e) {
+            matchManager.skip(skipMessage.getNickname());
+        } catch (GameException | InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
-
     /**
      * Handles a game creation request, notifying the client of the assigned game ID.
      *
@@ -116,7 +127,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             int gameId = matchManager.createGame(clientHandler.getNickname(), createGameMessage.getNumPlayers());
             clientHandler.onGameCreated(gameId);
-        } catch (Exception e) {
+        } catch (InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
@@ -131,7 +142,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             matchManager.joinGame(clientHandler.getNickname(), joinGameMessage.getId());
             clientHandler.onJoinGame(joinGameMessage.getId());
-        } catch (Exception e) {
+        } catch (InvalidTimingException | InvalidLobbyException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
@@ -148,7 +159,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
             matchManager.login(nickname, this.clientHandler);
             clientHandler.onLogin(nickname);
             clientHandler.onLoginSuccess(nickname);
-        } catch (Exception e) {
+        } catch (InvalidUsernameException e) {
             clientHandler.onLoginFailed(e.getMessage());
         }
     }
@@ -163,7 +174,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             Map<Integer, List<LobbyDTO>> lobbies = matchManager.getLobbies(clientHandler.getNickname());
             clientHandler.onLobbiesRequested(lobbies);
-        } catch (Exception e) {
+        } catch (InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
@@ -175,11 +186,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
      */
     @Override
     public void visit(PongMessage pongMessage) {
-        try {
-            System.out.println("[PONG] Received from " + clientHandler.getNickname());
-        } catch (Exception e) {
-            clientHandler.onErrorMessage(e.getMessage());
-        }
+        LOG.fine("[PONG] Received from " + clientHandler.getNickname());
     }
 
     /**
@@ -191,7 +198,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
     public void visit(QuitMessage quitMessage) {
         try {
             matchManager.quit(clientHandler.getNickname());
-        } catch (Exception e) {
+        } catch (InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
@@ -203,11 +210,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
      */
     @Override
     public void visit(ExitMessage exitMessage) {
-        try {
-            clientHandler.handleDisconnection(clientHandler.getNickname());
-        } catch (Exception e) {
-            clientHandler.onErrorMessage(e.getMessage());
-        }
+        clientHandler.handleDisconnection(clientHandler.getNickname());
     }
 
     /**
@@ -220,7 +223,7 @@ public class ClientMessageVisitorImpl implements ClientMessageVisitor {
         try {
             Map<String, Integer> ranking = matchManager.requestRanking(clientHandler.getNickname());
             clientHandler.onRankingResponse(ranking);
-        } catch (Exception e) {
+        } catch (InvalidTimingException e) {
             clientHandler.onErrorMessage(e.getMessage());
         }
     }
