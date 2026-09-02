@@ -590,8 +590,16 @@ public class GameState {
      */
     public EventDTO applyEvents(GamePhaseEnum phase) {
         EventDTO events = new EventDTO();
+        List<Card> targetList = new ArrayList<>();
 
-        List<Card> targetList = phase == GamePhaseEnum.END_ROUND ? lowerList : upperList;
+        if (phase == GamePhaseEnum.END_ROUND) {
+            targetList.addAll(lowerList.stream().filter(c -> c.getType().isEvent() && c.getTrigger().equals(GamePhaseEnum.END_ROUND)).toList());
+            if (currTurn == 10) {
+                targetList.addAll(upperList.stream().filter(c -> c.getType().isEvent() && c.getTrigger().equals(GamePhaseEnum.END_ROUND)).toList());
+            }
+        } else if (phase == GamePhaseEnum.PLAY_EVENT) {
+            targetList.addAll(upperList.stream().filter(c -> c.getType().isEvent() && c.getTrigger().equals(GamePhaseEnum.PLAY_EVENT)).toList());
+        }
 
         PlayEventVisitor visitor = new PlayEventVisitor(players, phase, events);
         for (Card c : targetList) {
@@ -600,7 +608,6 @@ public class GameState {
         visitor.feastIfPresent();
 
         players.forEach(p -> events.addStats(p.toStatsDTO()));
-
         return events;
     }
 
@@ -678,6 +685,10 @@ public class GameState {
 
         card.execInstantEffect(currPlayer, phase);
         card.execInteractiveEffect(currPlayer);
+
+        if(card.getType().isCharacter()){
+            currPlayer.applyBuildingInstantEffects(phase, card);
+        }
     }
 
     /**

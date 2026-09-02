@@ -445,7 +445,13 @@ public class GameController {
         tooltip.setShowDelay(Duration.millis(350));
         tooltip.setHideDelay(Duration.millis(100));
 
-        tooltip.setOnShowing(e -> tooltip.setAnchorY(tooltip.getAnchorY() + 18));
+        tooltip.setOnShowing(
+                e -> {tooltip.setAnchorY(tooltip.getAnchorY() + 18);
+                    Scene tooltipScene = tooltip.getScene();
+                    if (tooltipScene != null) {
+                        tooltipScene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+                    }}
+        );
 
         Tooltip.install(target, tooltip);
     }
@@ -1037,18 +1043,8 @@ public class GameController {
             viewGUI.setLeaderboardController(ctrl);
             ctrl.setData(stats, pos, this.viewGUI, globalRankingPos);
 
-            Scene scene = new Scene(root);
-            if(tiles.getScene() == null){
-                System.err.println("tiles.getScene è null");
-                return;
-            }
-
             Stage stage = (Stage) tiles.getScene().getWindow();
-            stage.setScene(scene);
-            Platform.runLater(() -> {
-                stage.setFullScreenExitHint("");
-                stage.setFullScreen(true);
-            });
+            stage.getScene().setRoot(root);
 
         } catch (Exception e){
             System.err.println("[GAME ENDING] Eccezione: " + e.getClass().getName() + " — " + e.getMessage() + "\n");

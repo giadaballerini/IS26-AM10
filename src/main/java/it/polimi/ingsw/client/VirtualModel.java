@@ -401,7 +401,7 @@ public class VirtualModel {
      *
      * @param nickname the nickname accepted by the server
      */
-    public void setNickname(String nickname) {
+    public synchronized void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
@@ -411,7 +411,7 @@ public class VirtualModel {
      *
      * @param a the updated draw actions for the current turn
      */
-    public void updateToDoActions(ActionsDTO a) {
+    public synchronized void updateToDoActions(ActionsDTO a) {
         toDoActions = new ActionsDTO(a);
     }
 
@@ -419,7 +419,7 @@ public class VirtualModel {
      * Clears all remaining draw actions for the current turn,
      * called when the player skips their optional draw.
      */
-    public void skip() {
+    public synchronized void skip() {
         toDoActions = new ActionsDTO(0, 0, false);
     }
 
@@ -431,7 +431,7 @@ public class VirtualModel {
      * @return the matching {@link CardDTO}
      * @throws InvalidCardException if no card with the given ID is currently visible
      */
-    public CardDTO findCardById(int cardId) {
+    public synchronized CardDTO findCardById(int cardId) {
         for (CardDTO c : upperList) {
             if (c.getId() == cardId) return c;
         }

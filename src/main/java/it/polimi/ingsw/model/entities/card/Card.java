@@ -145,7 +145,7 @@ public abstract class Card {
      * @return {@code true} if the effect may fire
      */
     public boolean canApply(GamePhaseEnum trigger, GamePhaseEnum currPhase) {
-        return trigger == currPhase;
+        return (trigger == currPhase || (trigger == GamePhaseEnum.DRAW_PHASE && currPhase == GamePhaseEnum.OPTIONAL_DRAW_PHASE));
     }
 
     /**
@@ -166,6 +166,33 @@ public abstract class Card {
                 e.apply(p, this);
                 if (e.isOneTime())
                     it.remove();
+            }
+        }
+    }
+
+    /**
+     * Applies all instant effects of this card to the given player, passing an
+     * external context card to each effect.
+     *
+     * <p>Use this overload when the card carrying the effects
+     * differs from the card that semantically triggered them.
+     * Each effect receives both {@code this} as owner and
+     * {@code context} as the trigger card, allowing context-sensitive effects
+     * such as {@code FOOD_FOR_SET} to inspect the drawn card's type.</p>
+     *
+     * @param p         the player to apply the effects to; must not be {@code null}
+     * @param currPhase the current game phase; effects only fire when their
+     *                  trigger matches this phase
+     * @param context   the card that semantically triggered the effects;
+     *                  must not be {@code null}
+     */
+    public void execInstantEffect(Player p, GamePhaseEnum currPhase, Card context) {
+        Iterator<CardEffectInstant> it = instantEffects.iterator();
+        while (it.hasNext()) {
+            CardEffectInstant e = it.next();
+            if (canApply(trigger, currPhase)) {
+                e.apply(p, this, context);
+                if (e.isOneTime()) it.remove();
             }
         }
     }

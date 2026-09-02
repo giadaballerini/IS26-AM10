@@ -148,43 +148,58 @@ public class MatchManager {
      * are recorded as reconnected. When all players of that match have
      * reconnected, the match is resumed via {@link #restoreGame}.
      *
+     * <p>State mutations are performed inside a {@code synchronized} block;
+     * remote calls ({@link ModelObserver#onReconnection} and game restore) are
+     * issued after the lock is released to avoid holding the monitor during
+     * potentially blocking network I/O.
+     *
      * @param nickname the player's nickname
      * @param client   the server-side observer representing this client
-     * @throws InvalidUsernameException if the nickname is already in use
+     * @throws InvalidUsernameException if the nickname is blank or already in use
      */
-    public synchronized void login(String nickname, ModelObserver client) throws InvalidUsernameException {
-        if (nickname == null || nickname.isBlank())
-            throw new InvalidUsernameException("Nickname non può essere vuoto");
-        if (clients.containsKey(nickname))
-            throw new InvalidUsernameException(
-                    "Username già esistente nella lobby, inserire un nuovo username");
-        clients.put(nickname, client);
-        LOG.info("Login: " + nickname);
-
+    public void login(String nickname, ModelObserver client) throws InvalidUsernameException {
+        int reconnMatchId   = -1;
         int matchIdToRestore = -1;
-        GameSnapshot snapToRestore = null;
+        GameSnapshot snapToRestore   = null;
+        Map<String, ModelObserver> reconnectedCopy = null;
 
-        for (Map.Entry<Integer, GameSnapshot> entry : pendingRestorations.entrySet()) {
-            int matchId = entry.getKey();
-            GameSnapshot snap = entry.getValue();
-            boolean belongsToMatch = snap.getPlayers().stream()
-                    .anyMatch(p -> p.getNickname().equals(nickname));
-            if (belongsToMatch) {
-                LOG.info("Giocatore " + nickname + " riconosciuto per partita " + matchId);
-                reconnectedPlayers.get(matchId).put(nickname, client);
-                clientToMatch.put(nickname, matchId);
-                client.onReconnection(matchId);
-                if (reconnectedPlayers.get(matchId).size() == snap.getNumPlayers()) {
-                    matchIdToRestore = matchId;
-                    snapToRestore = snap;
+        synchronized (this) {
+            if (nickname == null || nickname.isBlank())
+                throw new InvalidUsernameException("Nickname non può essere vuoto");
+            if (clients.containsKey(nickname))
+                throw new InvalidUsernameException(
+                        "Username già esistente nella lobby, inserire un nuovo username");
+            clients.put(nickname, client);
+            LOG.info("Login: " + nickname);
+
+            for (Map.Entry<Integer, GameSnapshot> entry : pendingRestorations.entrySet()) {
+                int matchId = entry.getKey();
+                GameSnapshot snap = entry.getValue();
+                boolean belongsToMatch = snap.getPlayers().stream()
+                        .anyMatch(p -> p.getNickname().equals(nickname));
+                if (belongsToMatch) {
+                    LOG.info("Giocatore " + nickname + " riconosciuto per partita " + matchId);
+                    reconnectedPlayers.get(matchId).put(nickname, client);
+                    clientToMatch.put(nickname, matchId);
+                    reconnMatchId = matchId;
+                    if (reconnectedPlayers.get(matchId).size() == snap.getNumPlayers()) {
+                        matchIdToRestore  = matchId;
+                        snapToRestore     = snap;
+                        reconnectedCopy   = new HashMap<>(reconnectedPlayers.get(matchId));
+                        pendingRestorations.remove(matchId);
+                        reconnectedPlayers.remove(matchId);
+                    }
+                    break;
                 }
-                break;
             }
+            LOG.info("Nuovo giocatore connesso: " + nickname);
         }
-        LOG.info("Nuovo giocatore connesso: " + nickname);
+
+        if (reconnMatchId != -1)
+            client.onReconnection(reconnMatchId);
 
         if (matchIdToRestore != -1)
-            restoreGame(matchIdToRestore, snapToRestore);
+            restoreGame(matchIdToRestore, snapToRestore, reconnectedCopy);
     }
 
     /**
@@ -195,12 +210,17 @@ public class MatchManager {
      * re-injects the game visitor into each handler, registers the game with
      * the persistence manager, and resumes execution on a new thread.
      *
-     * @param matchId the ID of the match to restore
-     * @param snap    the persisted snapshot to restore from
+     * <p>The {@code reconnected} map is captured by the caller inside the
+     * critical section and passed here so that remote calls
+     * ({@link ModelObserver#injectGameVisitor}) can be made outside any lock.
+     *
+     * @param matchId     the ID of the match to restore
+     * @param snap        the persisted snapshot to restore from
+     * @param reconnected map from nickname to observer, in reconnection order
      */
-    private void restoreGame(int matchId, GameSnapshot snap) {
+    private void restoreGame(int matchId, GameSnapshot snap,
+                             Map<String, ModelObserver> reconnected) {
         LOG.info("Ripristino partita " + matchId + " – tutti i giocatori presenti.");
-        Map<String, ModelObserver> reconnected = reconnectedPlayers.get(matchId);
         List<ModelObserver> orderedObservers = snap.getPlayers().stream()
                 .map(p -> reconnected.get(p.getNickname()))
                 .collect(Collectors.toList());
@@ -208,10 +228,11 @@ public class MatchManager {
         RestoredGameManager gm = new RestoredGameManager(
                 snap, orderedObservers, () -> onGameEnded(matchId));
         Controller controller = new Controller(gm, snap.getNumPlayers());
-        controllers.put(matchId, controller);
-        gameManagers.put(matchId, gm);
-        pendingRestorations.remove(matchId);
-        reconnectedPlayers.remove(matchId);
+
+        synchronized (this) {
+            controllers.put(matchId, controller);
+            gameManagers.put(matchId, gm);
+        }
 
         for (ModelObserver obs : orderedObservers)
             obs.injectGameVisitor(controller);
@@ -219,7 +240,6 @@ public class MatchManager {
         persistenceManager.register(matchId, gm);
         new Thread(gm::resume).start();
     }
-
     /**
      * Creates a new game lobby and assigns a match ID to it.
      *
@@ -483,12 +503,17 @@ public class MatchManager {
                 }
                 lobbies.remove(matchId);
 
-            } else {
+            }
+            else if(postMatch.containsKey(nickname)){
+                postMatch.remove(nickname);
+                reason = null;
+            }
+            else {
                 throw new InvalidTimingException("Non puoi usare questo comando al momento.");
             }
         }
-
-        toNotify.forEach(obs -> obs.onQuitServer(reason));
+        if(reason != null)
+            toNotify.forEach(obs -> obs.onQuitServer(reason));
     }
 
     /**

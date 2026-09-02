@@ -88,7 +88,7 @@
     "id" : 7,
     "trigger" : "DRAW_PHASE",
     "age" : 2,
-    "ppAmount" : 4,
+    "ppValue" : 4,
     "foodCost" : 7,
     "instantEffects" : [{
       "type" : "DISCOUNT_FOOD",
@@ -264,7 +264,7 @@
     "id" : 19,
     "trigger" : "END_GAME",
     "age" : 3,
-    "ppAmount" : 4,
+    "ppValue" : 4,
     "foodCost" : 7,
     "instantEffects" : [{
       "type" : "GAIN_PP",
@@ -294,7 +294,7 @@
     "id" : 21,
     "trigger" : "END_GAME",
     "age" : 3,
-    "ppAmount" : 6,
+    "ppValue" : 6,
     "foodCost" : 6,
     "instantEffects" : [{
       "type" : "GAIN_PP",

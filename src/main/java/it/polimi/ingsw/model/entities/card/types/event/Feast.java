@@ -65,16 +65,17 @@ public class Feast extends Event {
      */
     @Override
     public void execEvent(List<Player> players, GamePhaseEnum phase) {
-        for (Player playerRef : players) {
-            int discount = playerRef.calculateFeastDiscount();
-            int totalCost = playerRef.getNumCharacters() - discount;
-            for (int k = 0; k < totalCost; k++) {
-                if (playerRef.getNFood() > 0) {
-                    playerRef.addFood(-this.foodCost);
-                } else {
-                    playerRef.addPP(-this.ppCost);
+        if (phase == this.trigger)
+            for (Player playerRef : players) {
+                int discount = playerRef.calculateFeastDiscount();
+                int totalCost = playerRef.getNumCharacters() - discount;
+                for (int k = 0; k < totalCost; k++) {
+                    if (playerRef.getNFood() > 0) {
+                        playerRef.addFood(-this.foodCost);
+                    } else {
+                        playerRef.addPP(-this.ppCost);
+                    }
                 }
             }
-        }
     }
 }

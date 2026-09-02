@@ -47,7 +47,7 @@ public class OptionalDrawPhaseState implements GamePhaseState {
     /**
      * Returns the {@link GamePhaseEnum} constant identifying this phase.
      *
-     * @return {@link GamePhaseEnum#OPTIONAL_DRAW_PHASE}
+     * @return {@link GamePhaseEnum#DRAW_PHASE}
      */
     @Override
     public GamePhaseEnum getPhase() {

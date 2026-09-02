@@ -40,6 +40,7 @@ public class RestoredGameManager extends GameManager {
         super(observers, snapshot.getPlayers(), snapshot.getNumPlayers(), onGameEndedCallback);
         setState(new GameState(snapshot, snapshot.getPlayers()));
         reconnectTilePlayers(snapshot.getPlayers());
+        reconnectSkippableDrawOwners(snapshot.getPlayers());
         setCurrPhaseState(phaseStateFrom(snapshot.getCurrentPhase()));
     }
 
@@ -80,6 +81,21 @@ public class RestoredGameManager extends GameManager {
                     .findFirst()
                     .ifPresent(tile::setPlayer);
         });
+    }
+    /**
+     * Re-establishes the {@code owner} reference on every pending skippable
+     * draw action of every restored player, after deserialization from a
+     * {@link GameSnapshot}.
+     *
+     * <p>Jackson excludes {@link it.polimi.ingsw.model.action.Action#getOwner()}
+     * from serialization to avoid a circular reference back to {@link Player},
+     * so every {@code Action} inside a deserialized player's pending skippable
+     * draws has a {@code null} owner until this method repairs it.</p>
+     *
+     * @param savedPlayers the list of deserialized players from the snapshot
+     */
+    private void reconnectSkippableDrawOwners(List<Player> savedPlayers) {
+        savedPlayers.forEach(Player::reconnectSkippableDrawOwners);
     }
 
     /**

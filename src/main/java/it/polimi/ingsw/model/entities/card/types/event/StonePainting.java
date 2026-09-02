@@ -75,7 +75,7 @@ public class StonePainting extends Event {
      */
     @Override
     public void execEvent(List<Player> players, GamePhaseEnum phase) {
-        if (phase == GamePhaseEnum.END_ROUND) {
+        if (phase == this.trigger) {
             for (Player playerRef : players) {
                 playerRef.applyPaintBonus();
                 int nPaintersActual = playerRef.getNumType(CardTypeEnum.PAINTER);

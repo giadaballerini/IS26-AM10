@@ -62,6 +62,23 @@ public class GainFood extends CardEffectInstant {
     }
 
     /**
+     * Applies the food gain to the given player using {@code context} as the
+     * trigger card rather than the owning card.
+     *
+     * <p>This overload is used when a building carries this effect but the
+     * semantically relevant card is the one just drawn .</p>
+     *
+     * @param p       the player to apply the effect to; must not be {@code null}
+     * @param owner   the card that carries this effect; must not be {@code null}
+     * @param context the card that semantically triggered the effect;
+     *                must not be {@code null}
+     */
+    @Override
+    public void apply(Player p, Card owner, Card context) {
+        gainFoodType.apply(p, this, context);
+    }
+
+    /**
      * Returns the base food amount used as a parameter by the gain rule.
      *
      * @return base food amount

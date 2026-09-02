@@ -1,4 +1,0 @@
-@echo off
-cd /d "%~dp0"
-java -jar deliveries\jars\client.jar
-exit /b

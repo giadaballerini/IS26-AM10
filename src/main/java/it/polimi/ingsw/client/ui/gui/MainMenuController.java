@@ -21,8 +21,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Region;
+
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.util.List;
@@ -168,7 +167,6 @@ public class MainMenuController {
         });
         ownerColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(data.getValue().getNicknames().getFirst()));
         CursorManager.makeNodesHoverable(backButton, quitBtn);
-        positionBackButton();
         lobbyPane.prefWidthProperty().bind(lobbyPaneWrapper.widthProperty().multiply(0.3));
         lobbyPane.prefHeightProperty().bind(lobbyPaneWrapper.heightProperty().multiply(0.35));
         lobbyPane.maxWidthProperty().bind(lobbyPaneWrapper.widthProperty().multiply(0.3));
@@ -651,28 +649,6 @@ public class MainMenuController {
                 })
         );
         dismiss.play();
-    }
-    /**
-     * Positions the back button proportionally to the size of its parent pane.
-     * <p>
-     * Computed once when the scene becomes available: the stage is always
-     * fullscreen and its size never changes afterward, so a one-time
-     * calculation is enough. This compensates for the fixed pixel anchors
-     * defined in {@code MainMenu.fxml} ({@code bottomAnchor="150.0"},
-     * {@code leftAnchor="150.0"}), which were tuned for the design resolution
-     * (1280x720) and would otherwise be misplaced on different screen
-     * resolutions.
-     */
-    private void positionBackButton() {
-        backButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                Platform.runLater(() -> {
-                    Region parent = (Region) backButton.getParent();
-                    AnchorPane.setLeftAnchor(backButton, parent.getWidth() * 0.117);
-                    AnchorPane.setBottomAnchor(backButton, parent.getHeight() * 0.140);
-                });
-            }
-        });
     }
 
     /**

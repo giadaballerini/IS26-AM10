@@ -509,7 +509,7 @@ public class ClientRmi extends Client implements VirtualViewRmi {
                     connected = false;
                     pingExecutor.shutdownNow();
                     resetMatch();
-                    ui.onServerCrash(); //cambiare stampa, possibilmente dire "connessione al server persa"
+                    ui.onServerCrash();
                     break;
                 }
             }

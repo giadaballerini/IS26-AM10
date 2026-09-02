@@ -75,4 +75,5 @@ public class PlayEventVisitor implements CardVisitor {
             events.addEvents(feastEvent.toDTO());
         }
     }
+
 }

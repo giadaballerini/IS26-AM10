@@ -1,4 +1,8 @@
-# Mesos - Software engineering 2025/26 final project
+<div align="center">
+  <h1>Mesos - Software Engineering 2025/26</h1>
+  <h2> Awarded with 30/30 cum laude </h2>
+  <br>
+</div>
 
 ## Team
 - [Daniele Amodio](https://github.com/DanieleAmodio04)
@@ -286,4 +290,9 @@ src/main/java/it/polimi/ingsw/
 ```
 
 ## Disclaimer
-Mesos is a board game property of Cranio Creations. All copyrighted graphical assets used in this project were provided by Politecnico di Milano in collaboration with the respective rights holders, strictly for educational purposes. Any commercial use, redistribution, or reproduction of this project or its assets is strictly prohibited.
+
+**Il Gioco da tavolo Mesos e tutto il relativo materiale grafico è di esclusiva proprietà di Cranio Creations.**
+
+*(The board game Mesos and all related graphic material is the exclusive property of Cranio Creations.)*
+
+All copyrighted graphical assets used in this project were provided by Politecnico di Milano in collaboration with the respective rights holders, strictly for educational purposes. Any commercial use, redistribution, or reproduction of this project or its assets is strictly prohibited.

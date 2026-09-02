@@ -366,6 +366,23 @@ public class Player {
     }
 
     /**
+     * Applies the instant effects of all owned buildings for the given phase,
+     * passing {@code context} as the trigger card to each effect.
+     *
+     * <p>Use this after a character card is drawn so that context-sensitive
+     * effects such as {@code FOOD_FOR_SET} receive the drawn card's type
+     * rather than the building's own type.</p>
+     *
+     * @param currPhase the current game phase
+     * @param context   the card that semantically triggered the effects;
+     *                  must not be {@code null}
+     */
+    public void applyBuildingInstantEffects(GamePhaseEnum currPhase, Card context) {
+        for (Building b : myBuilds)
+            b.execInstantEffect(this, currPhase, context);
+    }
+
+    /**
      * Activates the hunt bonus, causing {@link #applyHuntBonus()} to grant
      * extra PP and food equal to the number of Hunter cards in the village.
      */
@@ -506,6 +523,9 @@ public class Player {
      * @return {@code true} if the new set is complete, {@code false} otherwise
      */
     public boolean completesNewCharacterSet(CardTypeEnum justAdded) {
+        if (!justAdded.isCharacter()) {
+            return false;
+        }
         int newMin = Integer.MAX_VALUE;
         int oldMin = Integer.MAX_VALUE;
         for (CardTypeEnum type : CardTypeEnum.values()) {
@@ -544,6 +564,19 @@ public class Player {
         List<Action> resolved = new ArrayList<>(skippableDraws);
         skippableDraws.clear();
         return resolved;
+    }
+
+    /**
+     * Re-establishes the {@code owner} reference (broken by JSON deserialization,
+     * since {@link Action#getOwner()} is excluded from serialization) on every
+     * pending skippable draw action belonging to this player.
+     *
+     * <p>Must be called after restoring a {@link Player} from a saved
+     * {@link it.polimi.ingsw.persistency.GameSnapshot}, before the actions in
+     * {@link #skippableDraws} are resolved.</p>
+     */
+    public void reconnectSkippableDrawOwners() {
+        skippableDraws.replaceAll(action -> action.withOwner(this));
     }
 
     /**

@@ -69,7 +69,7 @@ public class Ritual extends Event {
      */
     @Override
     public void execEvent(List<Player> players, GamePhaseEnum phase) {
-        if (phase == GamePhaseEnum.END_ROUND || phase == GamePhaseEnum.PLAY_EVENT) {
+        if (phase == this.trigger) {
             int maxStars = players.stream().mapToInt(Player::getNStars).max().getAsInt();
             int minStars = players.stream().mapToInt(Player::getNStars).min().getAsInt();
 

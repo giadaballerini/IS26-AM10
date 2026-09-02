@@ -14,7 +14,7 @@ public enum GamePhaseEnum {
     /** The phase in which players draw cards. */
     DRAW_PHASE,
 
-    /** An optional additional draw phase. */
+    /** The phase in which players draw optional cards. */
     OPTIONAL_DRAW_PHASE,
 
     /** The phase marking the end of a player's turn. */

@@ -54,6 +54,26 @@ public abstract class CardEffectInstant {
     public void apply(Player p, Card c) { apply(p); }
 
     /**
+     * Applies this effect to the given player with both the owning card and
+     * an external trigger context.
+     *
+     * <p>Use this overload when the card carrying the effect (e.g. a building)
+     * differs from the card that semantically triggered it (e.g. the character
+     * just drawn). Effects that depend on the trigger card — such as
+     * {@code FOOD_FOR_SET} — should override this method; all others inherit
+     * the default, which ignores {@code owner} and delegates to
+     * {@link #apply(Player, Card)} passing {@code context}.</p>
+     *
+     * @param p       the player to apply the effect to; must not be {@code null}
+     * @param owner   the card that carries this effect; must not be {@code null}
+     * @param context the card that semantically triggered the effect
+     *                (may differ from {@code owner}); must not be {@code null}
+     */
+    public void apply(Player p, Card owner, Card context) {
+        apply(p, context);
+    }
+
+    /**
      * Returns the prestige point amount associated with this effect.
      * The default implementation returns {@code 0}.
      *
